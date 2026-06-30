@@ -3,6 +3,7 @@ import { createApp } from "vue";
 
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
+import "./styles/tailwind.css";
 import "./styles/style.css";
 
 createApp(DemoApp).mount("#app");

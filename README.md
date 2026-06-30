@@ -254,3 +254,233 @@ At runtime the question is a plain text input — the popup never appears.
   `getType()` (so the JSON round-trips with your custom type),
   `getTemplate()` / `getCssType()` → `"text"` (so SurveyJS renders +
   styles it as a regular text input).
+
+---
+
+## 🧠 Custom Logic (Conditional Logic tab)
+
+`registerCustomLogic` adds a new entry to the form designer's
+**Conditional Logic** tab — alongside the built-in *Skip to question*,
+*Complete survey*, *Set answer*, etc. The user picks it from the action
+dropdown, types an expression, and the survey JSON gains a matching
+entry in its `triggers` array:
+
+```json
+"triggers": [
+  { "type": "reminder", "expression": "{question1} = 10" }
+]
+```
+
+An optional `onFire` callback runs at survey-fill time the moment the
+expression flips to `true`, so you can react in the host app (toast,
+log, emit an event, schedule a notification, …).
+
+### 1. Register the logic type
+
+Unlike `registerAsyncDropdown` / `registerAdvancedTextInput`, this
+helper does **not** need a Vue component context — call it at module
+load time, before the creator is instantiated:
+
+```ts
+import { registerCustomLogic } from "@yonus_amire01/form-builder";
+
+registerCustomLogic({
+  type: "reminder",
+  locales: {
+    en: {
+      displayName: "Reminder",
+      description: "Send a reminder when the condition is met",
+    },
+    fa: {
+      displayName: "یادآور",
+      description: "ارسال یادآور هنگام برقراری شرط",
+    },
+  },
+  onFire: ({ survey, expression, properties }) => {
+    console.log("[reminder] fired:", expression, survey.data, properties);
+  },
+});
+```
+
+The label shown in the Logic-tab dropdown (`displayName`) and the help
+text below it (`description`) automatically switch with the creator's
+current locale.
+
+### 2. Use it in the designer
+
+Open the **Logic** tab, click *Add New*, set a condition, then pick
+*Reminder* (or whatever you named it) from the action dropdown. Save —
+the produced survey JSON contains a trigger of your custom `type`.
+
+### 3. React at runtime (optional)
+
+When the survey is filled and the trigger's `expression` evaluates to
+`true`, your `onFire` callback runs with:
+
+| Field        | Type                       | Notes                                            |
+| ------------ | -------------------------- | ------------------------------------------------ |
+| `survey`     | `SurveyModel`              | The live survey instance — read `survey.data`    |
+| `expression` | `string`                   | The expression text the user authored            |
+| `properties` | `Record<string, unknown>`  | SurveyJS-supplied context (keys, navigation, …)  |
+
+If `onFire` is omitted the trigger is JSON-only — your app can still
+inspect `survey.triggers` itself.
+
+### API
+
+```ts
+interface RegisterCustomLogicOptions {
+  type: string;                       // value placed in triggers[].type
+  locales: Record<                    // per-locale label + description
+    string,
+    { displayName: string; description?: string }
+  >;
+  onFire?: (ctx: {                    // optional runtime hook
+    survey: SurveyModel;
+    expression: string;
+    properties: Record<string, unknown>;
+  }) => void;
+}
+```
+
+The call is **idempotent** — re-invoking with the same `type` updates
+only the `onFire` handler; the serializer class, Logic-tab entry, and
+locale strings are added once.
+
+### Internals (for the curious)
+
+- A `SurveyTrigger` subclass is registered with survey-core's
+  `Serializer` (parent `"surveytrigger"`, single `expression` property)
+  so JSON round-trips with `{ "type": "<your type>", "expression": "…" }`.
+- A `trigger_<type>` entry is pushed into `SurveyLogic.types`
+  (publicly-exposed static accessor), which is what the Logic-tab
+  dropdown reads.
+- Display strings are merged into `editorLocalization` under
+  `lg.trigger_<type>Name` / `lg.trigger_<type>Description` — the same
+  keys the built-in triggers use, so locale switching just works.
+- `onFire` is wired to the trigger's `onSuccess` hook (fires only when
+  the expression result transitions from `false` → `true`, per
+  SurveyJS semantics).
+
+---
+
+## 🪟 HTML-property Template Gallery (creator property grid)
+
+`registerHtmlEditorModal` adds a button to the title of every property
+editor in the Survey Creator's property grid whose underlying property
+stores HTML — i.e. `html`, `completedHtml`, `completedBeforeHtml`,
+`loadingHtml`, and any custom `:html`-typed property. Clicking the
+button opens a full template gallery: a categorised grid of view
+components you've registered, with a detail preview and a single
+"Insert template" button that writes the chosen component's HTML
+output into the property.
+
+### 1. Register views
+
+Each view is a Vue component that renders a preview AND exposes a
+`getHtml()` method through `defineExpose`. The library calls
+`getHtml()` when the user clicks **Insert template** in the detail
+preview, and writes the returned string straight into the property.
+
+```ts
+import { registerHtmlEditorModal } from "@yonus_amire01/form-builder";
+import BarChart from "./components/BarChart.vue";
+import PieChart from "./components/PieChart.vue";
+
+registerHtmlEditorModal({
+  iconName: "icon-edit",       // optional — title-action icon
+  title: "Choose template",    // optional — title-action tooltip
+  views: [
+    {
+      id: "bar",
+      name: "Vertical Bar",
+      category: "Bar",
+      description: "Compare values across discrete categories.",
+      bestFor: "Comparing categories",
+      dataShape: "1 dim · 1 measure",
+      component: BarChart,
+    },
+    {
+      id: "pie",
+      name: "Pie",
+      category: "Pie",
+      description: "Show parts of a whole as proportional slices.",
+      bestFor: "Part-to-whole",
+      component: PieChart,
+    },
+  ],
+});
+```
+
+### 2. Author a view component
+
+```vue
+<!-- BarChart.vue -->
+<script setup lang="ts">
+import { ref } from "vue";
+
+const svgRef = ref<SVGSVGElement | null>(null);
+
+defineExpose({
+  getHtml(): string {
+    return svgRef.value?.outerHTML ?? "";
+  },
+});
+</script>
+
+<template>
+  <svg ref="svgRef" viewBox="0 0 120 80" width="100%" height="100%">
+    <!-- … your chart markup … -->
+  </svg>
+</template>
+```
+
+`getHtml` can return a string **or a `Promise<string>`** — fetch
+data, hydrate a third-party renderer, or build markup with a template
+literal, then return the final HTML.
+
+### View shape
+
+| Field         | Type                          | Notes                                                                                  |
+| ------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
+| `id`          | `string`                      | Stable identifier (used for keys + selection state)                                    |
+| `name`        | `string`                      | Card title                                                                             |
+| `category`    | `string?`                     | If any view has one, category filter chips appear ("All", plus each distinct category) |
+| `description` | `string?`                     | Shown under the card title and inside the detail modal                                 |
+| `bestFor`     | `string?`                     | Optional row in the detail modal's meta panel                                          |
+| `dataShape`   | `string?`                     | Optional row in the detail modal's meta panel (rendered in JetBrains Mono)             |
+| `component`   | `Component`                   | Vue component; **must `defineExpose({ getHtml() })`**                                  |
+| `props`       | `Record<string, unknown>?`    | Bound to the component instance in both card and detail previews                       |
+
+### How it works
+
+- A title action with id `fb-html-editor` is pushed onto every property
+  editor whose `property.type === "html"`. Title actions render on the
+  trailing edge of the label (right in LTR, left in RTL).
+- The hook subscribes inside `initSurveyCreator()`, so every creator
+  produced by `FormBuilder` picks it up automatically.
+- Open state, current value, and the active property editor live in a
+  shared reactive store (`src/utils/htmlEditorModal.ts`). Clicking the
+  title button records `editor.value` and opens the gallery.
+- The gallery renders a card for each view, filterable by category.
+  Selecting a card opens a detail preview; the **Insert template**
+  button calls the previewed component's `getHtml()` and writes the
+  result back into `editor.value` (which SurveyJS propagates to the
+  surveyElement).
+- Visual design comes from Claude Design — Plus Jakarta Sans +
+  JetBrains Mono, `oklch()` palette, soft accent ring on hover, scaled
+  pop-in animation.
+- The gallery itself is styled with plain scoped CSS + CSS custom
+  properties — **no Tailwind dependency in the published library**.
+  Consumers only need to import `@yonus_amire01/form-builder/style.css`
+  for everything to render.
+- Dark / light mode follows the creator's color mode automatically.
+  The gallery reads `useSurveyConfig().colorMode` and toggles a
+  `.fb-dark` class that flips all theme tokens (`--fb-*` CSS
+  variables) — no separate configuration needed.
+- **Demo-only:** the example chart/score widgets in `src/demo/*` use
+  Tailwind v4 (`@tailwindcss/vite`) for convenience, and Tailwind is
+  imported from `src/main.ts` (the dev/demo entry) rather than the
+  library entry. If you author your own view components, you can use
+  whatever styling you want — they're rendered inside the gallery via
+  `<component :is>` and don't inherit any styling assumptions.

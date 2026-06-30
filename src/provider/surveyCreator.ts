@@ -5,8 +5,8 @@ import type {
 import { inject, provide, type InjectionKey } from "vue";
 import { getServeyCreatorTheme, getServeyTheme } from "../themes/factory";
 import { SurveyCreatorModel } from "survey-creator-core";
-import { useSurveyConfig } from "./surveyConfig";
 import immediateWatch from "../utils/immediateWatch";
+import { useSurveyConfig } from "./surveyConfig";
 
 const SURVEY_CREATOR_KEY: InjectionKey<SurveyCreatorModelType> =
   Symbol("survey_creator");
@@ -38,8 +38,9 @@ export function initSurveyCreator(
       colorMode: config.colorMode.value,
       cssVariable: config.cssVariable,
     };
+
     creator.applyCreatorTheme(getServeyCreatorTheme(themeArgs));
-    creator.applyTheme(getServeyTheme(themeArgs) as any);
+    creator.applyTheme(getServeyTheme(themeArgs));
   });
 
   provide(SURVEY_CREATOR_KEY, creator);
