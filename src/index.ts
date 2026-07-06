@@ -4,14 +4,10 @@ import registerCustomLogic from "./utils/registerCustomLogic";
 import useScrollToError from "./composables/useScrollToError";
 import { SurveySchemaPrompt } from "./utils/prefixPrompts";
 import FormBuilder from "./components/FormBuilder.vue";
-import HtmlEditorGallery from "./components/TemplateEditor.vue";
-import {
-  surveyResultTemplate,
-  surveyResultNoChartTemplate,
-  surveyResultNoDescriptionTemplate,
-  surveyResultAnnouncementTemplate,
-  surveyResultTemplates,
-} from "./components/templates/surveyResultTemplate";
+import SurveyResultEditor from "./components/SurveyResultEditor.vue";
+import SurveyResultEditorModal from "./components/SurveyResultEditorModal.vue";
+
+export { provideSurveyResultTemplate, useSurveyResultTemplate } from "./provider/surveyResultTemplate.ts";
 
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
@@ -34,17 +30,14 @@ export type {
   RegisterCustomLogicOptions,
 } from "./utils/registerCustomLogic";
 
+
 export {
   FormBuilder,
-  HtmlEditorGallery,
+  SurveyResultEditor,
+  SurveyResultEditorModal,
   SurveySchemaPrompt,
   registerAsyncDropdown,
   registerAdvancedTextInput,
   registerCustomLogic,
-  surveyResultTemplate,
-  surveyResultNoChartTemplate,
-  surveyResultNoDescriptionTemplate,
-  surveyResultAnnouncementTemplate,
-  surveyResultTemplates,
   useScrollToError,
 };

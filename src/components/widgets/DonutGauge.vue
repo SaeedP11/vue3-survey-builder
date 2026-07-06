@@ -71,14 +71,14 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   value: { type: Number, default: 65 },
   min: { type: Number, default: 0 },
   max: { type: Number, default: 100 },
   unit: { type: String, default: "" },
-  statusText: { type: String, default: "ON TRACK" },
-  statusColor: { type: String, default: "#6366f1" },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   duration: { type: Number, default: 1000 },
 });
 
@@ -99,6 +99,19 @@ const progress = computed(() => {
 const dashOffset = computed(() => circumference * (1 - progress.value));
 const displayValue = computed(() => Math.round(animatedValue.value));
 const percentageLabel = computed(() => `${Math.round(progress.value * 100)}%`);
+
+const tier = computed(() => {
+  const count = props.statusLabels.length || 1;
+  return tierIndex(animatedValue.value, props.min, props.max, count);
+});
+
+const statusText = computed(() =>
+  pickLabel(props.statusLabels, tier.value, "—"),
+);
+
+const statusColor = computed(() =>
+  pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
+);
 
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 

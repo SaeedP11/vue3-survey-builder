@@ -107,6 +107,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   value: { type: Number, default: 60 },
@@ -114,8 +115,7 @@ const props = defineProps({
   max: { type: Number, default: 140 },
   title: { type: String, default: "HEART RATE (BPM)" },
   unit: { type: String, default: "BPM" },
-  statusText: { type: String, default: "STABLE" },
-  statusColor: { type: String, default: "text-[#0ea5e9]" },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
 });
 
 const isLoaded = ref(false);
@@ -158,7 +158,18 @@ const pointerAngle = computed(() => {
   return 90 - 180 * animatedProgress.value;
 });
 
-const statusColorClass = computed(() => props.statusColor);
+const statusColorClass = computed(() =>
+  pickColor(["text-[#0ea5e9]", "text-[#f59e0b]", "text-[#ef4444]"], tier.value),
+);
+
+const statusText = computed(() =>
+  pickLabel(props.statusLabels, tier.value, "—"),
+);
+
+const tier = computed(() => {
+  const count = props.statusLabels.length || 1;
+  return tierIndex(props.value, props.min, props.max, count);
+});
 
 // Reversed Ticks Math — derive 6 evenly-spaced ticks from min/max so the
 // gauge stays legible across arbitrary ranges (score 0–100, BPM 40–140, etc.)

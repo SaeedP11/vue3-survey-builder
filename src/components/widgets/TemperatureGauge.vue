@@ -104,7 +104,7 @@
           class="text-4xl font-bold tracking-tight text-slate-800 tabular-nums transition-all duration-500"
           :class="{
             'scale-105 text-emerald-600':
-              isAnimationFinished && statusText === 'NORMAL',
+              isAnimationFinished && tier === 0,
           }"
         >
           {{ displayValue.toFixed(1)
@@ -137,6 +137,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   modelValue: {
@@ -168,13 +169,9 @@ const props = defineProps({
     type: String,
     default: "°C",
   },
-  statusText: {
-    type: String,
-    default: "Normal",
-  },
-  statusColor: {
-    type: String,
-    default: "#10b981", // Tailwind emerald-500
+  statusLabels: {
+    type: Array,
+    default: () => ["Mild", "Moderate", "Severe", "Critical"],
   },
   duration: {
     type: Number,
@@ -214,6 +211,19 @@ const currentProgressPercentage = computed(() => {
   const clamped = Math.max(props.min, Math.min(props.max, displayValue.value));
   return (clamped - props.min) / range;
 });
+
+const tier = computed(() => {
+  const count = props.statusLabels.length || 1;
+  return tierIndex(displayValue.value, props.min, props.max, count);
+});
+
+const statusText = computed(() =>
+  pickLabel(props.statusLabels, tier.value, "—"),
+);
+
+const statusColor = computed(() =>
+  pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
+);
 
 // Stroke offset required to dynamically expose active track portions via dash arrays
 const animatedStrokeOffset = computed(() => {

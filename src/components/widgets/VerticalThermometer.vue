@@ -56,6 +56,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   value: { type: Number, default: 36.8 },
@@ -63,7 +64,7 @@ const props = defineProps({
   max: { type: Number, default: 42 },
   unit: { type: String, default: "°" },
   title: { type: String, default: "Temperature" },
-  statusText: { type: String, default: "Normal" },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   tickCount: { type: Number, default: 5 },
   duration: { type: Number, default: 1200 },
 });
@@ -92,12 +93,18 @@ const ticks = computed(() => {
   return out;
 });
 
-const bulbColor = computed(() => {
-  const p = fillPercentage.value;
-  if (p < 33) return "#0ea5e9";
-  if (p < 66) return "#f59e0b";
-  return "#ef4444";
+const tier = computed(() => {
+  const count = props.statusLabels.length || 1;
+  return tierIndex(animatedValue.value, props.min, props.max, count);
 });
+
+const bulbColor = computed(() =>
+  pickColor(["#0ea5e9", "#f59e0b", "#ef4444"], tier.value),
+);
+
+const statusText = computed(() =>
+  pickLabel(props.statusLabels, tier.value, "—"),
+);
 
 const gradient = computed(
   () => `linear-gradient(to top, ${bulbColor.value}, #fbbf24 60%, #f97316)`,

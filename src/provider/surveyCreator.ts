@@ -28,8 +28,7 @@ export function initSurveyCreator(
   };
 
   const creator = new SurveyCreatorModel(creatorOptions);
-  creator.toolbox.showSubitems = false;
-
+  creator.toolbox.showSubitems = false
   const config = useSurveyConfig();
 
   immediateWatch([config.locale], () => (creator.locale = config.locale.value));

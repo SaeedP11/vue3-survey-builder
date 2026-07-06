@@ -56,6 +56,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   value: { type: Number, default: 70 },
@@ -64,18 +65,23 @@ const props = defineProps({
   max: { type: Number, default: 100 },
   unit: { type: String, default: "%" },
   title: { type: String, default: "Performance" },
-  bands: {
-    type: Array,
-    default: () => [
-      { label: "Poor", pct: 1, color: "bg-rose-100" },
-      { label: "Satisfactory", pct: 1, color: "bg-amber-100" },
-      { label: "Good", pct: 1, color: "bg-emerald-100" },
-    ],
-  },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   duration: { type: Number, default: 1100 },
 });
 
 const animatedValue = ref(props.min);
+
+const bands = computed(() => {
+  const palette = ["bg-rose-100", "bg-amber-100", "bg-emerald-100"];
+  const labels = props.statusLabels.length
+    ? props.statusLabels
+    : ["Mild", "Moderate", "Severe", "Critical"];
+  return labels.map((label, i) => ({
+    label,
+    pct: 1,
+    color: pickColor(palette, i),
+  }));
+});
 
 const valuePercentage = computed(() => percentOf(animatedValue.value));
 const targetPercentage = computed(() => percentOf(props.target ?? props.min));

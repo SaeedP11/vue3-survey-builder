@@ -5,10 +5,10 @@
   >
     <div class="relative w-full h-6 mb-8 text-xs font-medium text-gray-500">
       <div class="absolute w-[20%] text-center" style="left: 60%">
-        <span class="text-amber-700/80">Pre-HTN</span>
+        <span :style="{ color: upperLabels.third.color }">{{ upperLabels.third.text }}</span>
       </div>
       <div class="absolute w-[20%] text-center" style="left: 80%">
-        <span class="text-orange-700/80">HTN 1</span>
+        <span :style="{ color: upperLabels.fourth.color }">{{ upperLabels.fourth.text }}</span>
       </div>
     </div>
 
@@ -91,20 +91,22 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
-  modelValue: { type: Number,default: 20 },
+  modelValue: { type: Number, default: 20 },
   min: { type: Number, default: 60 },
   max: { type: Number, default: 110 },
   unit: { type: String, default: "mmHg" },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   ticks: { type: Array, default: () => [60, 70, 80, 90, 100, 110] },
   segments: {
     type: Array,
     default: () => [
-      { limit: 80, color: "#22c55e", label: "NORMAL" }, // Green
-      { limit: 90, color: "#eab308", label: "ELEVATED" }, // Yellow
-      { limit: 100, color: "#f97316", label: "PRE-HTN" }, // Orange
-      { limit: 110, color: "#ef4444", label: "HTN 1" }, // Red
+      { limit: 80, color: "#22c55e" },
+      { limit: 90, color: "#eab308" },
+      { limit: 100, color: "#f97316" },
+      { limit: 110, color: "#ef4444" },
     ],
   },
 });
@@ -120,10 +122,26 @@ const percentage = computed(() => {
 
 // Determine active state based on the current animated value
 const currentSegment = computed(() => {
-  return (
-    props.segments.find((seg) => displayValue.value <= seg.limit) ||
-    props.segments[props.segments.length - 1]
-  );
+  const found = props.segments.find((seg) => displayValue.value <= seg.limit);
+  const seg = found || props.segments[props.segments.length - 1];
+  const idx = props.segments.indexOf(seg);
+  return {
+    color: seg.color,
+    label: pickLabel(props.statusLabels, idx, "—"),
+  };
+});
+
+// Labels for the two upper-overlay tick markers (segments 3 and 4 by default)
+const upperLabels = computed(() => {
+  const count = props.segments.length;
+  const thirdIdx = Math.min(2, count - 1);
+  const fourthIdx = Math.min(3, count - 1);
+  const thirdColor = pickColor(props.segments.map((s) => s.color), thirdIdx);
+  const fourthColor = pickColor(props.segments.map((s) => s.color), fourthIdx);
+  return {
+    third: { text: pickLabel(props.statusLabels, thirdIdx, "—"), color: thirdColor },
+    fourth: { text: pickLabel(props.statusLabels, fourthIdx, "—"), color: fourthColor },
+  };
 });
 
 // 60fps Easing Animation logic

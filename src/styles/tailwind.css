@@ -2,13 +2,13 @@
 
 @theme {
   --color-fb-overlay: var(--sjs2-color-utility-overlay, oklch(0.2 0.02 265 / 0.46));
-  --color-fb-shell: var(--sjs2-color-bg-neutral-secondary, oklch(0.985 0.004 265));
-  --color-fb-surface: var(--sjs2-color-bg-neutral-primary, #ffffff);
-  --color-fb-surface-muted: var(--sjs2-color-bg-neutral-tertiary, oklch(0.985 0.004 265));
-  --color-fb-fg: var(--sjs2-color-fg-neutral-primary, oklch(0.22 0.01 265));
-  --color-fb-fg-muted: var(--sjs2-color-fg-neutral-primary-muted, oklch(0.5 0.01 265));
-  --color-fb-fg-secondary: var(--sjs2-color-fg-neutral-secondary, oklch(0.55 0.01 265));
-  --color-fb-border: var(--sjs2-color-border-neutral-primary, oklch(0.92 0.005 265));
+  --color-fb-shell: var(--sjs2-color-bg-basic-primary, #ffffff);
+  --color-fb-surface: var(--sjs2-color-utility-surface-designer, oklch(0.985 0.004 265));
+  --color-fb-surface-muted: var(--sjs2-color-bg-basic-tertiary, oklch(0.97 0.005 265));
+  --color-fb-fg: var(--sjs2-color-fg-basic-primary, oklch(0.22 0.01 265));
+  --color-fb-fg-secondary: var(--sjs2-color-fg-basic-secondary, oklch(0.45 0.01 265));
+  --color-fb-fg-muted: var(--sjs2-color-fg-basic-tertiary, oklch(0.55 0.01 265));
+  --color-fb-border: var(--sjs2-color-border-basic-secondary, oklch(0.92 0.005 265));
   --color-fb-border-strong: var(--sjs2-color-border-basic-primary, oklch(0.85 0.01 265));
   --color-fb-accent: var(--sjs2-color-bg-brand-primary, #5a59d6);
   --color-fb-accent-soft: var(--sjs2-color-bg-brand-secondary, oklch(0.94 0.04 280));

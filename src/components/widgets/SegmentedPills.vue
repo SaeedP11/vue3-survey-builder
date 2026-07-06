@@ -42,17 +42,19 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   value: { type: Number, default: 6 },
   min: { type: Number, default: 0 },
   max: { type: Number, default: 10 },
   segments: { type: Number, default: 10 },
-  lowLabel: { type: String, default: "Low" },
-  highLabel: { type: String, default: "High" },
-  statusText: { type: String, default: "Moderate" },
+  statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   duration: { type: Number, default: 900 },
 });
+
+const lowLabel = "Low";
+const highLabel = "High";
 
 const animatedValue = ref(props.min);
 
@@ -70,35 +72,37 @@ const activeSegments = computed(() =>
 const displayValue = computed(() => Math.round(animatedValue.value));
 
 const tier = computed(() => {
-  const p = progress.value;
-  if (p < 0.34) return "low";
-  if (p < 0.67) return "mid";
-  return "high";
+  const count = props.statusLabels.length || 1;
+  return tierIndex(animatedValue.value, props.min, props.max, count);
 });
 
-const activeClass = computed(() => {
-  switch (tier.value) {
-    case "low":
-      return "bg-emerald-500 border-emerald-600";
-    case "mid":
-      return "bg-amber-500 border-amber-600";
-    default:
-      return "bg-rose-500 border-rose-600";
-  }
-});
+const statusText = computed(() =>
+  pickLabel(props.statusLabels, tier.value, "—"),
+);
+
+const activeClass = computed(() =>
+  pickColor(
+    [
+      "bg-emerald-500 border-emerald-600",
+      "bg-amber-500 border-amber-600",
+      "bg-rose-500 border-rose-600",
+    ],
+    tier.value,
+  ),
+);
 
 const inactiveClass = "bg-slate-100 border-slate-200";
 
-const badgeClass = computed(() => {
-  switch (tier.value) {
-    case "low":
-      return "text-emerald-700 bg-emerald-50 border border-emerald-200";
-    case "mid":
-      return "text-amber-700 bg-amber-50 border border-amber-200";
-    default:
-      return "text-rose-700 bg-rose-50 border border-rose-200";
-  }
-});
+const badgeClass = computed(() =>
+  pickColor(
+    [
+      "text-emerald-700 bg-emerald-50 border border-emerald-200",
+      "text-amber-700 bg-amber-50 border border-amber-200",
+      "text-rose-700 bg-rose-50 border border-rose-200",
+    ],
+    tier.value,
+  ),
+);
 
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
