@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-formbilder-background: red;
   /* 
+  --color-formbilder-background: red;
   --color-formbilder-surface-background: black;
   --color-formbilder-primary: #6366f1;
   --color-formbilder-error: #ef4444;

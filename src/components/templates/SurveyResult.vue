@@ -32,7 +32,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { t, tm } = useLocalI18n(surveyResult);
+const { t } = useLocalI18n(surveyResult);
 
 const ui = computed(() => {
   const or = (v: string | undefined, fallback: string) =>
@@ -62,7 +62,7 @@ const statusLabels = computed<string[]>(() => {
   if (Array.isArray(props.statusLabels) && props.statusLabels.length) {
     return props.statusLabels;
   }
-  const i18nLabels = tm("statusLabels") as any;
+  const i18nLabels = t("statusLabels");
   if (Array.isArray(i18nLabels) && i18nLabels.length) {
     return i18nLabels.filter((s): s is string => typeof s === "string");
   }

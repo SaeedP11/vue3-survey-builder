@@ -18,11 +18,9 @@ import "./styles/tailwind.css";
 import "./styles/style.css";
 
 export { useSurveyCreator } from "./provider/surveyCreator";
-export type { CssVariables } from "./types/index.ts";
 export { SurveyComponent } from "survey-vue3-ui";
 export * from "./composables/useSurveyModel.ts";
 export * from "./provider/aiAssistantConfig.ts";
-export * from "./provider/surveyConfig.ts";
 export * from "survey-core";
 
 export type {
