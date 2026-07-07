@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import useFormBuilderI18n from "../../composables/useFormBuilderI18n.ts";
+import { surveyResult } from "../../locales/index.ts";
 import { tierIndex, pickLabel, pickColor } from "../../utils/statusTiers.ts";
+import useLocalI18n from "../../composables/useLocalI18n.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -18,11 +19,10 @@ const props = withDefaults(
   },
 );
 
-const { t, locale } = useFormBuilderI18n();
-
+const { t, locale } = useLocalI18n(surveyResult);
 const fmt = (n: number) => new Intl.NumberFormat(locale.value).format(n);
 
-const scoreLabel = computed(() => t("surveyResult.scoreLabel"));
+const scoreLabel = computed(() => t("scoreLabel"));
 const displayedScore = computed(() => fmt(props.value));
 
 const span = computed(() => Math.max(1, props.max - props.min));

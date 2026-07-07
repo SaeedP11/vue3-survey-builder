@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
 import { useSurveyCreator } from "../provider/surveyCreator";
-import useFormBuilderI18n from "../composables/useFormBuilderI18n.ts";
+import { surveyResultEditor } from "../locales/index.ts";
+import { computed, onBeforeUnmount, ref } from "vue";
 import type {
   ScoreDisplayVariant,
   SurveyResultProps,
   TableRow,
 } from "../types/index.ts";
+import useLocalI18n from "../composables/useLocalI18n.ts";
 
 const props = defineModel<SurveyResultProps>("props", { required: true });
-
+const { t } = useLocalI18n(surveyResultEditor);
 const creator = useSurveyCreator();
-const { t } = useFormBuilderI18n();
 
 const modifiedTick = ref(0);
 const onModified = () => {
@@ -155,12 +155,12 @@ function updateTableRow(
       <h3
         class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
-        {{ t("surveyResultEditor.groups.score") }}
+        {{ t("groups.score") }}
       </h3>
       <div class="mt-3 space-y-3.5">
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.scoreDisplay.label")
+            t("fields.scoreDisplay.label")
           }}</label>
           <select
             v-model="props.scoreDisplay"
@@ -171,25 +171,24 @@ function updateTableRow(
               :key="o.value"
               :value="o.value"
             >
-              {{ t(`surveyResultEditor.options.scoreDisplay.${o.value}`) }}
+              {{ t(`options.scoreDisplay.${o.value}`) }}
             </option>
           </select>
         </div>
 
         <div v-if="showScoreChartFields" class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.score.label")
+            t("fields.score.label")
           }}</label>
           <select
             v-if="hasScoreSources"
             v-model="props.score"
             class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
           >
-            <option value="">{{ t("surveyResultEditor.none") }}</option>
-            <optgroup
-              v-if="questionNames.length > 0"
-              :label="t('surveyResultEditor.questions')"
-            >
+            <option value="">
+              {{ t("none") }}
+            </option>
+            <optgroup v-if="questionNames.length > 0" :label="t('questions')">
               <option
                 v-for="name in questionNames"
                 :key="`q:${name}`"
@@ -200,7 +199,7 @@ function updateTableRow(
             </optgroup>
             <optgroup
               v-if="calculatedVariableNames.length > 0"
-              :label="t('surveyResultEditor.calculatedValues')"
+              :label="t('calculatedValues')"
             >
               <option
                 v-for="name in calculatedVariableNames"
@@ -213,21 +212,21 @@ function updateTableRow(
           </select>
           <div v-else class="flex flex-col gap-2">
             <p class="text-xs leading-snug text-fb-fg-muted">
-              {{ t("surveyResultEditor.noSourcesYet") }}
+              {{ t("noSourcesYet") }}
             </p>
             <button
               type="button"
               class="self-start cursor-pointer rounded-lg border border-fb-border bg-fb-surface-muted px-3 py-1.5 text-xs font-semibold text-fb-fg hover:bg-fb-border"
               @click="focusSurveyProperties"
             >
-              {{ t("surveyResultEditor.openSurveyProperties") }}
+              {{ t("openSurveyProperties") }}
             </button>
           </div>
         </div>
 
         <div v-if="showScoreChartFields" class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.min.label")
+            t("fields.min.label")
           }}</label>
           <input
             v-model.number="props.min"
@@ -238,7 +237,7 @@ function updateTableRow(
 
         <div v-if="showScoreChartFields" class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.max.label")
+            t("fields.max.label")
           }}</label>
           <input
             v-model.number="props.max"
@@ -255,7 +254,7 @@ function updateTableRow(
           <span
             class="block font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
           >
-            {{ t("surveyResultEditor.fields.tableRows.label") }}
+            {{ t("fields.tableRows.label") }}
           </span>
           <div class="space-y-4">
             <div
@@ -266,14 +265,14 @@ function updateTableRow(
               <div class="flex items-center justify-between gap-2">
                 <span
                   class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
-                  >{{ t("surveyResultEditor.row") }} {{ index + 1 }}</span
+                  >{{ t("row") }} {{ index + 1 }}</span
                 >
                 <button
                   type="button"
                   class="cursor-pointer rounded-md border border-fb-border bg-fb-surface-muted px-2 py-1 text-[11px] font-semibold text-fb-fg-muted hover:bg-fb-border"
                   @click="removeTableRow(index)"
                 >
-                  {{ t("surveyResultEditor.remove") }}
+                  {{ t("remove") }}
                 </button>
               </div>
 
@@ -281,7 +280,7 @@ function updateTableRow(
                 <label class="flex flex-col gap-1 col-span-2">
                   <span
                     class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                    >{{ t("surveyResultEditor.fields.metric.label") }}</span
+                    >{{ t("fields.metric.label") }}</span
                   >
                   <input
                     :value="(row.metric as string) ?? ''"
@@ -300,7 +299,7 @@ function updateTableRow(
                 <label class="flex flex-col gap-1">
                   <span
                     class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                    >{{ t("surveyResultEditor.fields.unit.label") }}</span
+                    >{{ t("fields.unit.label") }}</span
                   >
                   <input
                     :value="(row.unit as string) ?? ''"
@@ -320,7 +319,7 @@ function updateTableRow(
                   <label class="flex flex-col gap-1">
                     <span
                       class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                      >{{ t("surveyResultEditor.fields.min.label") }}</span
+                      >{{ t("fields.min.label") }}</span
                     >
                     <input
                       :value="row.min ?? ''"
@@ -338,7 +337,7 @@ function updateTableRow(
                   <label class="flex flex-col gap-1">
                     <span
                       class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                      >{{ t("surveyResultEditor.fields.max.label") }}</span
+                      >{{ t("fields.max.label") }}</span
                     >
                     <input
                       :value="row.max ?? ''"
@@ -359,9 +358,7 @@ function updateTableRow(
               <label class="flex flex-col gap-1">
                 <span
                   class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                  >{{
-                    t("surveyResultEditor.fields.valueVariable.label")
-                  }}</span
+                  >{{ t("fields.valueVariable.label") }}</span
                 >
                 <select
                   v-if="hasScoreSources"
@@ -376,11 +373,11 @@ function updateTableRow(
                   "
                 >
                   <option value="">
-                    {{ t("surveyResultEditor.pickQuestionOrCalculated") }}
+                    {{ t("pickQuestionOrCalculated") }}
                   </option>
                   <optgroup
                     v-if="questionNames.length > 0"
-                    :label="t('surveyResultEditor.questions')"
+                    :label="t('questions')"
                   >
                     <option
                       v-for="name in questionNames"
@@ -392,7 +389,7 @@ function updateTableRow(
                   </optgroup>
                   <optgroup
                     v-if="calculatedVariableNames.length > 0"
-                    :label="t('surveyResultEditor.calculatedValues')"
+                    :label="t('calculatedValues')"
                   >
                     <option
                       v-for="name in calculatedVariableNames"
@@ -405,14 +402,14 @@ function updateTableRow(
                 </select>
                 <div v-else class="flex flex-col gap-2">
                   <p class="text-xs leading-snug text-fb-fg-muted">
-                    {{ t("surveyResultEditor.noSourcesYet") }}
+                    {{ t("noSourcesYet") }}
                   </p>
                   <button
                     type="button"
                     class="self-start cursor-pointer rounded-lg border border-fb-border bg-fb-surface-muted px-3 py-1.5 text-xs font-semibold text-fb-fg hover:bg-fb-border"
                     @click="focusSurveyProperties"
                   >
-                    {{ t("surveyResultEditor.openSurveyProperties") }}
+                    {{ t("openSurveyProperties") }}
                   </button>
                 </div>
               </label>
@@ -423,7 +420,7 @@ function updateTableRow(
               class="w-full cursor-pointer rounded-lg border border-dashed border-fb-border-strong bg-fb-surface-muted/40 px-3 py-2.5 text-sm font-semibold text-fb-fg hover:bg-fb-surface-muted"
               @click="addTableRow"
             >
-              {{ t("surveyResultEditor.addRow") }}
+              {{ t("addRow") }}
             </button>
           </div>
         </div>
@@ -435,23 +432,23 @@ function updateTableRow(
       <h3
         class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
-        {{ t("surveyResultEditor.groups.brand") }}
+        {{ t("groups.brand") }}
       </h3>
       <div class="mt-3 space-y-3.5">
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.logoSrc.label")
+            t("fields.logoSrc.label")
           }}</label>
           <input
             v-model="props.logoSrc"
             type="text"
-            :placeholder="t('surveyResultEditor.fields.logoSrc.placeholder')"
+            :placeholder="t('fields.logoSrc.placeholder')"
             class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
           />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.brandName.label")
+            t("fields.brandName.label")
           }}</label>
           <input
             v-model="props.brandName"
@@ -461,7 +458,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.brandTagline.label")
+            t("fields.brandTagline.label")
           }}</label>
           <input
             v-model="props.brandTagline"
@@ -471,7 +468,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.categoryChip.label")
+            t("fields.categoryChip.label")
           }}</label>
           <input
             v-model="props.categoryChip"
@@ -487,12 +484,12 @@ function updateTableRow(
       <h3
         class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
-        {{ t("surveyResultEditor.groups.copy") }}
+        {{ t("groups.copy") }}
       </h3>
       <div class="mt-3 space-y-3.5">
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.title.label")
+            t("fields.title.label")
           }}</label>
           <input
             v-model="props.title"
@@ -502,7 +499,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.subtitle.label")
+            t("fields.subtitle.label")
           }}</label>
           <input
             v-model="props.subtitle"
@@ -512,7 +509,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.description.label")
+            t("fields.description.label")
           }}</label>
           <textarea
             v-model="props.description"
@@ -522,7 +519,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.noteText.label")
+            t("fields.noteText.label")
           }}</label>
           <textarea
             v-model="props.noteText"
@@ -532,7 +529,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.primaryLabel.label")
+            t("fields.primaryLabel.label")
           }}</label>
           <input
             v-model="props.primaryLabel"
@@ -542,7 +539,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.secondaryLabel.label")
+            t("fields.secondaryLabel.label")
           }}</label>
           <input
             v-model="props.secondaryLabel"
@@ -552,7 +549,7 @@ function updateTableRow(
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("surveyResultEditor.fields.closeLabel.label")
+            t("fields.closeLabel.label")
           }}</label>
           <input
             v-model="props.closeLabel"
@@ -568,16 +565,15 @@ function updateTableRow(
       <h3
         class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
-        {{ t("surveyResultEditor.groups.segments") }}
+        {{ t("groups.segments") }}
       </h3>
       <div class="mt-3 space-y-3.5">
         <div class="flex flex-col gap-1.5">
-          <span
-            class="text-[12px] font-semibold text-fb-fg-secondary"
-            >{{ t("surveyResultEditor.fields.statusLabels.label") }}</span
-          >
+          <span class="text-[12px] font-semibold text-fb-fg-secondary">{{
+            t("fields.statusLabels.label")
+          }}</span>
           <p class="text-xs leading-snug text-fb-fg-muted">
-            {{ t("surveyResultEditor.fields.statusLabels.help") }}
+            {{ t("fields.statusLabels.help") }}
           </p>
           <div class="space-y-2.5">
             <div
@@ -606,7 +602,7 @@ function updateTableRow(
                 class="shrink-0 cursor-pointer rounded-md border border-fb-border bg-fb-surface-muted px-2 py-1 text-[11px] font-semibold text-fb-fg-muted hover:bg-fb-border disabled:cursor-not-allowed disabled:opacity-50"
                 @click="removeStatusLabel(index)"
               >
-                {{ t("surveyResultEditor.remove") }}
+                {{ t("remove") }}
               </button>
             </div>
             <button
@@ -614,7 +610,7 @@ function updateTableRow(
               class="w-full cursor-pointer rounded-lg border border-dashed border-fb-border-strong bg-fb-surface-muted/40 px-3 py-2.5 text-sm font-semibold text-fb-fg hover:bg-fb-surface-muted"
               @click="addStatusLabel"
             >
-              {{ t("surveyResultEditor.addStatusLabel") }}
+              {{ t("addStatusLabel") }}
             </button>
           </div>
         </div>

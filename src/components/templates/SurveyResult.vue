@@ -17,11 +17,12 @@ import VerticalThermometer from "../widgets/VerticalThermometer.vue";
 // @ts-expect-error gauge SFCs use plain <script setup> without TS
 import SegmentedPills from "../widgets/SegmentedPills.vue";
 import Table from "../widgets/Table.vue";
+import type { SurveyResultProps, TableRow } from "../../types/index.ts";
 import DefaultScoreCard from "../widgets/DefaultScoreCard.vue";
 import HideableSection from "./HideableSection.vue";
 import { useSurveyCreator } from "../../provider/surveyCreator.ts";
-import type { SurveyResultProps, TableRow } from "../../types/index.ts";
-import useFormBuilderI18n from "../../composables/useFormBuilderI18n.ts";
+import useLocalI18n from "../../composables/useLocalI18n.ts";
+import { surveyResult } from "../../locales/index.ts";
 
 const props = withDefaults(defineProps<SurveyResultProps>(), {});
 
@@ -31,23 +32,23 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { t, tm } = useFormBuilderI18n();
+const { t, tm } = useLocalI18n(surveyResult);
 
 const ui = computed(() => {
   const or = (v: string | undefined, fallback: string) =>
     v && v.trim().length > 0 ? v : fallback;
 
   return {
-    brandName: or(props.brandName, t("surveyResult.brandName")),
-    brandTagline: or(props.brandTagline, t("surveyResult.brandTagline")),
-    categoryChip: or(props.categoryChip, t("surveyResult.categoryChip")),
-    title: or(props.title, t("surveyResult.title")),
-    subtitle: or(props.subtitle, t("surveyResult.subtitle")),
-    description: or(props.description, t("surveyResult.description")),
-    noteText: or(props.noteText, t("surveyResult.noteText")),
-    primaryLabel: or(props.primaryLabel, t("surveyResult.primaryLabel")),
-    secondaryLabel: or(props.secondaryLabel, t("surveyResult.secondaryLabel")),
-    closeLabel: or(props.closeLabel, t("surveyResult.closeLabel")),
+    brandName: or(props.brandName, t("brandName")),
+    brandTagline: or(props.brandTagline, t("brandTagline")),
+    categoryChip: or(props.categoryChip, t("categoryChip")),
+    title: or(props.title, t("title")),
+    subtitle: or(props.subtitle, t("subtitle")),
+    description: or(props.description, t("description")),
+    noteText: or(props.noteText, t("noteText")),
+    primaryLabel: or(props.primaryLabel, t("primaryLabel")),
+    secondaryLabel: or(props.secondaryLabel, t("secondaryLabel")),
+    closeLabel: or(props.closeLabel, t("close")),
   };
 });
 
@@ -61,7 +62,7 @@ const statusLabels = computed<string[]>(() => {
   if (Array.isArray(props.statusLabels) && props.statusLabels.length) {
     return props.statusLabels;
   }
-  const i18nLabels = tm("surveyResult.statusLabels") as unknown;
+  const i18nLabels = tm("statusLabels") as any;
   if (Array.isArray(i18nLabels) && i18nLabels.length) {
     return i18nLabels.filter((s): s is string => typeof s === "string");
   }
@@ -144,7 +145,7 @@ const restoreSections = () => {
             class="text-[11px] font-semibold text-[var(--sjs-general-forecolor-light)] bg-transparent border border-dashed border-[var(--sjs-border-default)] px-3 py-1.5 rounded-full cursor-pointer hover:text-[var(--sjs-primary-backcolor)] hover:border-[var(--sjs-primary-backcolor)]"
             @click="restoreSections"
           >
-            {{ t("surveyResult.restoreHidden") }}
+            {{ t("restoreHidden") }}
           </button>
         </div>
       </header>

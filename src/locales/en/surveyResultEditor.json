@@ -1,0 +1,60 @@
+{
+  "title": "Edit result template",
+  "save": "Save",
+  "cancel": "Cancel",
+  "questions": "Questions",
+  "calculatedValues": "Calculated values",
+  "none": "None",
+  "noSourcesYet": "No questions or calculated values in this survey yet.",
+  "openSurveyProperties": "+ Open survey properties",
+  "pickQuestionOrCalculated": "Pick a question or calculated value",
+  "addRow": "+ Add row",
+  "addStatusLabel": "+ Add status label",
+  "remove": "Remove",
+  "row": "Row",
+  "groups": {
+    "display": "Display",
+    "score": "Score",
+    "brand": "Brand",
+    "copy": "Copy",
+    "segments": "Status labels"
+  },
+  "fields": {
+    "scoreDisplay": { "label": "Metric display" },
+    "score": { "label": "Score variable", "placeholder": "Pick a calculated value" },
+    "max": { "label": "Max" },
+    "min": { "label": "Min" },
+    "logoSrc": { "label": "Logo URL", "placeholder": "https://" },
+    "brandName": { "label": "Brand name" },
+    "brandTagline": { "label": "Tagline" },
+    "categoryChip": { "label": "Category chip" },
+    "title": { "label": "Title" },
+    "subtitle": { "label": "Subtitle" },
+    "description": { "label": "Description" },
+    "noteText": { "label": "Note text" },
+    "primaryLabel": { "label": "Primary button" },
+    "secondaryLabel": { "label": "Secondary button" },
+    "closeLabel": { "label": "Close button" },
+    "statusLabels": {
+      "label": "Status labels",
+      "help": "Shared across every widget. The widget's value range is split into this many tiers, each showing its label."
+    },
+    "tableRows": { "label": "Table rows" },
+    "metric": { "label": "Metric" },
+    "unit": { "label": "Unit" },
+    "valueVariable": { "label": "Value variable" }
+  },
+  "options": {
+    "scoreDisplay": {
+      "default": "Default (segmented bar)",
+      "linear": "Linear health gauge",
+      "radial": "Radial gauge",
+      "temperature": "Temperature gauge",
+      "donut": "Donut",
+      "bullet": "Bullet chart",
+      "thermometer": "Vertical thermometer",
+      "pills": "Segmented pills",
+      "table": "Table"
+    }
+  }
+}

@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import useFormBuilderI18n from "../../composables/useFormBuilderI18n.ts";
+import useLocalI18n from "../../composables/useLocalI18n.ts";
+import { surveyResult } from "../../locales/index.ts";
 
 defineEmits<{ hide: [] }>();
 
-const { t } = useFormBuilderI18n();
+const { t } = useLocalI18n(surveyResult);
 </script>
 
 <template>
   <div class="group relative">
     <slot />
     <div
-      class="absolute inset-0 -m-0.5 border-2 border-dashed border-[var(--sjs-primary-backcolor)] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+      class="absolute inset-0 -m-0.5 border-2 border-dashed border-(--sjs-primary-backcolor) rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
       aria-hidden="true"
     />
     <button
       type="button"
-      class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[var(--sjs-special-red)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
-      :title="t('surveyResult.hideSection')"
-      :aria-label="t('surveyResult.hideSection')"
+      class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-(--sjs-special-red) text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
+      :title="t('hideSection')"
+      :aria-label="t('hideSection')"
       @click="$emit('hide')"
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

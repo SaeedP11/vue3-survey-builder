@@ -1,0 +1,10 @@
+{
+  "surveyTitle": "Your responses",
+  "tableTitle": "Submission history",
+  "submittedAtLabel": "Submitted at",
+  "emptyStateText": "No previous submissions yet.",
+  "loadingText": "Loading…",
+  "prevLabel": "Previous",
+  "nextLabel": "Next",
+  "pageLabel": "Page {n} of {total}"
+}

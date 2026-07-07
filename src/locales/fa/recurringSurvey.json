@@ -1,0 +1,10 @@
+{
+  "surveyTitle": "نگاهی به پاسخ‌های شما",
+  "tableTitle": "تاریخچه ارسال‌ها",
+  "submittedAtLabel": "زمان ارسال",
+  "emptyStateText": "هنوز ارسال پیش‌ین ثبت نشده است.",
+  "loadingText": "در حال بارگذاری…",
+  "prevLabel": "قبلی",
+  "nextLabel": "بعدی",
+  "pageLabel": "صفحه {n} از {total}"
+}

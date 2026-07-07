@@ -1,0 +1,15 @@
+{
+  "brandName": "BehAyand",
+  "brandTagline": "Heart health care",
+  "categoryChip": "Heart health",
+  "title": "Assessment complete",
+  "subtitle": "Cardiovascular disease risk assessment",
+  "description": "Based on your responses, a health risk score was calculated. This result indicates the likelihood of developing cardiovascular disease over the next 10 years.",
+  "scoreLabel": "Health risk score",
+  "noteText": "Your result falls within the moderate risk range. To reduce your risk level, we recommend regularly monitoring your health status and making simple lifestyle changes.",
+  "primaryLabel": "Book a consultation",
+  "secondaryLabel": "Download results (PDF)",
+  "statusLabels": ["Mild", "Moderate", "Severe", "Critical"],
+  "hideSection": "Hide this section",
+  "restoreHidden": "Restore hidden sections"
+}

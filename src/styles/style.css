@@ -1,3 +1,5 @@
+@import "./sv-creator-bridge.css";
+
 .svc-creator * {
   font-weight: normal !important;
 }
@@ -6,6 +8,11 @@
   border: 1px solid #5555;
   border-radius: var(--sjs2-radius-x200);
   padding: calc(var(--sjs2-radius-x200) - 0.7em);
+}
+
+.dark .svc-creator {
+  --background: var(--color-background);
+  --background-dim: var(--color-background-dim);
 }
 
 .sd-input--error {

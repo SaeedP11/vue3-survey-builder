@@ -1,4 +1,47 @@
-import fa from "./fa.json";
-import en from "./en.json";
+import surveyResultEditorEn from "./en/surveyResultEditor.json";
+import recurringSurveyEn from "./en/recurringSurvey.json";
+import surveyResultEn from "./en/surveyResult.json";
+import generalEn from "./en/general.json";
 
-export const locales: Record<string, Record<string, unknown>> = { fa, en };
+import surveyResultEditorFa from "./fa/surveyResultEditor.json";
+import recurringSurveyFa from "./fa/recurringSurvey.json";
+import surveyResultFa from "./fa/surveyResult.json";
+import generalFa from "./fa/general.json";
+
+export const general = {
+  en: generalEn,
+  fa: generalFa,
+};
+
+export const surveyResult = {
+  en: {
+    ...general.en,
+    ...surveyResultEn,
+  },
+  fa: {
+    ...general.fa,
+    ...surveyResultFa,
+  },
+};
+
+export const surveyResultEditor = {
+  en: {
+    ...surveyResult.en,
+    ...surveyResultEditorEn,
+  },
+  fa: {
+    ...surveyResult.fa,
+    ...surveyResultEditorFa,
+  },
+};
+
+export const recurringSurvey = {
+  en: {
+    ...general.en,
+    ...recurringSurveyEn,
+  },
+  fa: {
+    ...general.fa,
+    ...recurringSurveyFa,
+  },
+};

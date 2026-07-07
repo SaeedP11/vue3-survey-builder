@@ -1,0 +1,60 @@
+{
+  "title": "ویرایش قالب نتیجه",
+  "save": "ذخیره",
+  "cancel": "انصراف",
+  "questions": "سؤالات",
+  "calculatedValues": "مقادیر محاسبه‌شده",
+  "none": "هیچ",
+  "noSourcesYet": "هنوز هیچ سؤالی یا مقدار محاسبه‌شده‌ای در این نظرسنجی وجود ندارد.",
+  "openSurveyProperties": "+ باز کردن ویژگی‌های نظرسنجی",
+  "pickQuestionOrCalculated": "یک سؤال یا مقدار محاسبه‌شده انتخاب کنید",
+  "addRow": "+ افزودن ردیف",
+  "addStatusLabel": "+ افزودن برچسب وضعیت",
+  "remove": "حذف",
+  "row": "ردیف",
+  "groups": {
+    "display": "نمایش",
+    "score": "امتیاز",
+    "brand": "برند",
+    "copy": "متن",
+    "segments": "برچسب‌های وضعیت"
+  },
+  "fields": {
+    "scoreDisplay": { "label": "نوع نمایش معیار" },
+    "score": { "label": "متغیر امتیاز", "placeholder": "یک مقدار محاسبه‌شده انتخاب کنید" },
+    "max": { "label": "حداکثر" },
+    "min": { "label": "حداقل" },
+    "logoSrc": { "label": "نشانی لوگو", "placeholder": "https://" },
+    "brandName": { "label": "نام برند" },
+    "brandTagline": { "label": "شعار" },
+    "categoryChip": { "label": "برچسب دسته‌بندی" },
+    "title": { "label": "عنوان" },
+    "subtitle": { "label": "زیرعنوان" },
+    "description": { "label": "توضیحات" },
+    "noteText": { "label": "متن یادداشت" },
+    "primaryLabel": { "label": "دکمه اصلی" },
+    "secondaryLabel": { "label": "دکمه فرعی" },
+    "closeLabel": { "label": "دکمه بستن" },
+    "statusLabels": {
+      "label": "برچسب‌های وضعیت",
+      "help": "میان همه ویجت‌ها به اشتراک گذاشته می‌شود. بازه مقدار ویجت به این تعداد بخش تقسیم می‌شود و هر بخش برچسب خود را نشان می‌دهد."
+    },
+    "tableRows": { "label": "ردیف‌های جدول" },
+    "metric": { "label": "معیار" },
+    "unit": { "label": "واحد" },
+    "valueVariable": { "label": "متغیر مقدار" }
+  },
+  "options": {
+    "scoreDisplay": {
+      "default": "نوار بخش‌بندی پیش‌فرض",
+      "linear": "نمودار سلامت خطی",
+      "radial": "نمودار شعاعی",
+      "temperature": "نمودار دما",
+      "donut": "دونات",
+      "bullet": "نمودار بولت",
+      "thermometer": "دماسنج عمودی",
+      "pills": "قرص‌های بخش‌بندی",
+      "table": "جدول"
+    }
+  }
+}

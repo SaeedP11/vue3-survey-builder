@@ -1,6 +1,6 @@
 import type { SurveyResultProps, TemplateDefinition } from "../types/index.ts";
-import SurveyResult from "../components/templates/SurveyResult.vue";
 import SurveyResultEditor from "../components/SurveyResultEditor.vue";
+import SurveyResult from "../components/templates/SurveyResult.vue";
 
 export const defaultProps: Required<SurveyResultProps> = {
   score: "",

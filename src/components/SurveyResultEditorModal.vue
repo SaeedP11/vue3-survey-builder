@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import useCreatorToolbarAction from "../composables/useCreatorToolbarAction";
 import { useSurveyResultTemplate } from "../provider/surveyResultTemplate";
-import useFormBuilderI18n from "../composables/useFormBuilderI18n.ts";
+import { surveyResultEditor } from "../locales/index.ts";
 import { useSurveyCreator } from "../provider/surveyCreator";
 import type { SurveyResultProps } from "../types/index.ts";
+import useLocalI18n from "../composables/useLocalI18n.ts";
 import SurveyResultEditor from "./SurveyResultEditor.vue";
 import { defaultProps } from "../schemas/templates";
 import { computed, ref, watch } from "vue";
@@ -15,8 +16,9 @@ const emit = defineEmits<{
 
 const creator = useSurveyCreator();
 const activeTemplate = useSurveyResultTemplate();
+const { t } = useLocalI18n(surveyResultEditor);
 const isOpen = ref(false);
-const { t } = useFormBuilderI18n();
+
 
 const themeVars = computed<Record<string, string>>(() => {
   const vars = (creator.creatorTheme?.cssVariables ?? {}) as Record<
@@ -108,13 +110,13 @@ useCreatorToolbarAction(creator, {
         </div>
         <div class="flex items-center gap-2.5 text-[13px] text-fb-fg-secondary">
           <span class="font-semibold text-fb-fg">{{
-            t("surveyResultEditor.title")
+            t("title")
           }}</span>
         </div>
         <div class="flex-1" />
         <button
           class="h-7.5 w-7.5 cursor-pointer rounded-lg border-0 bg-fb-surface-muted text-base leading-none text-fb-fg-muted hover:bg-fb-border"
-          :aria-label="t('surveyResultEditor.close')"
+          :aria-label="t('close')""
           @click="close"
         >
           ✕
@@ -146,13 +148,13 @@ useCreatorToolbarAction(creator, {
               class="shrink-0 cursor-pointer rounded-lg border border-fb-border bg-fb-surface px-4 py-2.5 text-sm font-semibold text-fb-fg hover:bg-fb-surface-muted"
               @click="close"
             >
-              {{ t("surveyResultEditor.cancel") }}
+              {{ t("cancel") }}
             </button>
             <button
               class="flex-1 cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-semibold text-fb-accent-on bg-fb-accent transition-[filter] hover:brightness-90"
               @click="save"
             >
-              {{ t("surveyResultEditor.save") }}
+              {{ t("save") }}
             </button>
           </div>
         </div>

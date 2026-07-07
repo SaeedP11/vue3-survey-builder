@@ -1,5 +1,5 @@
-import type { SurveyModel } from "survey-core";
 import type { SurveyCreatorModel } from "survey-creator-core";
+import type { SurveyModel } from "survey-core";
 
 export default function handleComplete(
   creator: SurveyCreatorModel,
