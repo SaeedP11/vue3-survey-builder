@@ -4,7 +4,6 @@ import { createApp } from "vue";
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
 import { createI18n } from "vue-i18n";
-import "./styles/tailwind.css";
 import "./styles/style.css";
 
 const i18n = createI18n({

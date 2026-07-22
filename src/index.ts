@@ -14,7 +14,6 @@ export {
 
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
-import "./styles/tailwind.css";
 import "./styles/style.css";
 
 export { useSurveyCreator } from "./provider/surveyCreator";

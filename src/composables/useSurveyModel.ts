@@ -15,9 +15,11 @@ export function useSurveyModel(jsonObj?: object): SurveyModel {
 
   useScrollToError(survey);
 
-  immediateWatch(locale, () => (survey.locale = locale.value));
-  immediateWatch(isDark, (dark) => {
-    survey.applyTheme(dark ? DefaultDarkPanelless : DefaultLightPanelless);
+  immediateWatch([locale], () => (survey.locale = locale.value));
+  immediateWatch([isDark], () => {
+    survey.applyTheme(
+      isDark.value ? DefaultDarkPanelless : DefaultLightPanelless,
+    );
   });
 
   return survey;

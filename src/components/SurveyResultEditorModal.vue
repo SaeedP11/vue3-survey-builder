@@ -19,7 +19,6 @@ const activeTemplate = useSurveyResultTemplate();
 const { t } = useLocalI18n(surveyResultEditor);
 const isOpen = ref(false);
 
-
 const themeVars = computed<Record<string, string>>(() => {
   const vars = (creator.creatorTheme?.cssVariables ?? {}) as Record<
     string,
@@ -77,7 +76,7 @@ watch(isOpen, (open) => {
 
 useCreatorToolbarAction(creator, {
   id: "ui",
-  iconName: "pg-specific-24x24",
+  iconName: "icon-desktop-24x24",
   action: () => {
     isOpen.value = !isOpen.value;
   },

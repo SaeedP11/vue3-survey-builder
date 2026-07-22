@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SurveyResultEditorModal from "./SurveyResultEditorModal.vue";
+import SurveyResultRequiredToast from "./SurveyResultRequiredToast.vue";
 import { initSurveyCreator } from "../provider/surveyCreator.ts";
 import { SurveyCreatorComponent } from "survey-creator-vue";
 import handleComplete from "../utils/handleComplete.ts";
@@ -14,12 +15,24 @@ const json = defineModel<object>("json");
 const creator = initSurveyCreator();
 const showResult = ref(false);
 const result = ref({});
+const showRequiredToast = ref(false);
 
 let skipNextJsonWatch = false;
 
+function hasResultTemplate(surveyJson: any): boolean {
+  const rt = surveyJson?.resultTemplate;
+  return !!rt && typeof rt === "object" && Object.keys(rt).length > 0;
+}
+
 creator.saveSurveyFunc = () => {
+  const current = creator.JSON;
+  if (!hasResultTemplate(current)) {
+    showRequiredToast.value = true;
+  } else {
+    showRequiredToast.value = false;
+  }
   skipNextJsonWatch = true;
-  json.value = creator.JSON;
+  json.value = current;
 };
 
 watch(
@@ -49,6 +62,10 @@ handleComplete(creator, (sender) => {
   <IconPicker />
   <AiAssistant />
   <SurveyResultEditorModal />
+  <SurveyResultRequiredToast
+    :open="showRequiredToast"
+    @close="showRequiredToast = false"
+  />
   <SurveyCreatorComponent :model="creator" />
   <!-- `.svd-simulator-content .sd-root-modern .sv-scroll__wrapper` The place where the preview is displayed -->
   <Teleport

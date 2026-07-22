@@ -38,10 +38,12 @@ export function initSurveyCreator(
   const { isDark } = useColorMode();
   const { locale } = useI18n();
 
-  immediateWatch(locale, () => (creator.locale = locale.value));
-  immediateWatch(isDark, (dark) => {
-    creator.applyCreatorTheme(dark ? DefaultDark : DefaultLight);
-    creator.applyTheme(dark ? DefaultDarkPanelless : DefaultLightPanelless);
+  immediateWatch([locale], () => (creator.locale = locale.value));
+  immediateWatch([isDark], () => {
+    creator.applyCreatorTheme(isDark.value ? DefaultDark : DefaultLight);
+    creator.applyTheme(
+      isDark.value ? DefaultDarkPanelless : DefaultLightPanelless,
+    );
   });
 
   provide(SURVEY_CREATOR_KEY, creator);

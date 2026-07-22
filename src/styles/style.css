@@ -1,4 +1,5 @@
 @import "./sv-creator-bridge.css";
+@import "tailwindcss";
 
 .svc-creator * {
   font-weight: normal !important;

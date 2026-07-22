@@ -2,6 +2,12 @@
   "title": "Edit result template",
   "save": "Save",
   "cancel": "Cancel",
+  "resultTemplateRequired": {
+    "title": "Result template is required",
+    "message": "Before you can save the survey, you need to configure the result template that will be shown to respondents after they complete it.",
+    "configure": "Configure now",
+    "dismiss": "Dismiss"
+  },
   "questions": "Questions",
   "calculatedValues": "Calculated values",
   "none": "None",
