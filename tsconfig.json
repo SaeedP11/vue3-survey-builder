@@ -11,6 +11,10 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "assets/script.ts"
+    "assets/script.ts",
+    "demo/**/*.ts",
+    "demo/**/*.d.ts",
+    "demo/**/*.tsx",
+    "demo/**/*.vue"
   ]
 }

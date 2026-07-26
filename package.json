@@ -21,10 +21,10 @@
     "./style.css": "./dist/form-builder.css"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config demo/vite.config.ts",
     "build": "vite build && npm run build:types",
     "build:types": "vue-tsc -p tsconfig.build.json --declaration --emitDeclarationOnly --outDir dist/types",
-    "preview": "vite preview"
+    "preview": "vite preview --config demo/vite.config.ts"
   },
   "files": [
     "dist",

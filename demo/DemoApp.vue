@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FormBuilder from "./components/FormBuilder.vue";
+import FormBuilder from "../src/components/FormBuilder.vue";
 import { ref } from "vue";
 
 const json = ref<object>({});

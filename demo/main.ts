@@ -3,8 +3,10 @@ import { createApp } from "vue";
 
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
+
 import { createI18n } from "vue-i18n";
-import "./styles/style.css";
+import "../src/styles/style.css";
+import "./style.css";
 
 const i18n = createI18n({
   locale: "fa",
