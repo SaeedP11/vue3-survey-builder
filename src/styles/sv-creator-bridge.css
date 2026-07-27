@@ -1,16 +1,39 @@
-.svc-creator {
+* {
   --sjs2-color-bg-basic-primary: var(--color-formbilder-background) !important;
+
   --sjs2-color-bg-basic-secondary: var(
     --color-formbilder-surface-background
   ) !important;
+
   --sjs2-color-utility-surface-designer: var(
     --color-formbilder-surface-background
   ) !important;
+
   --sjs2-color-utility-surface-survey: var(
     --color-formbilder-surface-background
   ) !important;
 
+  --sjs-general-backcolor-dim-light: var(
+    --color-formbilder-surface-background
+  ) !important;
+
+  --sjs-questionpanel-backcolor: var(
+    --color-formbilder-surface-background
+  ) !important;
+
+  --sjs-editorpanel-backcolor: var(
+    --color-formbilder-surface-background
+  ) !important;
+
+  --sjs-general-backcolor: var(
+    --color-formbilder-surface-background
+  ) !important;
+
+  --sjs-general-backcolor-dim: var(--color-formbilder-background) !important;
+
   /* Primary Color */
+  --sjs-primary-backcolor: var(--color-formbilder-primary) !important;
+  --sjs-primary-backcolor-dark: var(--color-formbilder-primary) !important;
   --sjs2-color-project-brand-600: var(--color-formbilder-primary) !important;
   --sjs2-color-project-accent-600: var(--color-formbilder-primary) !important;
   --sjs2-color-fg-brand-primary: var(--color-formbilder-primary) !important;
@@ -31,6 +54,29 @@
   ) !important;
 
   /* ==================== TYPOGRAPHY ==================== */
+  --sjs-font-questiontitle-family: var(
+    --font-formbilder-family,
+    "Segoe UI"
+  ) !important;
+  --sjs-font-family: var(--font-formbilder-family, "Segoe UI") !important;
+
+  --sjs-font-pagedescription-weight: var(
+    --font-formbilder-weight,
+    400
+  ) !important;
+
+  --sjs-font-questiontitle-weight: var(
+    --font-formbilder-weight,
+    400
+  ) !important;
+
+  --sjs-font-questiontitle-size: var(
+    --font-formbilder-question-size,
+    16px
+  ) !important;
+
+  --sjs-font-editorfont-size: var(--font-formbilder-size, 14px) !important;
+
   --sjs2-typography-font-family-text: var(
     --font-formbilder-family,
     "Segoe UI"
