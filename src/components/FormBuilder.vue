@@ -8,6 +8,8 @@ import RenderResult from "./RenderResult.vue";
 import AiAssistant from "./AiAssistant.vue";
 import IconPicker from "./IconPicker.vue";
 import "survey-creator-core/i18n/persian";
+// The designer's strings above; these are the Preview tab survey's own
+import "survey-core/i18n/persian";
 import { ref, watch } from "vue";
 import "../utils/serilizers";
 
