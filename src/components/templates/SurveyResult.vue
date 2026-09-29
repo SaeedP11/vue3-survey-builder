@@ -24,7 +24,10 @@ import { useSurveyCreator } from "../../provider/surveyCreator.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
 
-const props = withDefaults(defineProps<SurveyResultProps>(), {});
+// A template without scoreDisplay (hand-written or older JSON) still shows its score
+const props = withDefaults(defineProps<SurveyResultProps>(), {
+  scoreDisplay: "default",
+});
 
 const emit = defineEmits<{
   primary: [];
