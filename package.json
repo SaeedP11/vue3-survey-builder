@@ -18,7 +18,8 @@
       "require": "./dist/form-builder.umd.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./style.css": "./dist/form-builder.css"
+    "./style.css": "./dist/form-builder.css",
+    "./tailwind.css": "./src/styles/tailwind.css"
   },
   "scripts": {
     "dev": "vite --config demo/vite.config.ts",

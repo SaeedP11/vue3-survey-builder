@@ -1,0 +1,27 @@
+/*
+ * Tailwind entry for host apps. Import it after Tailwind in the app's CSS:
+ *
+ *   @import "tailwindcss";
+ *   @import "@yonus_amire01/form-builder/tailwind.css";
+ *
+ * Tailwind skips node_modules, so the library's components are named as a
+ * source here. The fb-* colours are registered so their utilities
+ * (bg-fb-surface, text-fb-fg, ...) are generated. The components set these
+ * variables inline from the creator theme; the values below are fallbacks.
+ */
+@source "../";
+
+@theme {
+  --color-fb-overlay: rgb(0 0 0 / 0.5);
+  --color-fb-shell: #ffffff;
+  --color-fb-surface: #ffffff;
+  --color-fb-surface-muted: #f4f4f5;
+  --color-fb-fg: #18181b;
+  --color-fb-fg-secondary: #52525b;
+  --color-fb-fg-muted: #a1a1aa;
+  --color-fb-border: #e4e4e7;
+  --color-fb-border-strong: #d4d4d8;
+  --color-fb-accent: #19b394;
+  --color-fb-accent-soft: #e6f7f3;
+  --color-fb-accent-on: #ffffff;
+}

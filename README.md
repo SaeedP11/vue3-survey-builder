@@ -36,6 +36,29 @@ yarn add @yonus_amire01/form-builder
 
 ---
 
+## 🎨 Styling
+
+Import the library stylesheet where you use the components:
+
+```ts
+import "@yonus_amire01/form-builder/style.css";
+```
+
+Some components (the result template, its editor and the toasts) are styled
+with Tailwind v4 utilities, which your app's Tailwind build generates. Add
+the library's Tailwind entry to your app's CSS, after Tailwind itself:
+
+```css
+@import "tailwindcss";
+@import "@yonus_amire01/form-builder/tailwind.css";
+```
+
+It names the library's sources for Tailwind to scan (Tailwind skips
+`node_modules` otherwise) and registers the `fb-*` colours those components
+use.
+
+---
+
 ## 🔌 Async Dropdown (custom question)
 
 Register a server-driven dropdown question that the form designer and the
