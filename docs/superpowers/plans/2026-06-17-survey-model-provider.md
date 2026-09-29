@@ -1,5 +1,10 @@
 # Survey Model Provider Implementation Plan
 
+> **Status: superseded.** See the note at the top of the
+> [spec](../specs/2026-06-17-survey-model-provider-design.md):
+> `provideSurveyConfig` was removed in 91a4b17, and `useSurveyModel` works
+> without a provider. Kept as a record.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship a `provideSurveyConfig` + `useSurveyModel` composable pair so host apps stop writing the per-project survey-model helper.

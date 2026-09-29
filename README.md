@@ -11,28 +11,103 @@
 ## ✨ Features
 
 - 🎨 **Visual drag-and-drop form designer** powered by SurveyJS Creator
-- 🤖 **AI-driven form generation** — describe your form in natural language and let AI build the JSON schema
-- 📋 **Standard library panel** — search and insert pre-defined clinical/standard question sets (FHIR `Observation`-compatible)
-- 🌗 **Dark & Light themes** out of the box
-- 🌐 **Bilingual support** — Persian (Farsi) & English, with RTL rendering
-- 🖼️ **Icon Picker** — custom icon selection integrated into the toolbar
+- 🤖 **AI-driven form generation** — describe your form in natural language; your app calls the model and returns the JSON schema
+- 📊 **Result templates** — a score card for completed surveys, configured and previewed in the designer
+- 🔌 **Custom question types and logic** — async dropdowns, designer-only pickers, custom Conditional Logic triggers
+- 🌗 **Dark & Light themes**, following the `dark` class on `<html>`
+- 🌐 **Bilingual support** — Persian (Farsi) & English
+- 🖼️ **Icon Picker** — a Lucide icon for the survey logo, picked from the survey header
 - 📦 **Dual build output** — ESM (`.mjs`) + UMD (`.umd.js`) + TypeScript declarations
-- ⚡ Built with **Vite 8**, zero-config tree-shakeable exports
 
 ---
 
 ## 📦 Installation
 
+The SurveyJS packages, Vue, vue-i18n and Tailwind are peer dependencies,
+shared with your app rather than bundled. pnpm and npm install missing
+peers automatically; with yarn, or with peer auto-install turned off,
+add them yourself:
+
 ```bash
-# pnpm (recommended)
 pnpm add @yonus_amire01/form-builder
 
-# npm
-npm install @yonus_amire01/form-builder
-
-# yarn
-yarn add @yonus_amire01/form-builder
+# only if your package manager does not install peers:
+pnpm add survey-core survey-creator-core survey-creator-vue survey-vue3-ui vue vue-i18n tailwindcss
 ```
+
+survey-core and survey-creator-core keep global registries (custom
+properties, question types, locale strings), so the app and this library
+must share one copy. Import SurveyJS APIs from either package: this library
+re-exports `survey-core`.
+
+---
+
+## 🚀 Usage
+
+The components translate their own text with vue-i18n, so the app must
+install it (Composition API mode). Its current locale (`en` or `fa`) also
+drives the SurveyJS locale.
+
+```ts
+// main.ts
+import { createI18n } from "vue-i18n";
+
+app.use(createI18n({ legacy: false, locale: "fa", messages: {} }));
+```
+
+### Designer
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import {
+  FormBuilder,
+  SurveySchemaPrompt,
+  provideAiAssistantConfig,
+} from "@yonus_amire01/form-builder";
+import "@yonus_amire01/form-builder/style.css";
+
+const json = ref<object>({});
+
+// Optional: the toolbar's AI button sends the prompt here. Return the survey
+// JSON (or a Promise of it); return undefined to leave the form unchanged.
+provideAiAssistantConfig({
+  onSubmit: async (prompt) => {
+    const messages = [...SurveySchemaPrompt, { role: "user", content: prompt }];
+    const reply = await callYourModel(messages); // your LLM call
+    return JSON.parse(reply.match(/\[JSON\]([\s\S]*?)\[\/JSON\]/)![1]);
+  },
+});
+</script>
+
+<template>
+  <FormBuilder v-model:json="json" />
+</template>
+```
+
+`v-model:json` receives the survey JSON on every autosave, and setting it
+loads a new schema into the designer. `SurveySchemaPrompt` is a few-shot
+prompt that makes a model answer in the `[JSON]…[/JSON]` format above.
+
+### Filling a survey
+
+```vue
+<script setup lang="ts">
+import { SurveyComponent, useSurveyModel } from "@yonus_amire01/form-builder";
+import "@yonus_amire01/form-builder/style.css";
+
+const survey = useSurveyModel(surveyJson);
+survey.onComplete.add((sender) => save(sender.data));
+</script>
+
+<template>
+  <SurveyComponent :model="survey" />
+</template>
+```
+
+`useSurveyModel` builds the `Model`, keeps its locale and theme in step with
+the app, and scrolls to the first invalid question on validation. It must be
+called from a component's `setup()`.
 
 ---
 
@@ -56,6 +131,19 @@ the library's Tailwind entry to your app's CSS, after Tailwind itself:
 It names the library's sources for Tailwind to scan (Tailwind skips
 `node_modules` otherwise) and registers the `fb-*` colours those components
 use.
+
+To match the designer and surveys to your app's palette, set these CSS
+variables (for example on `:root`, and again under `.dark`); `style.css`
+maps them onto SurveyJS's own variables:
+
+| Variable | Used for |
+| -------- | -------- |
+| `--color-formbilder-background` | Page and input backgrounds |
+| `--color-formbilder-surface-background` | Panels and the designer surface |
+| `--color-formbilder-primary` | Brand and accent colour |
+| `--color-formbilder-error`, `--color-formbilder-error-light` | Validation errors |
+| `--font-formbilder-family`, `--font-formbilder-size`, `--font-formbilder-question-size`, `--font-formbilder-weight` | Typography |
+| `--radius-formbilder` | Corner radius of forms, inputs and buttons |
 
 ---
 
@@ -267,7 +355,7 @@ At runtime the question is a plain text input — the popup never appears.
 
 ### Internals (for the curious)
 
-- The popup component (`advanced-text-input-popup`) is registered
+- The popup component (`survey-text-input-popup`) is registered
   globally on the active Vue app on first call.
 - `QuestionAdornerViewModel.prototype.createConvertInputType` is
   monkey-patched **once** to swap in the async popup for questions
@@ -387,123 +475,41 @@ locale strings are added once.
 
 ---
 
-## 🪟 HTML-property Template Gallery (creator property grid)
 
-`registerHtmlEditorModal` adds a button to the title of every property
-editor in the Survey Creator's property grid whose underlying property
-stores HTML — i.e. `html`, `completedHtml`, `completedBeforeHtml`,
-`loadingHtml`, and any custom `:html`-typed property. Clicking the
-button opens a full template gallery: a categorised grid of view
-components you've registered, with a detail preview and a single
-"Insert template" button that writes the chosen component's HTML
-output into the property.
+## 📊 Result template
 
-### 1. Register views
+The designer toolbar's **desktop** button opens the result-template editor:
+a live preview on the left, settings on the right. The settings are stored
+in the survey JSON under `resultTemplate` (a hidden survey property):
 
-Each view is a Vue component that renders a preview AND exposes a
-`getHtml()` method through `defineExpose`. The library calls
-`getHtml()` when the user clicks **Insert template** in the detail
-preview, and writes the returned string straight into the property.
+| Setting | Notes |
+| ------- | ----- |
+| `scoreDisplay` | `default`, `linear`, `radial`, `temperature`, `donut`, `bullet`, `thermometer`, `pills` or `table` |
+| `score` | Name of the question or calculated value that holds the score |
+| `min`, `max` | Score range |
+| `statusLabels` | Tier labels shared by every display; the range is split into this many tiers |
+| `tableRows` | Rows for the `table` display: `metric`, `value` (a variable name or a number), `min`, `max`, `unit` |
+| Brand and copy | `logoSrc`, `brandName`, `brandTagline`, `categoryChip`, `title`, `subtitle`, `description`, `noteText`, button labels |
+
+When a survey is completed in the designer's **Preview** tab, the template
+is rendered over the preview with the score read from the answers. Saving a
+survey without a template shows a one-time reminder.
+
+The template is only rendered inside `FormBuilder` for now: the default
+template component reads the creator's theme, so it cannot yet be shown to
+respondents outside the designer.
+
+To use your own template component and editor, provide them from an
+ancestor of `FormBuilder`:
 
 ```ts
-import { registerHtmlEditorModal } from "@yonus_amire01/form-builder";
-import BarChart from "./components/BarChart.vue";
-import PieChart from "./components/PieChart.vue";
+import { provideSurveyResultTemplate } from "@yonus_amire01/form-builder";
+import MyResult from "./MyResult.vue"; // receives the settings as props
+import MyResultEditor from "./MyResultEditor.vue"; // v-model:props
 
-registerHtmlEditorModal({
-  iconName: "icon-edit",       // optional — title-action icon
-  title: "Choose template",    // optional — title-action tooltip
-  views: [
-    {
-      id: "bar",
-      name: "Vertical Bar",
-      category: "Bar",
-      description: "Compare values across discrete categories.",
-      bestFor: "Comparing categories",
-      dataShape: "1 dim · 1 measure",
-      component: BarChart,
-    },
-    {
-      id: "pie",
-      name: "Pie",
-      category: "Pie",
-      description: "Show parts of a whole as proportional slices.",
-      bestFor: "Part-to-whole",
-      component: PieChart,
-    },
-  ],
+provideSurveyResultTemplate({
+  id: "my-result",
+  component: MyResult,
+  editor: MyResultEditor, // optional; defaults to the built-in editor
 });
 ```
-
-### 2. Author a view component
-
-```vue
-<!-- BarChart.vue -->
-<script setup lang="ts">
-import { ref } from "vue";
-
-const svgRef = ref<SVGSVGElement | null>(null);
-
-defineExpose({
-  getHtml(): string {
-    return svgRef.value?.outerHTML ?? "";
-  },
-});
-</script>
-
-<template>
-  <svg ref="svgRef" viewBox="0 0 120 80" width="100%" height="100%">
-    <!-- … your chart markup … -->
-  </svg>
-</template>
-```
-
-`getHtml` can return a string **or a `Promise<string>`** — fetch
-data, hydrate a third-party renderer, or build markup with a template
-literal, then return the final HTML.
-
-### View shape
-
-| Field         | Type                          | Notes                                                                                  |
-| ------------- | ----------------------------- | -------------------------------------------------------------------------------------- |
-| `id`          | `string`                      | Stable identifier (used for keys + selection state)                                    |
-| `name`        | `string`                      | Card title                                                                             |
-| `category`    | `string?`                     | If any view has one, category filter chips appear ("All", plus each distinct category) |
-| `description` | `string?`                     | Shown under the card title and inside the detail modal                                 |
-| `bestFor`     | `string?`                     | Optional row in the detail modal's meta panel                                          |
-| `dataShape`   | `string?`                     | Optional row in the detail modal's meta panel (rendered in JetBrains Mono)             |
-| `component`   | `Component`                   | Vue component; **must `defineExpose({ getHtml() })`**                                  |
-| `props`       | `Record<string, unknown>?`    | Bound to the component instance in both card and detail previews                       |
-
-### How it works
-
-- A title action with id `fb-html-editor` is pushed onto every property
-  editor whose `property.type === "html"`. Title actions render on the
-  trailing edge of the label (right in LTR, left in RTL).
-- The hook subscribes inside `initSurveyCreator()`, so every creator
-  produced by `FormBuilder` picks it up automatically.
-- Open state, current value, and the active property editor live in a
-  shared reactive store (`src/utils/htmlEditorModal.ts`). Clicking the
-  title button records `editor.value` and opens the gallery.
-- The gallery renders a card for each view, filterable by category.
-  Selecting a card opens a detail preview; the **Insert template**
-  button calls the previewed component's `getHtml()` and writes the
-  result back into `editor.value` (which SurveyJS propagates to the
-  surveyElement).
-- Visual design comes from Claude Design — Plus Jakarta Sans +
-  JetBrains Mono, `oklch()` palette, soft accent ring on hover, scaled
-  pop-in animation.
-- The gallery itself is styled with plain scoped CSS + CSS custom
-  properties — **no Tailwind dependency in the published library**.
-  Consumers only need to import `@yonus_amire01/form-builder/style.css`
-  for everything to render.
-- Dark / light mode follows the creator's color mode automatically.
-  The gallery reads `useSurveyConfig().colorMode` and toggles a
-  `.fb-dark` class that flips all theme tokens (`--fb-*` CSS
-  variables) — no separate configuration needed.
-- **Demo-only:** the example chart/score widgets in `src/demo/*` use
-  Tailwind v4 (`@tailwindcss/vite`) for convenience, and Tailwind is
-  imported from `src/main.ts` (the dev/demo entry) rather than the
-  library entry. If you author your own view components, you can use
-  whatever styling you want — they're rendered inside the gallery via
-  `<component :is>` and don't inherit any styling assumptions.

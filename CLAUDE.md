@@ -8,7 +8,7 @@ Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `s
 
 ## Commands
 
-- `pnpm dev` — Vite dev server (mounts `src/main.ts` demo)
+- `pnpm dev` — Vite dev server for the demo app in `demo/` (entry `demo/main.ts`, config `demo/vite.config.ts`)
 - `pnpm build` — Vite library build + `vue-tsc` type declarations
 - `pnpm build:types` — type declarations only
 - **No tests, no linter, no formatter configured.** Do not invent `pnpm test` / `pnpm lint` — they do not exist. If verification is needed, run `pnpm build` (catches type errors via `vue-tsc`).
@@ -17,14 +17,13 @@ Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `s
 
 - TypeScript strict mode (`noUnusedLocals`, `noUnusedParameters`, `noUncheckedSideEffectImports` all on).
 - Vue 3 Composition API only, `<script setup lang="ts">`. Use `defineProps<>()` / `defineEmits<>()` generics.
-- Theming is driven by CSS variables passed in via the `cssVariables` prop — defined in `src/themes/theme.ts`. Do not add scoped `<style>` blocks for theme tokens.
-- Localization uses `surveyLocalization.setupLocale()` called directly in code (`src/index.ts`, `src/main.ts`), not JSON files.
+- Theming: the SurveyJS light/dark themes follow the `dark` class on `<html>` (`useColorMode`). Hosts restyle SurveyJS through the `--color-formbilder-*`, `--font-formbilder-*` and `--radius-formbilder` variables, which `src/styles/sv-creator-bridge.css` maps onto SurveyJS variables. The result template, its editor and the toasts use Tailwind utilities with `fb-*` colours: the colours are registered in `src/styles/tailwind.css` (hosts import it into their Tailwind build) and set inline from the creator theme.
+- Localization: component text lives in `src/locales/{en,fa}/*.json`, grouped in `src/locales/index.ts` and loaded per component with `useLocalI18n` (vue-i18n local scope; the host installs vue-i18n). Keep `en` and `fa` in step. SurveyJS strings go through `editorLocalization` (`src/utils/serilizers.ts`) and `survey-creator-core/i18n/persian`.
 
 ## Gotchas
 
 - `.env` contains `NODE_AUTH_TOKEN` (npm publish credential). Never echo, commit, or include it in tool output.
 - The peer dependencies (`vue`, `vue-i18n`, `survey-*`) are external in `vite.config.ts` and must stay so: survey-core and survey-creator-core keep global registries (`Serializer`, `ElementFactory`, `editorLocalization`), and a bundled second copy would not share them with the host. Their CSS is the exception and stays bundled into `form-builder.css`. A new peer goes in `peerDependencies`, `devDependencies` and the `peers` list.
-- `schema.txt` and `test.json` at the repo root are demo data, not generated artifacts.
 
 ## MCP Tools: code-review-graph
 

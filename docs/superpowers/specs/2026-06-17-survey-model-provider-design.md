@@ -1,5 +1,12 @@
 # Survey Model Provider + Inject Pattern
 
+> **Status: superseded.** `provideSurveyConfig` was built (f286b20) and later
+> removed (91a4b17, "fix: remove surveyConfig"). The shipped
+> `useSurveyModel(json?)` needs no provider: it follows the `dark` class on
+> `<html>` and the vue-i18n locale (`src/composables/useSurveyModel.ts`), and
+> hosts restyle SurveyJS through the `--color-formbilder-*` CSS variables.
+> Kept as a design record.
+
 ## Goal
 
 Eliminate the per-host `useSurveyModel` helper. The library should expose a
