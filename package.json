@@ -32,16 +32,16 @@
     "src"
   ],
   "peerDependencies": {
-    "tailwindcss": "^4.0.0",
-    "vue-i18n": "^11.0.0"
-  },
-  "dependencies": {
-    "lucide-vue-next": "^1.0.0",
     "survey-core": "^2.5.18",
     "survey-creator-core": "^2.5.18",
     "survey-creator-vue": "^2.5.18",
     "survey-vue3-ui": "^2.5.18",
-    "vue": "^3.5.30"
+    "tailwindcss": "^4.0.0",
+    "vue": "^3.5.30",
+    "vue-i18n": "^11.0.0"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^1.0.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
@@ -49,11 +49,16 @@
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/tsconfig": "^0.9.0",
     "csv-parser": "^3.2.1",
+    "survey-core": "^2.5.18",
+    "survey-creator-core": "^2.5.18",
+    "survey-creator-vue": "^2.5.18",
+    "survey-vue3-ui": "^2.5.18",
     "tailwindcss": "^4.3.1",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vue-devtools": "^8.1.2",
+    "vue": "^3.5.30",
     "vue-i18n": "^11.4.6",
     "vue-tsc": "^3.2.5"
   }

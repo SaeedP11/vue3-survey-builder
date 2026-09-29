@@ -11,21 +11,6 @@ importers:
       lucide-vue-next:
         specifier: ^1.0.0
         version: 1.0.0(vue@3.5.32(typescript@5.9.3))
-      survey-core:
-        specifier: ^2.5.18
-        version: 2.5.18
-      survey-creator-core:
-        specifier: ^2.5.18
-        version: 2.5.18(ace-builds@1.43.6)(survey-core@2.5.18)
-      survey-creator-vue:
-        specifier: ^2.5.18
-        version: 2.5.18(survey-core@2.5.18)(survey-creator-core@2.5.18(ace-builds@1.43.6)(survey-core@2.5.18))(survey-vue3-ui@2.5.18(survey-core@2.5.18)(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3))
-      survey-vue3-ui:
-        specifier: ^2.5.18
-        version: 2.5.18(survey-core@2.5.18)(vue@3.5.32(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.30
-        version: 3.5.32(typescript@5.9.3)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.1
@@ -42,6 +27,18 @@ importers:
       csv-parser:
         specifier: ^3.2.1
         version: 3.2.1
+      survey-core:
+        specifier: ^2.5.18
+        version: 2.5.18
+      survey-creator-core:
+        specifier: ^2.5.18
+        version: 2.5.18(ace-builds@1.43.6)(survey-core@2.5.18)
+      survey-creator-vue:
+        specifier: ^2.5.18
+        version: 2.5.18(survey-core@2.5.18)(survey-creator-core@2.5.18(ace-builds@1.43.6)(survey-core@2.5.18))(survey-vue3-ui@2.5.18(survey-core@2.5.18)(vue@3.5.32(typescript@5.9.3)))(vue@3.5.32(typescript@5.9.3))
+      survey-vue3-ui:
+        specifier: ^2.5.18
+        version: 2.5.18(survey-core@2.5.18)(vue@3.5.32(typescript@5.9.3))
       tailwindcss:
         specifier: ^4.3.1
         version: 4.3.1
@@ -57,6 +54,9 @@ importers:
       vite-plugin-vue-devtools:
         specifier: ^8.1.2
         version: 8.1.2(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@24.12.2)(jiti@2.7.0)(terser@5.47.1))(vue@3.5.32(typescript@5.9.3))
+      vue:
+        specifier: ^3.5.30
+        version: 3.5.32(typescript@5.9.3)
       vue-i18n:
         specifier: ^11.4.6
         version: 11.4.6(vue@3.5.32(typescript@5.9.3))

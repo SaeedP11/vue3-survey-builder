@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `survey-vue3-ui`). Adds theming, modal/icon overlays, and bilingual (Persian/English with RTL) localization. Published to npm; built as UMD + ESM with type declarations. Vue 3 is a **peer dependency** — not bundled.
+Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `survey-vue3-ui`). Adds theming, modal/icon overlays, and bilingual (Persian/English with RTL) localization. Published to npm; built as UMD + ESM with type declarations. Vue, vue-i18n and the SurveyJS packages are **peer dependencies**, not bundled.
 
 ## Commands
 
@@ -23,7 +23,7 @@ Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `s
 ## Gotchas
 
 - `.env` contains `NODE_AUTH_TOKEN` (npm publish credential). Never echo, commit, or include it in tool output.
-- `vue` is marked external in the Rollup config — never add it to bundled imports or assume it's tree-shakeable here.
+- The peer dependencies (`vue`, `vue-i18n`, `survey-*`) are external in `vite.config.ts` and must stay so: survey-core and survey-creator-core keep global registries (`Serializer`, `ElementFactory`, `editorLocalization`), and a bundled second copy would not share them with the host. Their CSS is the exception and stays bundled into `form-builder.css`. A new peer goes in `peerDependencies`, `devDependencies` and the `peers` list.
 - `schema.txt` and `test.json` at the repo root are demo data, not generated artifacts.
 
 ## MCP Tools: code-review-graph
