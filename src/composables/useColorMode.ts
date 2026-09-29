@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { getCurrentScope, onScopeDispose, ref } from "vue";
 
 export default function useColorMode() {
   const isDark = ref(document.documentElement.classList.contains("dark"));
@@ -11,6 +11,8 @@ export default function useColorMode() {
     attributeFilter: ["class"],
     attributes: true,
   });
+
+  if (getCurrentScope()) onScopeDispose(() => observer.disconnect());
 
   return {
     isDark,
