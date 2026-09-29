@@ -115,7 +115,7 @@ useCreatorToolbarAction(creator, {
         <div class="flex-1" />
         <button
           class="h-7.5 w-7.5 cursor-pointer rounded-lg border-0 bg-fb-surface-muted text-base leading-none text-fb-fg-muted hover:bg-fb-border"
-          :aria-label="t('close')""
+          :aria-label="t('close')"
           @click="close"
         >
           ✕

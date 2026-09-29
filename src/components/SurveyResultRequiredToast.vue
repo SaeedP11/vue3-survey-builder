@@ -66,7 +66,7 @@ function configure() {
         </div>
         <button
           class="h-6 w-6 shrink-0 cursor-pointer rounded-md border-0 bg-transparent text-sm leading-none text-fb-fg-muted hover:bg-fb-surface-muted"
-          :aria-label="t('dismiss')"
+          :aria-label="t('resultTemplateRequired.dismiss')"
           @click="emit('close')"
         >
           ✕
