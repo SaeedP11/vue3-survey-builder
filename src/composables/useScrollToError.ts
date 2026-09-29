@@ -1,12 +1,8 @@
 import type { SurveyModel } from "survey-core";
 
 export default function useScrollToError(survey: SurveyModel) {
-  survey.onValidateQuestion.add((_, options) => {
-    const error: any = options.errors[0];
-
-    if (error) {
-      const question = error.errorOwner;
-      question.getWrapperElement().scrollIntoView();
-    }
+  // Raised once per page validation, with the invalid questions in page order.
+  survey.onValidatedErrorsOnCurrentPage.add((_, options) => {
+    options.questions[0]?.getWrapperElement()?.scrollIntoView();
   });
 }
