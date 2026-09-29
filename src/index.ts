@@ -23,6 +23,16 @@ export * from "./provider/aiAssistantConfig.ts";
 export * from "survey-core";
 
 export type {
+  AsyncDropdownHandlers,
+  ItemType,
+  ScoreDisplayVariant,
+  SurveyAiAssitantConfig,
+  SurveyResultProps,
+  TableRow,
+  TemplateDefinition,
+} from "./types";
+
+export type {
   CustomLogicFireContext,
   CustomLogicLocales,
   CustomLogicLocaleStrings,
