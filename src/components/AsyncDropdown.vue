@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type { AsyncDropdownHandlers, ItemType } from "../types";
 
 defineOptions({
@@ -16,10 +16,21 @@ const items = computed<ItemType[]>(() => handlers?.items.value ?? []);
 const currentPage = computed(() => handlers?.currentPage.value ?? 0);
 const totalPages = computed(() => handlers?.totalPages.value ?? 0);
 
+// Texts of every item seen so far: the selected one can be on a page or
+// search result that is no longer loaded.
+const seenTexts = new Map<string, string>();
+watch(
+  items,
+  (list) => list.forEach((i) => seenTexts.set(i.value, i.text)),
+  { immediate: true },
+);
+
 const selectedText = computed(() => {
   const v = props.question.value;
   if (v === undefined || v === null) return "";
-  return items.value.find((i) => i.value === v)?.text ?? "";
+  return (
+    items.value.find((i) => i.value === v)?.text ?? seenTexts.get(v) ?? ""
+  );
 });
 
 const inputDisplay = computed(() =>
