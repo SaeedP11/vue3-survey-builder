@@ -30,8 +30,8 @@ const handleClick = async () => {
 
   try {
     isLoading.value = true;
-    const schema = config.onSubmit(prompt.value);
-    creator.JSON = schema;
+    const schema = await config.onSubmit(prompt.value);
+    if (schema) creator.JSON = schema;
   } catch (error) {
   } finally {
     isLoading.value = false;

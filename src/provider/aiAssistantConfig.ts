@@ -8,9 +8,9 @@ const SURVEY_AI_ASSISTANT: InjectionKey<SurveyAiAssitantConfig> = Symbol(
 const DEFAULT_AI_ASSISTANT_CONFIG: SurveyAiAssitantConfig = {
   onSubmit: () => {
     console.warn(
-      "useSurveyAiAssistantConfig(): no provideAiAssistantConfig() in an ancestor — returning empty schema.",
+      "useSurveyAiAssistantConfig(): no provideAiAssistantConfig() in an ancestor — leaving the form unchanged.",
     );
-    return {};
+    return undefined;
   },
 };
 

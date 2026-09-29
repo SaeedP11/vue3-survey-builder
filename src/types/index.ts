@@ -4,7 +4,12 @@ import type { Component } from "vue";
 import type { Ref } from "vue";
 
 export type SurveyAiAssitantConfig = {
-  onSubmit: (prompt: string) => SurveyCreatorModel["JSON"];
+  onSubmit: (
+    prompt: string,
+  ) =>
+    | SurveyCreatorModel["JSON"]
+    | Promise<SurveyCreatorModel["JSON"] | undefined>
+    | undefined;
 };
 
 export type ItemType = { value: string; text: string };
