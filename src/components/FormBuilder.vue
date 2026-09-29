@@ -18,6 +18,9 @@ const result = ref({});
 const showRequiredToast = ref(false);
 
 let skipNextJsonWatch = false;
+// Autosave runs on every edit: remind about the result template once, not
+// on each save.
+let requiredToastShown = false;
 
 function hasResultTemplate(surveyJson: any): boolean {
   const rt = surveyJson?.resultTemplate;
@@ -26,10 +29,11 @@ function hasResultTemplate(surveyJson: any): boolean {
 
 creator.saveSurveyFunc = () => {
   const current = creator.JSON;
-  if (!hasResultTemplate(current)) {
-    showRequiredToast.value = true;
-  } else {
+  if (hasResultTemplate(current)) {
     showRequiredToast.value = false;
+  } else if (!requiredToastShown) {
+    requiredToastShown = true;
+    showRequiredToast.value = true;
   }
   skipNextJsonWatch = true;
   json.value = current;
