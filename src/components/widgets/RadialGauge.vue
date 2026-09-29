@@ -129,8 +129,10 @@ const arcLength = Math.PI * RADIUS;
 
 // Current normalized progress
 const currentProgress = computed(() => {
+  const range = props.max - props.min;
+  if (range <= 0) return 0;
   const clampedValue = Math.max(props.min, Math.min(props.value, props.max));
-  return (clampedValue - props.min) / (props.max - props.min);
+  return (clampedValue - props.min) / range;
 });
 
 const displayValue = computed(() => {
