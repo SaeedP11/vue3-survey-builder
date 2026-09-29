@@ -45,9 +45,14 @@ export default function registerCustomLogic(
   }
   if (onFire) registered.set(type, onFire);
 
+  // SurveyJS writes a trigger as { type: "complete" } but reads it back as the
+  // class "completetrigger" (the triggers property's classNamePart), so the
+  // class needs the suffix or the trigger is dropped when JSON loads.
+  const className = `${type}trigger`;
+
   class CustomTrigger extends SurveyTrigger {
     getType(): string {
-      return type;
+      return className;
     }
     protected onSuccess(properties: Record<string, unknown>): void {
       const handler = registered.get(type);
@@ -60,15 +65,15 @@ export default function registerCustomLogic(
     }
   }
 
-  if (!Serializer.findClass(type)) {
-    Serializer.addClass(type, [], () => new CustomTrigger(), "surveytrigger");
+  if (!Serializer.findClass(className)) {
+    Serializer.addClass(className, [], () => new CustomTrigger(), "surveytrigger");
   }
 
   const logicTypeName = `trigger_${type}`;
   if (!SurveyLogic.types.some((t) => t.name === logicTypeName)) {
     SurveyLogic.types.push({
       name: logicTypeName,
-      baseClass: type,
+      baseClass: className,
       propertyName: "expression",
     });
   }
