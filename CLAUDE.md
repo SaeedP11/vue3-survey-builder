@@ -8,7 +8,7 @@ Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `s
 
 ## Commands
 
-- `pnpm dev` — Vite dev server for the demo app in `demo/` (entry `demo/main.ts`, config `demo/vite.config.ts`)
+- `pnpm dev` — Vite dev server for the playground in `demo/` (entry `demo/main.ts`, config `demo/vite.config.ts`): designer, fill and JSON tabs, sample surveys, the custom question types and logic registered with fake data, an AI mock, locale and dark-mode switches, and an event log. It imports the library from `src/index.ts`, so it exercises the public API; keep it in step when that changes.
 - `pnpm build` — Vite library build + `vue-tsc` type declarations
 - `pnpm build:types` — type declarations only
 - **No tests, no linter, no formatter configured.** Do not invent `pnpm test` / `pnpm lint` — they do not exist. If verification is needed, run `pnpm build` (catches type errors via `vue-tsc`).

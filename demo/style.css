@@ -1,2 +1,25 @@
 @import "tailwindcss";
 @import "../src/styles/tailwind.css";
+
+/* The library follows a `dark` class on <html>; so does the playground UI */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* What a host sets to brand the designer and surveys (see the README's
+   Styling section); these match phc-frontend. */
+:root {
+  --color-formbilder-background: #f8fafc;
+  --color-formbilder-surface-background: #ffffff;
+  --color-formbilder-primary: #00d5be;
+  --color-formbilder-error: #ff2156;
+  --color-formbilder-error-light: #fecaee;
+  --font-formbilder-family: ui-sans-serif, system-ui, sans-serif;
+  --font-formbilder-question-size: 15px;
+  --font-formbilder-weight: 400;
+  --font-formbilder-size: 14px;
+  --radius-formbilder: 8px;
+}
+
+.dark {
+  --color-formbilder-background: #0f172b;
+  --color-formbilder-surface-background: #020618;
+}
