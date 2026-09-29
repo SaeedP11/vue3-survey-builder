@@ -6,7 +6,6 @@
         "code-review-graph",
         "serve"
       ],
-      "cwd": "/home/yonus/workspace/form-builder",
       "type": "stdio"
     }
   }
