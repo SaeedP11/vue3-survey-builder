@@ -91,7 +91,7 @@ function removeStatusLabel(index: number) {
 function updateStatusLabel(index: number, raw: string) {
   ensureStatusLabels();
   const labels = statusLabels.value;
-  if (!labels[index]) return;
+  if (index >= labels.length) return;
   labels[index] = raw;
 }
 
