@@ -12,6 +12,7 @@ import {
   type Component,
 } from "vue";
 import * as LucideIcons from "lucide-vue-next";
+import type { SurveyModel } from "survey-core";
 import Modal from "./Modal.vue";
 
 const search = ref("");
@@ -25,7 +26,7 @@ const onLogoPickerClick = (e: Event) => {
   isOpen.value = !isOpen.value;
 };
 
-useCreatorEvent(creator.survey.onAfterRenderHeader, (_: any, options: any) => {
+const onAfterRenderHeader = (survey: SurveyModel, options: any) => {
   const logoPicker: HTMLElement | null = options.htmlElement?.children?.[1];
   if (logoPicker) {
     // remove file input
@@ -34,10 +35,25 @@ useCreatorEvent(creator.survey.onAfterRenderHeader, (_: any, options: any) => {
     if (fileInput) logoPicker.removeChild(fileInput);
 
     logoPicker.addEventListener("click", onLogoPickerClick);
+
+    // Draw the icon saved in the survey JSON, e.g. after a reload.
+    const saved =
+      survey.icon && LucideIcons[survey.icon as keyof typeof LucideIcons];
+    if (saved) mountIcon(saved as Component);
+  }
+};
+
+// The designer survey is replaced whenever creator.JSON is set, so follow
+// each new one as well as the current one.
+creator.survey.onAfterRenderHeader.add(onAfterRenderHeader);
+useCreatorEvent(creator.onSurveyInstanceCreated, (_: any, options: any) => {
+  if (options.area === "designer-tab") {
+    options.survey.onAfterRenderHeader.add(onAfterRenderHeader);
   }
 });
 
 onScopeDispose(() => {
+  creator.survey?.onAfterRenderHeader.remove(onAfterRenderHeader);
   logoPickerContainer.value?.removeEventListener("click", onLogoPickerClick);
 });
 
@@ -54,19 +70,18 @@ const filteredIcons: Ref<[string, object][]> = computed(() => {
 
 let mountedIconApp: App | null = null;
 
+function mountIcon(Component: Component) {
+  const iconPlaceholder = logoPickerContainer.value?.firstElementChild;
+  if (iconPlaceholder) {
+    mountedIconApp?.unmount();
+    mountedIconApp = createApp(Component);
+    mountedIconApp.mount(iconPlaceholder);
+  }
+}
+
 const selectIcon = (name: string, Component: Component) => {
   creator.survey.icon = name;
-  const logoPicker = logoPickerContainer.value;
-
-  if (logoPicker) {
-    const iconPlaceholder = logoPicker.firstElementChild;
-    if (iconPlaceholder) {
-      mountedIconApp?.unmount();
-      mountedIconApp = createApp(Component);
-      mountedIconApp.mount(iconPlaceholder);
-    }
-  }
-
+  mountIcon(Component);
   isOpen.value = false;
 };
 
