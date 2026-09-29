@@ -2,19 +2,12 @@
 import { computed, ref } from "vue";
 
 defineOptions({ inheritAttrs: false });
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import LinearHealthGauge from "../widgets/LinearHealthGauge.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import RadialGauge from "../widgets/RadialGauge.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import TemperatureGauge from "../widgets/TemperatureGauge.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import DonutGauge from "../widgets/DonutGauge.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import BulletChart from "../widgets/BulletChart.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import VerticalThermometer from "../widgets/VerticalThermometer.vue";
-// @ts-expect-error gauge SFCs use plain <script setup> without TS
 import SegmentedPills from "../widgets/SegmentedPills.vue";
 import Table from "../widgets/Table.vue";
 import type { SurveyResultProps, TableRow } from "../../types/index.ts";
