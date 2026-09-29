@@ -17,13 +17,17 @@ const prompt = ref("");
 const creator = useSurveyCreator();
 const config = useSurveyAiAssistantConfig();
 
-useCreatorToolbarAction(creator, {
-  id: "chat-ai",
-  iconName: "pg-specific-24x24",
-  action: () => {
-    isOpen.value = !isOpen.value;
+useCreatorToolbarAction(
+  creator,
+  {
+    id: "chat-ai",
+    iconName: "pg-specific-24x24",
+    action: () => {
+      isOpen.value = !isOpen.value;
+    },
   },
-});
+  () => t("aiAssistant"),
+);
 
 const onAfterEnter = () => {
   textareaRef.value?.focus();

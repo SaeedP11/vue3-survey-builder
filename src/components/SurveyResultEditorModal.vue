@@ -74,13 +74,17 @@ watch(isOpen, (open) => {
   if (open) loadStored();
 });
 
-useCreatorToolbarAction(creator, {
-  id: "ui",
-  iconName: "icon-desktop-24x24",
-  action: () => {
-    isOpen.value = !isOpen.value;
+useCreatorToolbarAction(
+  creator,
+  {
+    id: "ui",
+    iconName: "icon-desktop-24x24",
+    action: () => {
+      isOpen.value = !isOpen.value;
+    },
   },
-});
+  () => t("title"),
+);
 </script>
 
 <template>

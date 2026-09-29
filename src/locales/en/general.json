@@ -3,5 +3,6 @@
   "aiPromptPlaceholder": "Describe the form you want to design...",
   "aiGenerating": "Designing...",
   "aiCreate": "Create",
+  "aiAssistant": "AI assistant",
   "iconSearchPlaceholder": "Search icons..."
 }
