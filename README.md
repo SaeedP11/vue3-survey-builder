@@ -2,7 +2,7 @@
 
 > A powerful, AI-assisted, drag-and-drop form builder Vue 3 component library — built on top of [SurveyJS](https://surveyjs.io/), with full **Persian (Farsi) / English** bilingual support and **AI-powered form generation**.
 
-[![npm version](https://img.shields.io/npm/v/@yonus_amire01/form-builder?color=2dd4bf&label=npm)](https://www.npmjs.com/package/@yonus_amire01/form-builder)
+[![npm version](https://img.shields.io/npm/v/vue3-survey-builder?color=2dd4bf&label=npm)](https://www.npmjs.com/package/vue3-survey-builder)
 [![Vue 3](https://img.shields.io/badge/Vue-3.x-4FC08D?logo=vue.js)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
@@ -29,7 +29,7 @@ peers automatically; with yarn, or with peer auto-install turned off,
 add them yourself:
 
 ```bash
-pnpm add @yonus_amire01/form-builder
+pnpm add vue3-survey-builder
 
 # only if your package manager does not install peers:
 pnpm add survey-core survey-creator-core survey-creator-vue survey-vue3-ui vue vue-i18n tailwindcss
@@ -64,8 +64,8 @@ import {
   FormBuilder,
   SurveySchemaPrompt,
   provideAiAssistantConfig,
-} from "@yonus_amire01/form-builder";
-import "@yonus_amire01/form-builder/style.css";
+} from "vue3-survey-builder";
+import "vue3-survey-builder/style.css";
 
 const json = ref<object>({});
 
@@ -93,8 +93,8 @@ prompt that makes a model answer in the `[JSON]…[/JSON]` format above.
 
 ```vue
 <script setup lang="ts">
-import { SurveyComponent, useSurveyModel } from "@yonus_amire01/form-builder";
-import "@yonus_amire01/form-builder/style.css";
+import { SurveyComponent, useSurveyModel } from "vue3-survey-builder";
+import "vue3-survey-builder/style.css";
 
 const survey = useSurveyModel(surveyJson);
 survey.onComplete.add((sender) => save(sender.data));
@@ -116,7 +116,7 @@ called from a component's `setup()`.
 Import the library stylesheet where you use the components:
 
 ```ts
-import "@yonus_amire01/form-builder/style.css";
+import "vue3-survey-builder/style.css";
 ```
 
 Some components (the result template, its editor and the toasts) are styled
@@ -125,7 +125,7 @@ the library's Tailwind entry to your app's CSS, after Tailwind itself:
 
 ```css
 @import "tailwindcss";
-@import "@yonus_amire01/form-builder/tailwind.css";
+@import "vue3-survey-builder/tailwind.css";
 ```
 
 It names the library's sources for Tailwind to scan (Tailwind skips
@@ -166,7 +166,7 @@ import {
   FormBuilder,
   registerAsyncDropdown,
   type ItemType,
-} from "@yonus_amire01/form-builder";
+} from "vue3-survey-builder";
 
 const items = ref<ItemType[]>([]);
 const currentPage = ref(1);
@@ -265,7 +265,7 @@ import {
   registerAdvancedTextInput,
   type AsyncDropdownHandlers,
   type ItemType,
-} from "@yonus_amire01/form-builder";
+} from "vue3-survey-builder";
 
 const COUNTRIES: ItemType[] = [
   { value: "IR", text: "Iran" },
@@ -393,7 +393,7 @@ helper does **not** need a Vue component context — call it at module
 load time, before the creator is instantiated:
 
 ```ts
-import { registerCustomLogic } from "@yonus_amire01/form-builder";
+import { registerCustomLogic } from "vue3-survey-builder";
 
 registerCustomLogic({
   type: "reminder",
@@ -503,7 +503,7 @@ To use your own template component and editor, provide them from an
 ancestor of `FormBuilder`:
 
 ```ts
-import { provideSurveyResultTemplate } from "@yonus_amire01/form-builder";
+import { provideSurveyResultTemplate } from "vue3-survey-builder";
 import MyResult from "./MyResult.vue"; // receives the settings as props
 import MyResultEditor from "./MyResultEditor.vue"; // v-model:props
 

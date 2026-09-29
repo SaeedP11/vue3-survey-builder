@@ -173,7 +173,7 @@ describe("type declarations", () => {
           lib: ["ES2022", "DOM"],
           types: [],
           skipLibCheck: true,
-          paths: { "@yonus_amire01/form-builder": ["../../../dist/types/index.d.ts"] },
+          paths: { "vue3-survey-builder": ["../../../dist/types/index.d.ts"] },
         },
         files: ["consumer.ts"],
       }),
@@ -190,7 +190,7 @@ import {
   type SurveyAiAssitantConfig,
   type SurveyResultProps,
   type TemplateDefinition,
-} from "@yonus_amire01/form-builder";
+} from "vue3-survey-builder";
 
 const components = [FormBuilder, SurveyComponent, SurveyResultEditor, SurveyResultEditorModal];
 const item: ItemType = { value: "IR", text: "Iran" };

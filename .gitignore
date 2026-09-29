@@ -32,3 +32,5 @@ playwright-report
 # Added by code-review-graph
 .code-review-graph/
 CLAUDE.md
+# npm credentials
+.npmrc

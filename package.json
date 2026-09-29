@@ -1,17 +1,17 @@
 {
-  "name": "@yonus_amire01/form-builder",
+  "name": "vue3-survey-builder",
   "version": "3.0.0",
   "main": "./dist/form-builder.umd.js",
   "module": "./dist/form-builder.mjs",
   "types": "./dist/types/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yonus-a/form-builder.git"
+    "url": "https://github.com/SaeedP11/vue-survey-builder.git"
   },
   "bugs": {
-    "url": "https://github.com/yonus-a/form-builder/issues"
+    "url": "https://github.com/SaeedP11/vue-survey-builder/issues"
   },
-  "homepage": "https://github.com/yonus-a/form-builder#readme",
+  "homepage": "https://github.com/SaeedP11/vue-survey-builder#readme",
   "exports": {
     ".": {
       "import": "./dist/form-builder.mjs",

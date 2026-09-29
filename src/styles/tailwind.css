@@ -2,7 +2,7 @@
  * Tailwind entry for host apps. Import it after Tailwind in the app's CSS:
  *
  *   @import "tailwindcss";
- *   @import "@yonus_amire01/form-builder/tailwind.css";
+ *   @import "vue3-survey-builder/tailwind.css";
  *
  * Tailwind skips node_modules, so the library's components are named as a
  * source here. The fb-* colours are registered so their utilities
