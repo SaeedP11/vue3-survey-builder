@@ -1,0 +1,18 @@
+/** The library's own public API, as the README documents it (beside survey-core's). */
+export const OWN_EXPORTS = [
+  "FormBuilder",
+  "SurveyComponent",
+  "SurveyResultEditor",
+  "SurveyResultEditorModal",
+  "SurveySchemaPrompt",
+  "provideAiAssistantConfig",
+  "provideSurveyResultTemplate",
+  "registerAdvancedTextInput",
+  "registerAsyncDropdown",
+  "registerCustomLogic",
+  "useScrollToError",
+  "useSurveyAiAssistantConfig",
+  "useSurveyCreator",
+  "useSurveyModel",
+  "useSurveyResultTemplate",
+].sort();

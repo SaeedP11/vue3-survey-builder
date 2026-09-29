@@ -8,6 +8,9 @@ export default defineConfig({
   root: fileURLToPath(new URL("./", import.meta.url)),
   plugins: [vue(), vueDevTools(), tailwindcss()],
   server: {
+    // The devzone's end-to-end container reaches the playground by its
+    // compose service name
+    allowedHosts: ["form-builder"],
     fs: {
       allow: [fileURLToPath(new URL("../", import.meta.url))],
     },

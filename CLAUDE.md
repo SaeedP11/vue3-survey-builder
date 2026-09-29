@@ -11,7 +11,20 @@ Vue 3 component library wrapping the SurveyJS creator (`survey-creator-vue` + `s
 - `pnpm dev` — Vite dev server for the playground in `demo/` (entry `demo/main.ts`, config `demo/vite.config.ts`): designer, fill and JSON tabs, sample surveys, the custom question types and logic registered with fake data, an AI mock, locale and dark-mode switches, and an event log. It imports the library from `src/index.ts`, so it exercises the public API; keep it in step when that changes.
 - `pnpm build` — Vite library build + `vue-tsc` type declarations
 - `pnpm build:types` — type declarations only
-- **No tests, no linter, no formatter configured.** Do not invent `pnpm test` / `pnpm lint` — they do not exist. If verification is needed, run `pnpm build` (catches type errors via `vue-tsc`).
+- `pnpm typecheck` — `vue-tsc` over the library and playground (`tsconfig.app.json`) and the tests (`tsconfig.test.json`)
+- `pnpm test` — unit and component tests (Vitest, jsdom); `pnpm test:coverage` adds a coverage report in `coverage/`
+- `pnpm test:package` — builds, then checks `dist/` as consumers get it (exports resolve, only peers are imported, CSS and `tailwind.css` complete, a strict TypeScript consumer type-checks, `npm pack` contents)
+- `pnpm test:e2e` — Playwright against a running playground (`PLAYGROUND_URL`, default `http://localhost:5180`)
+- `pnpm check` — typecheck + test + test:package; `prepublishOnly` runs it, so a publish with a failing check stops
+- No linter or formatter is configured.
+
+## Tests
+
+- `tests/unit/` — one file per module or component. Components run against a real `SurveyCreatorModel` (`mountWithCreator` in `helpers.ts` provides it and vue-i18n); only `FormBuilder.test.ts` mocks SurveyJS's creator UI. `tests/setup.ts` stubs the browser APIs jsdom lacks.
+- `locales.test.ts` fails when a component's `t("key")` is missing in `en` or `fa`, or the two languages' keys differ.
+- `tests/publicApi.ts` lists the public exports; `exports.test.ts` and the package tests hold the build to it, so a new export goes there too.
+- `tests/package/` needs `dist/`; `tests/e2e/` drives the playground through `fixtures.ts` (the `Playground` helpers), so e2e selectors track `demo/`.
+- Every bug fixed so far has a regression test; add one with each fix.
 
 ## Code style
 

@@ -73,6 +73,7 @@ async function copy() {
     </div>
     <textarea
       v-model="draft"
+      aria-label="Survey JSON"
       spellcheck="false"
       class="min-h-0 flex-1 resize-none bg-white p-4 font-mono text-xs outline-none dark:bg-slate-950"
     />
