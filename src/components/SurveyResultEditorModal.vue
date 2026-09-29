@@ -6,7 +6,7 @@ import { useSurveyCreator } from "../provider/surveyCreator";
 import type { SurveyResultProps } from "../types/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import SurveyResultEditor from "./SurveyResultEditor.vue";
-import { defaultProps } from "../schemas/templates";
+import { getDefaultProps } from "../schemas/templates";
 import { computed, ref, watch } from "vue";
 
 const emit = defineEmits<{
@@ -16,7 +16,7 @@ const emit = defineEmits<{
 
 const creator = useSurveyCreator();
 const activeTemplate = useSurveyResultTemplate();
-const { t } = useLocalI18n(surveyResultEditor);
+const { t, locale } = useLocalI18n(surveyResultEditor);
 const isOpen = ref(false);
 
 const themeVars = computed<Record<string, string>>(() => {
@@ -42,11 +42,11 @@ const themeVars = computed<Record<string, string>>(() => {
   };
 });
 
-const editedProps = ref<SurveyResultProps>({ ...defaultProps });
+const editedProps = ref<SurveyResultProps>(getDefaultProps(locale.value));
 
 function loadStored() {
   const stored = creator.JSON?.resultTemplate as SurveyResultProps | undefined;
-  editedProps.value = { ...defaultProps, ...(stored ?? {}) };
+  editedProps.value = { ...getDefaultProps(locale.value), ...(stored ?? {}) };
 }
 
 function close() {

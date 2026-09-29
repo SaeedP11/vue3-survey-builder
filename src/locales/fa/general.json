@@ -1,3 +1,7 @@
 {
-  "close": "بستن"
+  "close": "بستن",
+  "aiPromptPlaceholder": "لطفا دستور طراحی خود را وارد کنید...",
+  "aiGenerating": "در حال طراحی...",
+  "aiCreate": "ایجاد",
+  "iconSearchPlaceholder": "جستجوی آیکون..."
 }

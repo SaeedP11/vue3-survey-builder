@@ -13,7 +13,11 @@ import {
 } from "vue";
 import * as LucideIcons from "lucide-vue-next";
 import type { SurveyModel } from "survey-core";
+import useLocalI18n from "../composables/useLocalI18n.ts";
+import { general } from "../locales/index.ts";
 import Modal from "./Modal.vue";
+
+const { t } = useLocalI18n(general);
 
 const search = ref("");
 const isOpen = ref(false);
@@ -93,11 +97,11 @@ onScopeDispose(() => {
 
 <template>
   <Modal v-model="isOpen">
-    <div v-if="isOpen" class="modal-container" dir="rtl">
+    <div v-if="isOpen" class="modal-container">
       <input
         v-model.trim="search"
         class="search-input"
-        placeholder="جستجوی آیکون..."
+        :placeholder="t('iconSearchPlaceholder')"
         autofocus
       />
       <div class="icon-grid">

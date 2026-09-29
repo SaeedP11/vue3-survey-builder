@@ -11,5 +11,11 @@
   "secondaryLabel": "دانلود نتایج (PDF)",
   "statusLabels": ["خفیف", "متوسط", "شدید", "بحرانی"],
   "hideSection": "پنهان کردن این بخش",
-  "restoreHidden": "بازگرداندن بخش‌های پنهان"
+  "restoreHidden": "بازگرداندن بخش‌های پنهان",
+  "table": {
+    "metric": "شاخص / فاکتور",
+    "currentValue": "مقدار فعلی",
+    "normalRange": "محدوده نرمال",
+    "status": "وضعیت سیستم"
+  }
 }

@@ -3,7 +3,11 @@ import { useSurveyCreator } from "../provider/surveyCreator.ts";
 import useCreatorToolbarAction from "../composables/useCreatorToolbarAction.ts";
 import { useSurveyAiAssistantConfig } from "../provider/aiAssistantConfig.ts";
 import { ref, useTemplateRef } from "vue";
+import useLocalI18n from "../composables/useLocalI18n.ts";
+import { general } from "../locales/index.ts";
 import Modal from "./Modal.vue";
+
+const { t } = useLocalI18n(general);
 
 const textareaRef = useTemplateRef("chatbox");
 const isLoading = ref(false);
@@ -47,7 +51,7 @@ const handleClick = async () => {
         rows="20"
         cols="80"
         v-model="prompt"
-        placeholder="لطفا دستور طراحی خود را وارد کنید..."
+        :placeholder="t('aiPromptPlaceholder')"
         class="prompt-textarea"
         ref="chatbox"
       ></textarea>
@@ -62,8 +66,8 @@ const handleClick = async () => {
           class="submit-button"
           @click.prevent="handleClick"
         >
-          <span v-if="isLoading">در حال طراحی...</span>
-          <span v-else>ایجاد</span>
+          <span v-if="isLoading">{{ t("aiGenerating") }}</span>
+          <span v-else>{{ t("aiCreate") }}</span>
         </button>
       </div>
     </div>

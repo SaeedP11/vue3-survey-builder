@@ -1,3 +1,7 @@
 {
-  "close": "Close"
+  "close": "Close",
+  "aiPromptPlaceholder": "Describe the form you want to design...",
+  "aiGenerating": "Designing...",
+  "aiCreate": "Create",
+  "iconSearchPlaceholder": "Search icons..."
 }

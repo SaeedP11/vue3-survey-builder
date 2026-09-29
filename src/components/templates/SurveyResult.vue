@@ -32,7 +32,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { t } = useLocalI18n(surveyResult);
+const { t, tm, rt } = useLocalI18n(surveyResult);
 
 const ui = computed(() => {
   const or = (v: string | undefined, fallback: string) =>
@@ -62,9 +62,11 @@ const statusLabels = computed<string[]>(() => {
   if (Array.isArray(props.statusLabels) && props.statusLabels.length) {
     return props.statusLabels;
   }
-  const i18nLabels = t("statusLabels");
+  // t() returns the key for an array message; tm() gives the array. It is
+  // cast because its generic key typing recurses too deep for vue-tsc here.
+  const i18nLabels = (tm as (key: string) => unknown)("statusLabels");
   if (Array.isArray(i18nLabels) && i18nLabels.length) {
-    return i18nLabels.filter((s): s is string => typeof s === "string");
+    return i18nLabels.map((m) => rt(m));
   }
   return ["Mild", "Moderate", "Severe", "Critical"];
 });

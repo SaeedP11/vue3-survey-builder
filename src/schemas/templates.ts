@@ -1,28 +1,33 @@
 import type { SurveyResultProps, TemplateDefinition } from "../types/index.ts";
 import SurveyResultEditor from "../components/SurveyResultEditor.vue";
 import SurveyResult from "../components/templates/SurveyResult.vue";
+import { surveyResult } from "../locales/index.ts";
 
-export const defaultProps: Required<SurveyResultProps> = {
-  score: "",
-  min: 0,
-  max: 100,
-  scoreDisplay: "default",
-  tableRows: [],
-  logoSrc: "",
-  brandName: "BehAyand",
-  brandTagline: "مراقبت از سلامت قلب",
-  categoryChip: "سلامت قلب",
-  title: "ارزیابی تکمیل شد",
-  subtitle: "ارزیابی خطر بیماری‌های قلبی و عروقی",
-  description:
-    "بر اساس پاسخ‌های شما، امتیاز خطر سلامت محاسبه شد. این نتیجه احتمال ابتلا به بیماری‌های قلبی و عروقی در ۱۰ سال آینده نشان می‌دهد.",
-  noteText:
-    "نتیجه شما در محدوده خطر متوسط قرار دارد. توصیه می‌شود برای کاهش سطح خطر، به‌صورت منظم وضعیت سلامت خود را پیگیری کرده و تغییرات ساده‌ای در سبک زندگی ایجاد کنید.",
-  primaryLabel: "رزرو مشاوره",
-  secondaryLabel: "دانلود نتایج (PDF)",
-  closeLabel: "بستن",
-  statusLabels: ["خفیف", "متوسط", "شدید", "بحرانی"],
-};
+/** Starting values for a new result template, with the copy in `locale`. */
+export function getDefaultProps(locale: string): Required<SurveyResultProps> {
+  const lang = locale.split("-")[0] as keyof typeof surveyResult;
+  const copy = surveyResult[lang] ?? surveyResult.en;
+
+  return {
+    score: "",
+    min: 0,
+    max: 100,
+    scoreDisplay: "default",
+    tableRows: [],
+    logoSrc: "",
+    brandName: copy.brandName,
+    brandTagline: copy.brandTagline,
+    categoryChip: copy.categoryChip,
+    title: copy.title,
+    subtitle: copy.subtitle,
+    description: copy.description,
+    noteText: copy.noteText,
+    primaryLabel: copy.primaryLabel,
+    secondaryLabel: copy.secondaryLabel,
+    closeLabel: copy.close,
+    statusLabels: [...copy.statusLabels],
+  };
+}
 
 export const surveyResultTemplate: TemplateDefinition<SurveyResultProps> = {
   id: "survey-result",

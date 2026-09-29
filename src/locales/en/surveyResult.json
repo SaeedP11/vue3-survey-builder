@@ -11,5 +11,11 @@
   "secondaryLabel": "Download results (PDF)",
   "statusLabels": ["Mild", "Moderate", "Severe", "Critical"],
   "hideSection": "Hide this section",
-  "restoreHidden": "Restore hidden sections"
+  "restoreHidden": "Restore hidden sections",
+  "table": {
+    "metric": "Metric / factor",
+    "currentValue": "Current value",
+    "normalRange": "Normal range",
+    "status": "Status"
+  }
 }

@@ -8,10 +8,10 @@
           <tr
             class="border-b border-[var(--sjs-border-inside)] text-xs font-bold uppercase tracking-wider text-[var(--sjs-general-forecolor-light)]"
           >
-            <th class="py-4 px-6 font-semibold text-left">شاخص / فاکتور</th>
-            <th class="py-4 px-6 font-semibold text-center">مقدار فعلی</th>
-            <th class="py-4 px-6 font-semibold text-center">محدوده نرمال</th>
-            <th class="py-4 px-6 font-semibold text-center">وضعیت سیستم</th>
+            <th class="py-4 px-6 font-semibold text-left">{{ t("table.metric") }}</th>
+            <th class="py-4 px-6 font-semibold text-center">{{ t("table.currentValue") }}</th>
+            <th class="py-4 px-6 font-semibold text-center">{{ t("table.normalRange") }}</th>
+            <th class="py-4 px-6 font-semibold text-center">{{ t("table.status") }}</th>
           </tr>
         </thead>
 
@@ -81,11 +81,15 @@
 import { computed } from "vue";
 import type { TableRow } from "../../types/index.ts";
 import { pickLabel } from "../../utils/statusTiers.ts";
+import useLocalI18n from "../../composables/useLocalI18n.ts";
+import { surveyResult } from "../../locales/index.ts";
 
 const props = defineProps<{
   rows?: TableRow[];
   statusLabels?: string[];
 }>();
+
+const { t } = useLocalI18n(surveyResult);
 
 const resolvedStatusLabels = computed<string[]>(() =>
   Array.isArray(props.statusLabels) && props.statusLabels.length

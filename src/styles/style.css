@@ -63,7 +63,6 @@
   color: white;
   outline: none;
   transition: all 0.2s;
-  direction: rtl;
 }
 
 .search-input:focus {
