@@ -12,6 +12,7 @@
 
 - 🎨 **Visual drag-and-drop form designer** powered by SurveyJS Creator
 - 🤖 **AI-driven form generation** — describe your form in natural language; your app calls the model and returns the JSON schema
+- 🧾 **Highlighted JSON editor** — the designer's JSON Editor tab colours the JSON and formats it (toolbar button or Shift+Alt+F)
 - 📊 **Result templates** — a score card for completed surveys, configured and previewed in the designer
 - 🔌 **Custom question types and logic** — async dropdowns, designer-only pickers, custom Conditional Logic triggers
 - 🌗 **Dark & Light themes**, following the `dark` class on `<html>`
@@ -144,6 +145,7 @@ maps them onto SurveyJS's own variables:
 | `--color-formbilder-error`, `--color-formbilder-error-light` | Validation errors |
 | `--font-formbilder-family`, `--font-formbilder-size`, `--font-formbilder-question-size`, `--font-formbilder-weight` | Typography |
 | `--radius-formbilder` | Corner radius of forms, inputs and buttons |
+| `--color-formbilder-json-key`, `-string`, `-number`, `-boolean`, `-null`, `-punctuation`, `-comment` | Token colours in the JSON Editor tab (light and dark defaults otherwise) |
 
 ---
 

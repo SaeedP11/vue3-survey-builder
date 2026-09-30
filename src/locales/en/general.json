@@ -4,5 +4,6 @@
   "aiGenerating": "Designing...",
   "aiCreate": "Create",
   "aiAssistant": "AI assistant",
-  "iconSearchPlaceholder": "Search icons..."
+  "iconSearchPlaceholder": "Search icons...",
+  "formatJson": "Format JSON"
 }

@@ -48,7 +48,7 @@ export class Playground {
   }
 
   /** A button the library adds to the creator's toolbar, by its name. */
-  toolbarButton(name: "AI assistant" | "Edit result template"): Locator {
+  toolbarButton(name: "AI assistant" | "Edit result template" | "Format JSON (Shift+Alt+F)"): Locator {
     return this.page.locator(".svc-creator").getByRole("button", { name, exact: true });
   }
 }

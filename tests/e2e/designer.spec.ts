@@ -37,6 +37,24 @@ test("the JSON tab rejects invalid JSON", async ({ playground, page }) => {
   await expect(page.locator(".text-rose-600")).toBeVisible();
 });
 
+test("the creator's JSON Editor tab colours the JSON and formats it", async ({ playground, page }) => {
+  await playground.loadSample("Heart risk (result template)");
+  await playground.creatorTab("JSON Editor");
+  const editor = page.locator(".fb-json-editor");
+  await expect(editor.locator(".fb-json-key", { hasText: '"title"' }).first()).toBeVisible();
+
+  const textarea = editor.locator("textarea");
+  await textarea.fill('{"title":"Compact","pages":[]}');
+  await playground.toolbarButton("Format JSON (Shift+Alt+F)").click();
+  await expect(textarea).toHaveValue('{\n  "title": "Compact",\n  "pages": []\n}');
+
+  // The browser's undo takes the formatting back
+  await textarea.press("Control+z");
+  await expect(textarea).toHaveValue('{"title":"Compact","pages":[]}');
+  await textarea.press("Shift+Alt+F");
+  await expect(textarea).toHaveValue('{\n  "title": "Compact",\n  "pages": []\n}');
+});
+
 test("the designer survives a reload with its survey", async ({ playground, page }) => {
   await playground.loadSample("Heart risk (result template)");
   await page.reload();

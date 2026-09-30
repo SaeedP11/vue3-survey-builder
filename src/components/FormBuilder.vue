@@ -4,6 +4,7 @@ import SurveyResultRequiredToast from "./SurveyResultRequiredToast.vue";
 import { initSurveyCreator } from "../provider/surveyCreator.ts";
 import { SurveyCreatorComponent } from "survey-creator-vue";
 import handleComplete from "../utils/handleComplete.ts";
+import registerJsonEditor from "../utils/registerJsonEditor.ts";
 import RenderResult from "./RenderResult.vue";
 import AiAssistant from "./AiAssistant.vue";
 import IconPicker from "./IconPicker.vue";
@@ -14,6 +15,7 @@ import { ref, watch } from "vue";
 import "../utils/serilizers";
 
 const json = defineModel<object>("json");
+registerJsonEditor();
 const creator = initSurveyCreator();
 const showResult = ref(false);
 const result = ref({});
