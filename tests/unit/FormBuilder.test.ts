@@ -25,26 +25,32 @@ const SURVEY = { elements: [{ type: "text", name: "score" }] };
 /**
  * Mounts FormBuilder with v-model:json, as a host does.
  */
-function setup(initial: object | undefined = SURVEY) {
+function setup(
+  initial: object | undefined = SURVEY,
+  { locale = "en", dir }: { locale?: string; dir?: "ltr" | "rtl" } = {},
+) {
   const json = ref<object | undefined>(initial);
   const updates: object[] = [];
   const Host = defineComponent({
     setup: () => () =>
       h(FormBuilder, {
         json: json.value,
+        dir,
         "onUpdate:json": (value: object | undefined) => {
           if (value) updates.push(value);
           json.value = value;
         },
       }),
   });
+  const i18n = createTestI18n(locale);
   const wrapper = mount(Host, {
-    global: { plugins: [createTestI18n("en")] },
+    global: { plugins: [i18n] },
     attachTo: document.body,
   });
   const creator = wrapper.findComponent({ name: "SurveyCreatorStub" }).props("model") as SurveyCreatorModel;
   const toastOpen = () => wrapper.findComponent(SurveyResultRequiredToast).props("open");
-  return { wrapper, creator, json, updates, toastOpen };
+  const root = () => wrapper.get(".fb-root");
+  return { wrapper, creator, json, updates, toastOpen, i18n, root };
 }
 
 afterEach(() => {
@@ -157,6 +163,37 @@ describe("FormBuilder", () => {
   test("registers its survey properties (icon, repetition, resultTemplate)", () => {
     const { creator } = setup({ ...SURVEY, icon: "Star", repetition: true });
     expect(creator.JSON).toMatchObject({ icon: "Star", repetition: true });
+  });
+
+  test("lays the designer out right to left in Persian", () => {
+    const { creator, root } = setup(SURVEY, { locale: "fa" });
+    expect(root().attributes("dir")).toBe("rtl");
+    expect(creator.isRTL).toBe(true);
+  });
+
+  test("lays the designer out left to right in English", () => {
+    const { creator, root } = setup(SURVEY, { locale: "en" });
+    expect(root().attributes("dir")).toBe("ltr");
+    expect(creator.isRTL).toBe(false);
+  });
+
+  test("follows a locale switch", async () => {
+    const { creator, root, i18n } = setup(SURVEY, { locale: "en" });
+    i18n.global.locale.value = "fa";
+    await nextTick();
+    expect(root().attributes("dir")).toBe("rtl");
+    expect(creator.isRTL).toBe(true);
+
+    i18n.global.locale.value = "en";
+    await nextTick();
+    expect(root().attributes("dir")).toBe("ltr");
+    expect(creator.isRTL).toBe(false);
+  });
+
+  test("a dir prop wins over the locale", () => {
+    const { creator, root } = setup(SURVEY, { locale: "fa", dir: "ltr" });
+    expect(root().attributes("dir")).toBe("ltr");
+    expect(creator.isRTL).toBe(false);
   });
 
   test("works without a v-model value", () => {

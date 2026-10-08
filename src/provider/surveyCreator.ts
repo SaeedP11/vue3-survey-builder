@@ -30,7 +30,6 @@ export function initSurveyCreator(
     showTranslationTab: true,
     autoSaveEnabled: true,
     collapseOnDrag: true,
-    isRTL: false,
   };
 
   const creator = new SurveyCreatorModel(creatorOptions);

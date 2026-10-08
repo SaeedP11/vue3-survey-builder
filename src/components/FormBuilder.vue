@@ -12,12 +12,24 @@ import IconPicker from "./IconPicker.vue";
 import "survey-creator-core/i18n/persian";
 // The designer's strings above; these are the Preview tab survey's own
 import "survey-core/i18n/persian";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import localeDirection, {
+  type TextDirection,
+} from "../utils/localeDirection.ts";
+import immediateWatch from "../utils/immediateWatch.ts";
 import "../utils/serilizers";
 
+const props = defineProps<{
+  /** The designer's text direction; by default the direction of vue-i18n's locale. */
+  dir?: TextDirection;
+}>();
 const json = defineModel<object>("json");
 registerJsonEditor();
 const creator = initSurveyCreator();
+const { locale } = useI18n();
+const direction = computed(() => props.dir ?? localeDirection(locale.value));
+immediateWatch([direction], () => (creator.isRTL = direction.value === "rtl"));
 useJsonFormatAction(creator);
 const showResult = ref(false);
 const result = ref({});
@@ -69,19 +81,23 @@ handleComplete(creator, (sender) => {
 </script>
 
 <template>
-  <IconPicker />
-  <AiAssistant />
-  <SurveyResultEditorModal />
-  <SurveyResultRequiredToast
-    :open="showRequiredToast"
-    @close="showRequiredToast = false"
-  />
-  <SurveyCreatorComponent :model="creator" />
-  <!-- `.svd-simulator-content .sd-root-modern .sv-scroll__wrapper` The place where the preview is displayed -->
-  <Teleport
-    v-if="showResult"
-    to=".svd-simulator-content .sd-root-modern .sv-scroll__wrapper"
-  >
-    <RenderResult :templateProps="creator.JSON?.resultTemplate" :result />
-  </Teleport>
+  <!-- SurveyJS mirrors the creator with `:dir(rtl)`, so the direction is set on an element around
+       it; `display: contents` keeps that element out of the host's layout. -->
+  <div class="fb-root" :dir="direction" style="display: contents">
+    <IconPicker />
+    <AiAssistant />
+    <SurveyResultEditorModal />
+    <SurveyResultRequiredToast
+      :open="showRequiredToast"
+      @close="showRequiredToast = false"
+    />
+    <SurveyCreatorComponent :model="creator" />
+    <!-- `.svd-simulator-content .sd-root-modern .sv-scroll__wrapper` The place where the preview is displayed -->
+    <Teleport
+      v-if="showResult"
+      to=".svd-simulator-content .sd-root-modern .sv-scroll__wrapper"
+    >
+      <RenderResult :templateProps="creator.JSON?.resultTemplate" :result />
+    </Teleport>
+  </div>
 </template>

@@ -16,7 +16,7 @@ const { t } = useLocalI18n(surveyResult);
     />
     <button
       type="button"
-      class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-(--sjs-special-red) text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
+      class="absolute -top-2 -end-2 w-7 h-7 rounded-full bg-(--sjs-special-red) text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-110 cursor-pointer"
       :title="t('hideSection')"
       :aria-label="t('hideSection')"
       @click="$emit('hide')"

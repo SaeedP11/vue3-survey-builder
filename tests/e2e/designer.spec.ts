@@ -102,6 +102,13 @@ test("switching to Persian turns the page and the designer right-to-left", async
   // The creator's own UI is translated, and so are the library's buttons
   await expect(page.locator(".svc-creator")).toContainText(/[؀-ۿ]/);
   await expect(page.locator(".svc-creator").getByRole("button", { name: "دستیار هوش مصنوعی" })).toBeVisible();
+  // The designer sets its own direction rather than relying on the page's
+  await expect(page.locator(".fb-root")).toHaveAttribute("dir", "rtl");
+  await expect(page.locator(".svc-creator")).toHaveCSS("direction", "rtl");
+
+  await playground.language("en");
+  await expect(page.locator(".fb-root")).toHaveAttribute("dir", "ltr");
+  await expect(page.locator(".svc-creator")).toHaveCSS("direction", "ltr");
 });
 
 test("dark mode sets the dark class the library follows", async ({ page }) => {

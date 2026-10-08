@@ -131,7 +131,7 @@ useCreatorToolbarAction(
         style="grid-template-columns: 1fr 420px"
       >
         <div
-          class="overflow-auto bg-fb-surface-muted border-r border-fb-border"
+          class="overflow-auto bg-fb-surface-muted border-e border-fb-border"
         >
           <component :is="activeTemplate.component" v-bind="editedProps" />
         </div>

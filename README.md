@@ -90,6 +90,14 @@ provideAiAssistantConfig({
 loads a new schema into the designer. `SurveySchemaPrompt` is a few-shot
 prompt that makes a model answer in the `[JSON]…[/JSON]` format above.
 
+#### Text direction
+
+The designer follows the locale's direction: right to left in `fa` (and
+other RTL languages), left to right in `en`, switching with the locale. Pass
+`dir="ltr"` or `dir="rtl"` to fix it instead. SurveyJS mounts its popups on
+`<body>` and reads their direction from it, so keep `<html dir>` in step with
+the locale (a Nuxt i18n app does this) for menus and dropdowns to match.
+
 ### Filling a survey
 
 ```vue
@@ -108,7 +116,8 @@ survey.onComplete.add((sender) => save(sender.data));
 
 `useSurveyModel` builds the `Model`, keeps its locale and theme in step with
 the app, and scrolls to the first invalid question on validation. It must be
-called from a component's `setup()`.
+called from a component's `setup()`. A Persian survey renders right to left on
+its own; an English one takes the page's direction.
 
 ---
 

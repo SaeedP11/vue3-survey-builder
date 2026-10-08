@@ -3,12 +3,12 @@
     class="w-full max-w-5xl mx-auto rounded-2xl border border-[var(--sjs-border-inside)] shadow-sm overflow-hidden font-sans bg-[var(--sjs-general-backcolor)]"
   >
     <div class="w-full overflow-x-auto">
-      <table class="w-full text-right border-collapse">
+      <table class="w-full text-start border-collapse">
         <thead>
           <tr
             class="border-b border-[var(--sjs-border-inside)] text-xs font-bold uppercase tracking-wider text-[var(--sjs-general-forecolor-light)]"
           >
-            <th class="py-4 px-6 font-semibold text-left">{{ t("table.metric") }}</th>
+            <th class="py-4 px-6 font-semibold text-start">{{ t("table.metric") }}</th>
             <th class="py-4 px-6 font-semibold text-center">{{ t("table.currentValue") }}</th>
             <th class="py-4 px-6 font-semibold text-center">{{ t("table.normalRange") }}</th>
             <th class="py-4 px-6 font-semibold text-center">{{ t("table.status") }}</th>
@@ -47,7 +47,7 @@
             >
               {{ row.currentValue }}
               <span
-                class="text-xs font-sans font-medium text-[var(--sjs-general-forecolor-light)] mr-0.5"
+                class="text-xs font-sans font-medium text-[var(--sjs-general-forecolor-light)] ms-0.5"
                 >{{ row.displayUnit }}</span
               >
             </td>
