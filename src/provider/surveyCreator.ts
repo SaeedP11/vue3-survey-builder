@@ -34,6 +34,9 @@ export function initSurveyCreator(
   };
 
   const creator = new SurveyCreatorModel(creatorOptions);
+  // Save on every change, not 500 ms later: the host reads the survey from v-model:json, and a
+  // Save button pressed inside the default delay sent the survey as it was before the last edit.
+  creator.autoSaveDelay = 0;
   creator.toolbox.showSubitems = false;
   const { isDark } = useColorMode();
   const { locale } = useI18n();

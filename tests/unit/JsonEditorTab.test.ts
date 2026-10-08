@@ -2,10 +2,11 @@ import { TextareaJsonEditorModel } from "survey-creator-core";
 import { SvgRegistry } from "survey-core";
 import { ComponentFactory } from "survey-vue3-ui";
 import { afterEach, describe, expect, test } from "vitest";
-import { nextTick } from "vue";
+import { defineComponent, h, nextTick, ref } from "vue";
 import JsonEditorTab from "../../src/components/JsonEditorTab.vue";
 import { formatJson, highlightJson } from "../../src/utils/jsonHighlight.ts";
 import registerJsonEditor from "../../src/utils/registerJsonEditor.ts";
+import useJsonFormatAction from "../../src/composables/useJsonFormatAction.ts";
 import { mountWithCreator, newCreator } from "./helpers.ts";
 
 /** The tokens `highlightJson` marks, as [type, text] pairs. */
@@ -99,7 +100,12 @@ describe("JsonEditorTab", () => {
     const creator = newCreator(json);
     creator.activeTab = "json";
     const model = new TextareaJsonEditorModel(creator);
-    const mounted = mountWithCreator(JsonEditorTab, { creator, props: { model } });
+    // FormBuilder adds the toolbar button, for the creator's lifetime
+    const mounted = mountWithCreator(JsonEditorTab, {
+      creator,
+      props: { model },
+      setup: () => useJsonFormatAction(creator),
+    });
     const textarea = mounted.child.find("textarea");
     const highlight = mounted.child.find(".fb-json-editor__highlight");
     return { ...mounted, model, textarea, highlight };
@@ -156,11 +162,33 @@ describe("JsonEditorTab", () => {
     expect(el.selectionStart).toBe(3);
   });
 
-  test("the button is shown on the JSON tab only, and goes with the editor", () => {
-    const { creator, wrapper } = mountTab();
+  test("the button is shown on the JSON tab only, and outlives the tab", async () => {
+    // Adding and removing the button with the tab, mid tab switch, left the
+    // creator showing the designer for every later tab
+    const creator = newCreator({ elements: [{ type: "text", name: "q1" }] });
+    creator.activeTab = "json";
+    const model = new TextareaJsonEditorModel(creator);
+    const open = ref(true);
+    const Tab = defineComponent({
+      setup: () => () => (open.value ? h(JsonEditorTab, { model }) : null),
+    });
+    const { wrapper } = mountWithCreator(Tab, {
+      creator,
+      setup: () => useJsonFormatAction(creator),
+    });
     const action = creator.toolbar.getActionById("fb-json-format");
+    expect(action.visible).toBe(true);
     creator.activeTab = "designer";
     expect(action.visible).toBe(false);
+
+    open.value = false;
+    await nextTick();
+    expect(creator.toolbar.getActionById("fb-json-format")).toBe(action);
+    const text = model.text;
+    action.action!();
+    expect(model.text).toBe(text);
+
+    // It goes with the creator's host
     wrapper.unmount();
     expect(creator.toolbar.getActionById("fb-json-format")).toBeFalsy();
   });

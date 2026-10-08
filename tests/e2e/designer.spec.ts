@@ -55,6 +55,24 @@ test("the creator's JSON Editor tab colours the JSON and formats it", async ({ p
   await expect(textarea).toHaveValue('{\n  "title": "Compact",\n  "pages": []\n}');
 });
 
+test("every tab still opens after a visit to the JSON Editor tab", async ({ playground, page }) => {
+  // The tab's Format JSON button was added and removed with the tab, mid-switch,
+  // which left the creator showing the designer for every later tab
+  await playground.loadSample("Heart risk (result template)");
+  await playground.creatorTab("JSON Editor");
+  await playground.creatorTab("Designer");
+
+  await playground.creatorTab("Preview");
+  await expect(page.locator(".svd-simulator-content")).toContainText("Do you smoke?");
+  await playground.creatorTab("Logic");
+  await expect(page.locator("#scrollableDiv-logic")).toBeVisible();
+  await playground.creatorTab("JSON Editor");
+  await expect(page.locator(".fb-json-editor")).toBeVisible();
+  await expect(playground.toolbarButton("Format JSON (Shift+Alt+F)")).toBeVisible();
+  await playground.creatorTab("Designer");
+  await expect(playground.toolbarButton("Format JSON (Shift+Alt+F)")).toBeHidden();
+});
+
 test("the designer survives a reload with its survey", async ({ playground, page }) => {
   await playground.loadSample("Heart risk (result template)");
   await page.reload();

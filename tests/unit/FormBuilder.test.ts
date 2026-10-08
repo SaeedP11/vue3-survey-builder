@@ -60,10 +60,10 @@ describe("FormBuilder", () => {
   test("autosave hands the creator's JSON back through v-model", async () => {
     const { creator, updates } = setup();
     creator.survey.pages[0].addNewQuestion("text", "added");
-    creator.saveSurveyFunc(1, () => {});
     await flush();
     expect(updates).toHaveLength(1);
     expect(updates[0]).toEqual(creator.JSON);
+    expect(JSON.stringify(updates[0])).toContain("added");
   });
 
   test("its own autosave does not reload the designer", async () => {
@@ -141,9 +141,17 @@ describe("FormBuilder", () => {
     await nextTick();
     const save = wrapper.findAll("button").find((b) => b.text() === "Save")!;
     await save.trigger("click");
-    // The creator autosaves after a short delay
-    await new Promise((resolve) => setTimeout(resolve, creator.autoSaveDelay + 100));
+    await nextTick();
     expect(updates.at(-1)).toMatchObject({ resultTemplate: { scoreDisplay: "default" } });
+  });
+
+  test("an edit reaches the host's v-model at once, not after the autosave delay", () => {
+    // A host Save pressed within the creator's default 500 ms sent the survey
+    // as it was before the last edit
+    const { creator, updates } = setup();
+    expect(creator.autoSaveDelay).toBe(0);
+    creator.survey.title = "Edited";
+    expect(updates.at(-1)).toMatchObject({ title: "Edited" });
   });
 
   test("registers its survey properties (icon, repetition, resultTemplate)", () => {

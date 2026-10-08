@@ -4,19 +4,15 @@ import {
   type TextareaJsonEditorModel,
 } from "survey-creator-core";
 import { SvComponent, useBase } from "survey-vue3-ui";
-import { ComputedUpdater } from "survey-core";
 import { computed, onMounted, useTemplateRef } from "vue";
-import useCreatorToolbarAction from "../composables/useCreatorToolbarAction.ts";
+import { useJsonFormatter } from "../composables/useJsonFormatAction.ts";
 import { formatJson, highlightJson } from "../utils/jsonHighlight.ts";
 import { useSurveyCreator } from "../provider/surveyCreator.ts";
-import useLocalI18n from "../composables/useLocalI18n.ts";
-import { general } from "../locales/index.ts";
 
 // Stands in for the creator's textarea JSON tab: the same model, textarea and
 // error list, with the text coloured by a highlighted copy drawn behind it.
 const props = defineProps<{ model: TextareaJsonEditorModel }>();
 
-const { t } = useLocalI18n(general);
 const creator = useSurveyCreator();
 const input = useTemplateRef<HTMLTextAreaElement>("input");
 const code = useTemplateRef<HTMLElement>("code");
@@ -75,20 +71,8 @@ function syncScroll() {
   }
 }
 
-useCreatorToolbarAction(
-  creator,
-  {
-    id: "fb-json-format",
-    iconName: "icon-fb-format-json",
-    iconSize: "auto",
-    mode: "small",
-    visible: new ComputedUpdater(
-      () => creator.activeTab === "json" && !props.model.readOnly,
-    ),
-    action: format,
-  },
-  () => `${t("formatJson")} (Shift+Alt+F)`,
-);
+// The toolbar button is FormBuilder's (useJsonFormatAction); it formats through this
+useJsonFormatter(creator, format);
 
 defineExpose({ format });
 </script>
