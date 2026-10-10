@@ -13,6 +13,7 @@
 - 🎨 **Visual drag-and-drop form designer** powered by SurveyJS Creator
 - 🤖 **AI-driven form generation** — describe your form in natural language; your app calls the model and returns the JSON schema
 - 🧾 **Highlighted JSON editor** — the designer's JSON Editor tab colours the JSON and formats it (toolbar button or Shift+Alt+F)
+- 📈 **Chart question** — a built-in, display-only bar, line or donut chart of the answers, live as the form is filled
 - 📊 **Result templates** — a score card for completed surveys, configured and previewed in the designer
 - 🔌 **Custom question types and logic** — async dropdowns, designer-only pickers, custom Conditional Logic triggers
 - 🌗 **Dark & Light themes**, following the `dark` class on `<html>`
@@ -486,6 +487,56 @@ locale strings are added once.
 
 ---
 
+
+## 📈 Chart question (built in)
+
+A display-only question that charts numbers the form already holds. It is
+built in: importing the library registers it, so the designer's toolbox
+lists **Chart** and every survey rendered with `SurveyComponent` draws it,
+with nothing to call.
+
+Each data row is a label and a SurveyJS expression evaluated against the
+answers as the respondent fills the form: a question (`{weight}`), a
+calculation (`{a} + {b}`, `min(100, {steps} * 10)`), a calculated value or a
+constant. A row whose expression names an unanswered question stays empty
+instead of drawing a zero. The chart adds nothing to the survey's data and
+never blocks completion.
+
+```json
+{
+  "type": "chart",
+  "name": "today",
+  "title": "Today at a glance",
+  "chartType": "bar",
+  "unit": "h",
+  "maxValue": 12,
+  "items": [
+    { "value": "sleep", "text": "Sleep", "expression": "{sleep}" },
+    { "value": "goal", "text": "Goal", "expression": "8", "color": "#1baf7a" }
+  ]
+}
+```
+
+| Property    | Values                                          | Default |
+| ----------- | ----------------------------------------------- | ------- |
+| `chartType` | `bar`, `horizontalBar`, `line`, `donut`         | `bar`   |
+| `items`     | `{ value, text, expression, color? }[]`         | `[]`    |
+| `unit`      | text after each value (`kg`, `%`, ...)          |         |
+| `maxValue`  | top of the value axis; empty fits the data      |         |
+
+- Bars and lines use one colour (the first palette slot, or a row's
+  `color`); a donut gives each slice the next slot of a fixed eight-colour,
+  colour-blind-checked palette, with light and dark steps that follow the
+  `dark` class on `<html>`. A ninth slice and later fold into "Other".
+- Hovering or focusing a bar, point or slice shows its value; each chart
+  carries a screen-reader summary and a hidden table of its numbers.
+- Right-to-left forms put the value axis on the right; numbers are
+  formatted for vue-i18n's locale (Persian digits in `fa`).
+- In the designer the chart shows sample numbers, labelled as such.
+- `QuestionChartModel` and `ChartItemValue` are exported for code that
+  builds or inspects chart questions.
+
+---
 
 ## 📊 Result template
 

@@ -123,4 +123,82 @@ export const SAMPLES: Sample[] = [
       triggers: [{ type: "reminder", expression: "{satisfaction} <= 2" }],
     },
   },
+  {
+    id: "charts",
+    name: "Chart question",
+    json: {
+      title: "Daily wellbeing",
+      description:
+        "Built-in chart questions drawing the answers above them, live in the Preview tab.",
+      pages: [
+        {
+          name: "page1",
+          elements: [
+            { type: "text", name: "sleep", title: "Hours of sleep", inputType: "number", min: 0, max: 24 },
+            { type: "text", name: "water", title: "Glasses of water", inputType: "number", min: 0 },
+            { type: "text", name: "steps", title: "Steps (thousands)", inputType: "number", min: 0 },
+            {
+              type: "rating",
+              name: "mood",
+              title: "Mood",
+              rateMax: 10,
+            },
+            {
+              type: "chart",
+              name: "today",
+              title: "Today at a glance",
+              chartType: "bar",
+              items: [
+                { value: "sleep", text: "Sleep (h)", expression: "{sleep}" },
+                { value: "water", text: "Water (glasses)", expression: "{water}" },
+                { value: "steps", text: "Steps (k)", expression: "{steps}" },
+                { value: "mood", text: "Mood", expression: "{mood}" },
+              ],
+            },
+            {
+              type: "chart",
+              name: "week",
+              title: "Sleep this week (today is the last point)",
+              chartType: "line",
+              unit: "h",
+              maxValue: 12,
+              items: [
+                { value: "mon", text: "Mon", expression: "7" },
+                { value: "tue", text: "Tue", expression: "6.5" },
+                { value: "wed", text: "Wed", expression: "8" },
+                { value: "thu", text: "Thu", expression: "5.5" },
+                { value: "fri", text: "Fri", expression: "7.5" },
+                { value: "sat", text: "Sat", expression: "9" },
+                { value: "today", text: "Today", expression: "{sleep}" },
+              ],
+            },
+            {
+              type: "chart",
+              name: "day",
+              title: "How the day splits",
+              chartType: "donut",
+              unit: "h",
+              items: [
+                { value: "sleep", text: "Sleep", expression: "{sleep}" },
+                { value: "rest", text: "Awake", expression: "24 - {sleep}" },
+              ],
+            },
+            {
+              type: "chart",
+              name: "goals",
+              title: "Goals reached (%)",
+              chartType: "horizontalBar",
+              unit: "%",
+              maxValue: 100,
+              items: [
+                { value: "sleep", text: "Sleep (8 h)", expression: "min(100, {sleep} / 8 * 100)" },
+                { value: "water", text: "Water (8 glasses)", expression: "min(100, {water} / 8 * 100)" },
+                { value: "steps", text: "Steps (10k)", expression: "min(100, {steps} * 10)" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

@@ -6,6 +6,11 @@ import registerCustomLogic from "./utils/registerCustomLogic";
 import useScrollToError from "./composables/useScrollToError";
 import { SurveySchemaPrompt } from "./utils/prefixPrompts";
 import FormBuilder from "./components/FormBuilder.vue";
+import registerChartQuestion from "./utils/registerChartQuestion";
+
+// Built in: the chart question needs nothing from the host, so the designer
+// and every survey rendered with this library know it from import
+registerChartQuestion();
 
 export {
   provideSurveyResultTemplate,
@@ -31,6 +36,12 @@ export type {
   TableRow,
   TemplateDefinition,
 } from "./types";
+
+export {
+  ChartItemValue,
+  QuestionChartModel,
+  type ChartType,
+} from "./utils/registerChartQuestion";
 
 export type {
   CustomLogicFireContext,

@@ -1,0 +1,15 @@
+{
+  "sampleData": "Sample data: the chart fills in from the answers",
+  "empty": "The chart fills in as the form is answered",
+  "noItems": "Add data rows to this chart in its properties",
+  "other": "Other",
+  "label": "Label",
+  "value": "Value",
+  "summary": "{type} chart: {points}",
+  "types": {
+    "bar": "Bar",
+    "horizontalBar": "Horizontal bar",
+    "line": "Line",
+    "donut": "Donut"
+  }
+}

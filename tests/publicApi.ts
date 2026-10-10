@@ -1,6 +1,8 @@
 /** The library's own public API, as the README documents it (beside survey-core's). */
 export const OWN_EXPORTS = [
+  "ChartItemValue",
   "FormBuilder",
+  "QuestionChartModel",
   "SurveyComponent",
   "SurveyResultEditor",
   "SurveyResultEditorModal",
