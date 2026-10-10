@@ -106,6 +106,7 @@ onScopeDispose(() => {
       />
       <div class="icon-grid">
         <button
+          type="button"
           v-for="[name, IconComp] in filteredIcons"
           @click.prevent="selectIcon(name, IconComp)"
           class="icon-button"

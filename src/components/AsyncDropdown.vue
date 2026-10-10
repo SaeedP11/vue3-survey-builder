@@ -168,6 +168,7 @@ function onPrev() {
                     </ul>
                     <div class="pagination" v-if="totalPages > 0">
                       <button
+                        type="button"
                         class="sd-editor-button-item sd-editor-button-item--pressed"
                         :disabled="currentPage >= totalPages"
                         @mousedown.prevent="onNext"
@@ -182,6 +183,7 @@ function onPrev() {
                       </button>
                       <span>{{ currentPage }} / {{ totalPages }}</span>
                       <button
+                        type="button"
                         class="sd-editor-button-item sd-editor-button-item--pressed"
                         :disabled="currentPage <= 1"
                         @mousedown.prevent="onPrev"

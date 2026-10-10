@@ -298,12 +298,14 @@ const restoreSections = () => {
           <div>
             <div class="flex gap-3">
               <button
+                type="button"
                 class="flex-1 bg-[var(--sjs-primary-backcolor)] text-[var(--sjs-primary-forecolor)] border-0 rounded-xl py-3.75 text-[15px] font-bold cursor-pointer font-[Cairo,sans-serif]"
                 @click="emit('primary')"
               >
                 {{ ui.primaryLabel }}
               </button>
               <button
+                type="button"
                 class="flex-1 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] border-[1.5px] border-[var(--sjs-border-default)] rounded-xl py-3.5 text-sm font-bold cursor-pointer flex items-center justify-center gap-2 font-[Cairo,sans-serif]"
                 @click="emit('secondary')"
               >
@@ -320,6 +322,7 @@ const restoreSections = () => {
               </button>
             </div>
             <button
+              type="button"
               class="w-full bg-transparent text-[var(--sjs-general-forecolor-light)] border-0 py-1.75 mt-3 text-sm font-semibold cursor-pointer font-[Cairo,sans-serif]"
               @click="emit('close')"
             >

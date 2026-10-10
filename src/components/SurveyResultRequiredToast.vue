@@ -65,6 +65,7 @@ function configure() {
           </p>
         </div>
         <button
+          type="button"
           class="h-6 w-6 shrink-0 cursor-pointer rounded-md border-0 bg-transparent text-sm leading-none text-fb-fg-muted hover:bg-fb-surface-muted"
           :aria-label="t('resultTemplateRequired.dismiss')"
           @click="emit('close')"
@@ -75,6 +76,7 @@ function configure() {
 
       <div class="flex justify-end gap-2 border-t border-fb-border bg-fb-surface px-4 py-3">
         <button
+          type="button"
           class="cursor-pointer rounded-lg border-0 bg-fb-accent px-3.5 py-2 text-[12px] font-semibold text-fb-accent-on transition-[filter] hover:brightness-90"
           @click="configure"
         >

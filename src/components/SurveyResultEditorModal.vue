@@ -118,6 +118,7 @@ useCreatorToolbarAction(
         </div>
         <div class="flex-1" />
         <button
+          type="button"
           class="h-7.5 w-7.5 cursor-pointer rounded-lg border-0 bg-fb-surface-muted text-base leading-none text-fb-fg-muted hover:bg-fb-border"
           :aria-label="t('close')"
           @click="close"
@@ -148,12 +149,14 @@ useCreatorToolbarAction(
             class="sticky bottom-0 z-10 flex gap-2.5 border-t border-fb-border bg-fb-surface px-6 py-4"
           >
             <button
+              type="button"
               class="shrink-0 cursor-pointer rounded-lg border border-fb-border bg-fb-surface px-4 py-2.5 text-sm font-semibold text-fb-fg hover:bg-fb-surface-muted"
               @click="close"
             >
               {{ t("cancel") }}
             </button>
             <button
+              type="button"
               class="flex-1 cursor-pointer rounded-lg border-0 px-4 py-2.5 text-sm font-semibold text-fb-accent-on bg-fb-accent transition-[filter] hover:brightness-90"
               @click="save"
             >

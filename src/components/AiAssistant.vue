@@ -66,6 +66,7 @@ const handleClick = async () => {
 
       <div class="action-wrapper">
         <button
+          type="button"
           :disabled="isLoading"
           class="submit-button"
           @click.prevent="handleClick"
