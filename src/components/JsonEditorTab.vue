@@ -4,7 +4,7 @@ import {
   type TextareaJsonEditorModel,
 } from "survey-creator-core";
 import { SvComponent, useBase } from "survey-vue3-ui";
-import { computed, onMounted, useTemplateRef } from "vue";
+import { computed, onBeforeUnmount, onMounted, useTemplateRef } from "vue";
 import { useJsonFormatter } from "../composables/useJsonFormatAction.ts";
 import { formatJson, highlightJson } from "../utils/jsonHighlight.ts";
 import { useSurveyCreator } from "../provider/surveyCreator.ts";
@@ -41,7 +41,44 @@ function insert(value: string, all = false) {
   props.model.text = el.value.slice(0, start) + value + el.value.slice(end);
   el.value = props.model.text;
   el.selectionStart = el.selectionEnd = start + value.length;
+  scheduleApply();
 }
+
+// How long typing pauses before the text reaches the survey
+const APPLY_DELAY = 400;
+let applyTimer: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Hands the text to the creator as leaving the tab would, so the designer and
+ * the host's v-model:json follow the JSON tab while it stays open: a host
+ * saving from the tab otherwise saved the survey as it was before the edits.
+ * Text that does not parse or has errors waits for a fix.
+ */
+function apply() {
+  clearTimeout(applyTimer);
+  const model = props.model;
+  if (model.isDisposed || model.readOnly || !model.isJSONChanged) return;
+  if (!model.allowingDeactivate()) return;
+  // As the creator does on deactivate; its typing does not allow the clear
+  creator.selectedElement = undefined!;
+  creator.changeText(model.text, false, true);
+  creator.selectedElement = creator.survey;
+  creator.setModified({ type: "JSON_EDITOR" });
+  model.isJSONChanged = false;
+}
+
+function scheduleApply() {
+  clearTimeout(applyTimer);
+  applyTimer = setTimeout(apply, APPLY_DELAY);
+}
+
+function onInput(e: Event) {
+  props.model.text = (e.target as HTMLTextAreaElement).value;
+  scheduleApply();
+}
+
+// Leaving the tab applies the text itself (the creator's deactivate)
+onBeforeUnmount(() => clearTimeout(applyTimer));
 
 function format() {
   const formatted = formatJson(
@@ -95,7 +132,8 @@ defineExpose({ format });
           spellcheck="false"
           autocomplete="off"
           autocapitalize="off"
-          @input="model.text = ($event.target as HTMLTextAreaElement).value"
+          @input="onInput"
+          @blur="apply"
           @keydown="onKeydown"
           @scroll="syncScroll"
         ></textarea>

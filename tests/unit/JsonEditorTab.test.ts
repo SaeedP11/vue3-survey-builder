@@ -1,7 +1,7 @@
 import { TextareaJsonEditorModel } from "survey-creator-core";
 import { SvgRegistry } from "survey-core";
 import { ComponentFactory } from "survey-vue3-ui";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { defineComponent, h, nextTick, ref } from "vue";
 import JsonEditorTab from "../../src/components/JsonEditorTab.vue";
 import { formatJson, highlightJson } from "../../src/utils/jsonHighlight.ts";
@@ -126,6 +126,41 @@ describe("JsonEditorTab", () => {
     expect(model.text).toBe('{"title": 5}');
     expect(model.isJSONChanged).toBe(true);
     expect(highlight.find(".fb-json-number").text()).toBe("5");
+  });
+
+  test("edits reach the survey and its save without leaving the tab", async () => {
+    // A host saving from the open JSON tab saved the questions as they were
+    // before the edits: the text only reached the creator on a tab switch
+    vi.useFakeTimers();
+    try {
+      const { creator, model, textarea } = mountTab();
+      creator.autoSaveEnabled = true;
+      creator.autoSaveDelay = 0;
+      const saved: string[] = [];
+      creator.saveSurveyFunc = () =>
+        saved.push(creator.survey.getAllQuestions().map((q) => q.name).join());
+
+      await textarea.setValue('{"elements": [{"type": "text", "name": "q2"}]}');
+      expect(saved).toEqual([]);
+      vi.advanceTimersByTime(400);
+      expect(saved).toEqual(["q2"]);
+      expect(creator.survey.getQuestionByName("q2")).toBeTruthy();
+      expect(model.isJSONChanged).toBe(false);
+
+      // Blurring (to press the host's Save) applies at once
+      await textarea.setValue('{"elements": [{"type": "text", "name": "q3"}]}');
+      await textarea.trigger("blur");
+      expect(saved).toEqual(["q2", "q3"]);
+
+      // Text with errors waits
+      await textarea.setValue('{"elements": [{"type": "text", "name": ');
+      vi.advanceTimersByTime(400);
+      await textarea.trigger("blur");
+      expect(saved).toEqual(["q2", "q3"]);
+      expect(model.isJSONChanged).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test("the toolbar's Format JSON button re-indents the text", async () => {

@@ -55,6 +55,33 @@ test("the creator's JSON Editor tab colours the JSON and formats it", async ({ p
   await expect(textarea).toHaveValue('{\n  "title": "Compact",\n  "pages": []\n}');
 });
 
+test("edits in the JSON Editor tab reach v-model without leaving the tab", async ({ playground, page }) => {
+  // They reached it only on a tab switch, so a host saving from the open tab
+  // saved the survey as it was before the edits
+  await playground.loadSample("Heart risk (result template)");
+  await playground.creatorTab("JSON Editor");
+  const textarea = page.locator(".fb-json-editor textarea");
+  await textarea.fill(
+    JSON.stringify({ title: "Edited", elements: [{ type: "text", name: "edited_q" }] }),
+  );
+  // The playground's JSON tab shows v-model; the creator stays on its JSON tab
+  await expect
+    .poll(async () => {
+      const json = await playground.json();
+      return [json.title, JSON.stringify(json).includes("edited_q")];
+    })
+    .toEqual(["Edited", true]);
+  await expect(page.locator(".fb-json-editor")).toBeVisible();
+});
+
+test("the JSON Editor tab stays left to right in Persian", async ({ playground, page }) => {
+  await playground.language("fa");
+  await playground.creatorTab("JSON");
+  await expect(page.locator(".svc-creator")).toHaveCSS("direction", "rtl");
+  await expect(page.locator(".fb-json-editor textarea")).toHaveCSS("direction", "ltr");
+  await expect(page.locator(".fb-json-editor__highlight")).toHaveCSS("direction", "ltr");
+});
+
 test("every tab still opens after a visit to the JSON Editor tab", async ({ playground, page }) => {
   // The tab's Format JSON button was added and removed with the tab, mid-switch,
   // which left the creator showing the designer for every later tab
