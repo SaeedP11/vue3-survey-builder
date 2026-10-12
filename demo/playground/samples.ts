@@ -82,6 +82,26 @@ export const SAMPLES: Sample[] = [
         description: "A made-up score from four answers, to exercise the template.",
         noteText: "Not medical advice: the formula is invented for the playground.",
         images: [],
+        // Drag these about in the result editor; the HTML blocks fill in from
+        // the score and the answers on the Preview tab
+        layout: [
+          { id: "hero", type: "hero" },
+          { id: "score", type: "score" },
+          {
+            id: "html-summary",
+            type: "html",
+            html: '<p style="margin:0;text-align:center">Your score is <strong>{$score}</strong>: <strong>{$status}</strong> risk.</p>',
+          },
+          {
+            id: "html-high",
+            type: "html",
+            tier: 3,
+            html: '<div style="padding:12px 16px;border-radius:12px;background:#fdecec;color:#7a1c1c"><strong>Please book a check-up soon.</strong> At {age}, a reading of {systolic} mmHg is worth a doctor\'s look.</div>',
+          },
+          { id: "note", type: "note" },
+          { id: "divider-1", type: "divider" },
+          { id: "actions", type: "actions" },
+        ],
         actions: [
           {
             id: "book",

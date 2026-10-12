@@ -554,6 +554,7 @@ in the survey JSON under `resultTemplate` (a hidden survey property):
 | Brand and copy | `logoSrc`, `brandName`, `brandTagline`, `categoryChip`, `title`, `subtitle`, `description`, `noteText` |
 | `images` | `{ id, src, alt?, caption?, placement?, fit?, tier? }[]`: see below |
 | `actions` | `{ id, label, type, variant?, icon?, url?, newTab? }[]`: the page's buttons, see below |
+| `layout` | `{ id, type, placement?, html?, hidden?, tier? }[]`: the page's blocks, top to bottom, see below |
 
 **Images.** `placement` is `banner` (full width under the header),
 `afterScore` (the default) or `beforeActions`; `fit` is `cover` (fill and
@@ -566,6 +567,31 @@ so a host that handles it stores images on its own server; without a handler
 the image is saved in the survey JSON as a data URL, up to 1 MB. The logo
 field uploads the same way. Only http(s), relative, `blob:` and raster
 `data:image` addresses are shown.
+
+**Layout.** The page is a list of blocks: `hero` (check mark, title,
+subtitle and description), `score`, `note`, `images` (with a `placement`:
+the images placed there show in it), `actions` (the buttons), and the
+author's own `html` and `divider` blocks. Without `layout` the page keeps
+its standard order (banner images, hero, score, images, note, images,
+buttons), so templates saved before it look as they did. Any block can be
+`hidden`, or limited to one status `tier` like an image.
+
+In the editor, blocks are arranged by dragging them, on the preview or in the
+**Layout** panel. The panel also has move up/down buttons, and a focused
+preview block moves with Alt+↑/↓. New blocks are dragged in from the panel's
+palette, or clicked to go after the selected block; a removed built-in block
+goes back to the palette.
+
+**HTML blocks.** An `html` block shows the author's markup, styled inline.
+DOMPurify sanitizes it before it is shown: scripts, event handlers,
+`<style>`, form controls, frames and `<template>` go; links must be http(s),
+`mailto:`, `tel:` or relative; `target` may only be `_blank` (and gets
+`rel="noopener noreferrer"`); and `id`/`name` are prefixed so they cannot
+clobber the page's globals. The block is CSS-contained, so even
+`position: fixed` stays inside it. `{name}` puts in an answer or calculated
+value as text (HTML-escaped, so an answer never adds markup); `{$score}`,
+`{$status}`, `{$min}` and `{$max}` put in the score, its status label and
+the range. The editor's preview shows the placeholders as written.
 
 **Buttons.** `variant` is `primary`, `secondary` or `text`; up to two filled
 buttons share a row, with more the primary ones get their own row, and text
@@ -586,7 +612,8 @@ existed keeps `primaryLabel`, `secondaryLabel` and `closeLabel` (now
 deprecated): it shows those three buttons, which still emit `primary`,
 `secondary` and `close`, and the editor turns them into `actions` when it is
 next saved. The template editor's preview never follows links or prints, and
-it shows every image, marking those that belong to one tier.
+it shows every image and block, marking those that belong to one tier or are
+hidden.
 
 When a survey is completed in the designer's **Preview** tab, the template
 is rendered over the preview with the score read from the answers. Saving a

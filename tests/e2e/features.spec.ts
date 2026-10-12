@@ -38,7 +38,7 @@ test.describe("result template editor", () => {
     const labels = dialog.locator("input[type=text]").filter({ hasNot: page.locator("[placeholder]") });
     await labels.last().fill("Critical");
     await dialog.locator("label", { hasText: /^Title$/ }).locator("..").locator("input").fill("Saved title");
-    await dialog.getByRole("button", { name: "Save" }).click();
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
     await expect(dialog).toBeHidden();
     // The creator autosaves the change into v-model after its short delay
     await expect(playground.events().filter({ hasText: "autosave" })).toHaveCount(1);

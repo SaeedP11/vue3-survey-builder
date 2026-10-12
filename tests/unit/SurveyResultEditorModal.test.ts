@@ -1,7 +1,9 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import useBlockDrag from "../../src/composables/useBlockDrag.ts";
 import { defineComponent, h, nextTick } from "vue";
 import SurveyResultEditor from "../../src/components/SurveyResultEditor.vue";
 import SurveyResultEditorModal from "../../src/components/SurveyResultEditorModal.vue";
+import ResultLayoutEditor from "../../src/components/ResultLayoutEditor.vue";
 import SurveyResultRequiredToast from "../../src/components/SurveyResultRequiredToast.vue";
 import Modal from "../../src/components/Modal.vue";
 import SurveyResult from "../../src/components/templates/SurveyResult.vue";
@@ -11,7 +13,7 @@ import { getDefaultProps } from "../../src/schemas/templates.ts";
 import { surveyResult } from "../../src/locales/index.ts";
 import { legacyActions } from "../../src/utils/resultContent.ts";
 import "../../src/utils/serilizers.ts";
-import { mountWithCreator, newCreator } from "./helpers.ts";
+import { mountWithCreator, newCreator, flush } from "./helpers.ts";
 import { mount } from "@vue/test-utils";
 
 const T = surveyResultEditor.en;
@@ -172,3 +174,95 @@ describe("Modal", () => {
     expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([false]);
   });
 });
+
+describe("SurveyResultEditorModal's layout", () => {
+  async function opened(json: object = {}) {
+    const creator = newCreator({ elements: [{ type: "text", name: "q" }], ...json });
+    const mounted = mountWithCreator(SurveyResultEditorModal, { creator });
+    creator.toolbar.getActionById("ui").action();
+    await nextTick();
+    const preview = () => mounted.child.findComponent(SurveyResult);
+    const editor = () => mounted.child.findComponent(SurveyResultEditor);
+    const panel = () => mounted.child.findComponent(ResultLayoutEditor);
+    const canvas = (id: string) => preview().find(`[data-block-id="${id}"]`);
+    const save = () => mounted.child.findAll("button").find((b) => b.text() === T.save)!.trigger("click");
+    return { ...mounted, preview, editor, panel, canvas, save };
+  }
+
+  const ids = (layout: unknown) => (layout as { id: string }[]).map((b) => b.id);
+
+  test("a block dragged on the preview moves in the panel too, and is saved", async () => {
+    const { canvas, panel, save, creator } = await opened();
+    await canvas("actions").trigger("dragstart");
+    await flush();
+    await canvas("hero").trigger("dragover");
+    await canvas("hero").trigger("drop");
+    // After the banner slot, empty here and so not on the preview
+    expect(ids(panel().props("modelValue")).slice(0, 3)).toEqual(["images-banner", "actions", "hero"]);
+
+    await save();
+    expect(ids(creator.JSON.resultTemplate.layout).slice(0, 3)).toEqual(["images-banner", "actions", "hero"]);
+  });
+
+  test("a block picked on the preview opens in the panel, and the other way round", async () => {
+    const { canvas, panel, child } = await opened();
+    await canvas("score").trigger("click");
+    expect(panel().props("selected")).toBe("score");
+    expect(child.find('li[data-block-id="score"] button[aria-expanded]').attributes("aria-expanded")).toBe("true");
+
+    await child.find('li[data-block-id="hero"] button[aria-expanded]').trigger("click");
+    expect(canvas("hero").attributes("aria-current")).toBe("true");
+  });
+
+  test("an HTML block added in the panel shows on the preview as it is typed", async () => {
+    const { child, preview, save, creator } = await opened();
+    await child.find('[data-palette="html"]').trigger("click");
+    const textarea = child.find("textarea");
+    await textarea.setValue('<p>Hello <script>x</script><a href="javascript:x">there</a></p>');
+    const html = preview().find(".fb-result-html");
+    expect(html.text()).toBe("Hello there");
+    expect(html.find("script").exists()).toBe(false);
+    expect(html.find("a").attributes("href")).toBeUndefined();
+
+    await save();
+    // The author's markup is stored as written; it is sanitized wherever it is shown
+    const stored = creator.JSON.resultTemplate.layout.find((b: { type: string }) => b.type === "html");
+    expect(stored.html).toContain("<script>x</script>");
+  });
+
+  test("hiding on the preview is saved with the template", async () => {
+    const { canvas, save, creator } = await opened();
+    await canvas("note").find(`button[aria-label^="${surveyResult.en.canvas.hide}"]`).trigger("click");
+    await save();
+    expect(creator.JSON.resultTemplate.layout.find((b: { id: string }) => b.id === "note")).toEqual({
+      id: "note",
+      type: "note",
+      hidden: true,
+    });
+  });
+
+  test("loads a stored layout, cleaned up", async () => {
+    const { panel } = await opened({
+      resultTemplate: {
+        layout: [{ id: "score", type: "score" }, { type: "html", html: "<p>x</p>" }, { type: "bogus" }],
+      },
+    });
+    expect(panel().props("modelValue")).toEqual([
+      { id: "score", type: "score" },
+      { id: "html-1", type: "html", html: "<p>x</p>" },
+    ]);
+  });
+
+  test("forgets the selection when it is opened again", async () => {
+    const { canvas, panel, creator } = await opened();
+    await canvas("score").trigger("click");
+    creator.toolbar.getActionById("ui").action();
+    await nextTick();
+    creator.toolbar.getActionById("ui").action();
+    await nextTick();
+    expect(panel().props("selected")).toBeNull();
+  });
+});
+
+// The drag in progress is shared across the page: none outlives a test
+afterEach(() => useBlockDrag().end());

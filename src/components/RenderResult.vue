@@ -2,6 +2,7 @@
 import { useSurveyResultTemplate } from "../provider/surveyResultTemplate.ts";
 import type { ResultAction, SurveyResultProps } from "../types";
 import { fillPlaceholders } from "../utils/resultContent.ts";
+import { fillHtmlPlaceholders, isTemplateVariable } from "../utils/resultHtml.ts";
 import { computed } from "vue";
 
 const props = defineProps<{
@@ -46,6 +47,22 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
         ? { ...action, url: fillPlaceholders(action.url, props.result) }
         : action,
     ),
+    // ...and an HTML block shows answers as text. {$score} and the like are
+    // the template's own, filled from the score
+    layout: Array.isArray(templateProps.layout)
+      ? templateProps.layout.map((block) =>
+          block?.type === "html" && typeof block.html === "string"
+            ? {
+                ...block,
+                html: fillHtmlPlaceholders(
+                  block.html,
+                  props.result,
+                  (name) => !isTemplateVariable(name),
+                ),
+              }
+            : block,
+        )
+      : undefined,
   };
 });
 </script>

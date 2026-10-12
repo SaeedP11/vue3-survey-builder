@@ -27,5 +27,29 @@
     "failed": "Image could not be loaded",
     "empty": "No image yet",
     "onlyFor": "Only for: {tier}"
+  },
+  "blocks": {
+    "hero": "Title and description",
+    "score": "Score",
+    "note": "Note",
+    "images": {
+      "banner": "Banner images",
+      "afterScore": "Images under the score",
+      "beforeActions": "Images above the buttons"
+    },
+    "actions": "Buttons",
+    "html": "HTML",
+    "divider": "Divider"
+  },
+  "canvas": {
+    "drag": "Drag to move",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "hide": "Hide on the result page",
+    "show": "Show on the result page",
+    "hidden": "Hidden",
+    "emptyHtml": "Empty HTML block: write its HTML in the Layout panel.",
+    "dropHere": "Drop here to put the block last",
+    "emptyLayout": "This page has no blocks yet. Drag one here from the Layout panel."
   }
 }

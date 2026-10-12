@@ -4,6 +4,7 @@ import { surveyResultEditor } from "../locales/index.ts";
 import { computed, onBeforeUnmount, ref } from "vue";
 import type {
   ResultAction,
+  ResultBlock,
   ResultImage,
   ScoreDisplayVariant,
   SurveyResultProps,
@@ -13,8 +14,12 @@ import useLocalI18n from "../composables/useLocalI18n.ts";
 import ImageSourceField from "./ImageSourceField.vue";
 import ResultActionsEditor from "./ResultActionsEditor.vue";
 import ResultImagesEditor from "./ResultImagesEditor.vue";
+import ResultLayoutEditor from "./ResultLayoutEditor.vue";
+import { resolveLayout } from "../utils/resultLayout.ts";
 
 const props = defineModel<SurveyResultProps>("props", { required: true });
+// Shared with the preview, where a block can be clicked too
+const selectedBlock = defineModel<string | null>("selectedBlock", { default: null });
 const { t } = useLocalI18n(surveyResultEditor);
 const creator = useSurveyCreator();
 
@@ -121,6 +126,35 @@ const actions = computed<ResultAction[]>({
   },
 });
 
+const layout = computed<ResultBlock[]>({
+  get: () => resolveLayout(props.value.layout),
+  set: (next) => {
+    props.value.layout = next;
+  },
+});
+
+/** Variables an HTML block can put in braces. */
+const variableNames = computed(() => [
+  ...new Set([...questionNames.value, ...calculatedVariableNames.value]),
+]);
+
+/** Blocks that would show nothing on the page yet. */
+const emptyBlockIds = computed(() =>
+  layout.value
+    .filter((block) => {
+      if (block.type === "note") return !props.value.noteText?.trim();
+      if (block.type === "actions") return actions.value.length === 0;
+      if (block.type === "images") {
+        return !images.value.some(
+          (image) => (image.placement ?? "afterScore") === block.placement,
+        );
+      }
+      if (block.type === "html") return !block.html?.trim();
+      return false;
+    })
+    .map((block) => block.id),
+);
+
 const tableRows = computed<TableRow[]>({
   get: () => {
     const v = props.value.tableRows;
@@ -176,6 +210,24 @@ function updateTableRow(
 
 <template>
   <div class="flex flex-col gap-6">
+    <!-- Layout -->
+    <section>
+      <h3
+        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+      >
+        {{ t("groups.layout") }}
+      </h3>
+      <div class="mt-3">
+        <ResultLayoutEditor
+          v-model="layout"
+          v-model:selected="selectedBlock"
+          :status-labels="statusLabels"
+          :variables="variableNames"
+          :empty-ids="emptyBlockIds"
+        />
+      </div>
+    </section>
+
     <!-- Score -->
     <section>
       <h3

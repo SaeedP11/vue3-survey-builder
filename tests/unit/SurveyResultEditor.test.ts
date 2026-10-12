@@ -2,6 +2,8 @@ import { DOMWrapper } from "@vue/test-utils";
 import { describe, expect, test, vi } from "vitest";
 import { nextTick, reactive } from "vue";
 import SurveyResultEditor from "../../src/components/SurveyResultEditor.vue";
+import ResultLayoutEditor from "../../src/components/ResultLayoutEditor.vue";
+import { defaultLayout } from "../../src/utils/resultLayout.ts";
 import { surveyResultEditor } from "../../src/locales/index.ts";
 import { getDefaultProps } from "../../src/schemas/templates.ts";
 import type { SurveyResultProps } from "../../src/types/index.ts";
@@ -289,5 +291,50 @@ describe("buttons", () => {
       .find((r) => r.attributes("value") === "secondary")!;
     await secondary.setValue(true);
     expect(model.actions![0].variant).toBe("secondary");
+  });
+});
+
+describe("layout", () => {
+  test("comes first, listing the page's blocks", () => {
+    const { child } = setup();
+    expect(child.find("h3").text()).toBe(T.groups.layout);
+    const panel = child.findComponent(ResultLayoutEditor);
+    expect(panel.props("modelValue")).toEqual(defaultLayout());
+  });
+
+  test("offers the survey's questions and calculated values to HTML blocks, once each", () => {
+    const { child } = setup({
+      ...WITH_SOURCES,
+      calculatedValues: [...WITH_SOURCES.calculatedValues, { name: "age", expression: "1" }],
+    });
+    expect(child.findComponent(ResultLayoutEditor).props("variables")).toEqual(["age", "weight", "riskScore"]);
+  });
+
+  test("marks the blocks that have nothing to show yet", () => {
+    const { child } = setup(WITH_SOURCES, {
+      noteText: " ",
+      actions: [],
+      images: [{ id: "i", src: "https://x.test/a.png", placement: "banner" }],
+      layout: [...defaultLayout(), { id: "h", type: "html", html: "" }],
+    });
+    expect(child.findComponent(ResultLayoutEditor).props("emptyIds")).toEqual([
+      "images-afterScore",
+      "note",
+      "images-beforeActions",
+      "actions",
+      "h",
+    ]);
+  });
+
+  test("writes the panel's changes into the template", async () => {
+    const { child, model } = setup();
+    await child.find('[data-palette="divider"]').trigger("click");
+    expect(model.layout?.at(-1)?.type).toBe("divider");
+  });
+
+  test("shares the selected block through v-model:selectedBlock", async () => {
+    const { child } = setup();
+    await child.find('li[data-block-id="score"] button[aria-expanded]').trigger("click");
+    expect(child.emitted("update:selectedBlock")?.at(-1)).toEqual(["score"]);
   });
 });

@@ -118,6 +118,40 @@ export interface ResultImage {
   tier?: number;
 }
 
+/** A part of the result page the layout places. */
+export type ResultBlockType =
+  /** The check mark, title, subtitle and description. */
+  | "hero"
+  /** The score display chosen in `scoreDisplay`. */
+  | "score"
+  /** `noteText`, with its info icon. */
+  | "note"
+  /** The images whose `placement` is the block's `placement`. */
+  | "images"
+  /** The `actions` buttons. */
+  | "actions"
+  /** The author's own HTML, sanitized; `{name}` puts in an answer. */
+  | "html"
+  /** A horizontal rule. */
+  | "divider";
+
+export interface ResultBlock {
+  /** Stable id; the built-in blocks use their type (and placement) as id. */
+  id: string;
+  type: ResultBlockType;
+  /** An `images` block's slot: the images with this placement show in it. */
+  placement?: ResultImagePlacement;
+  /** An `html` block's markup. */
+  html?: string;
+  /** Kept in the layout but not shown. */
+  hidden?: boolean;
+  /**
+   * Shows the block only while the score falls in this status tier (an index
+   * into `statusLabels`); unset shows it for every result.
+   */
+  tier?: number;
+}
+
 export interface SurveyResultProps {
   score?: number | string;
   min?: number;
@@ -138,6 +172,11 @@ export interface SurveyResultProps {
   /** The page's buttons, in order. When unset, the three legacy labels below make the buttons. */
   actions?: ResultAction[];
   images?: ResultImage[];
+  /**
+   * The page's blocks, top to bottom. When unset the page shows its standard
+   * order: banner images, hero, score, images, note, images, buttons.
+   */
+  layout?: ResultBlock[];
 
   /** @deprecated Use `actions`; read only while `actions` is unset. */
   primaryLabel?: string;

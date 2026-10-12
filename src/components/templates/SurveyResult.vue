@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, type Component } from "vue";
 
 defineOptions({ inheritAttrs: false });
 import LinearHealthGauge from "../widgets/LinearHealthGauge.vue";
@@ -12,6 +12,7 @@ import SegmentedPills from "../widgets/SegmentedPills.vue";
 import Table from "../widgets/Table.vue";
 import type {
   ResultAction,
+  ResultBlock,
   ResultImage,
   ResultImagePlacement,
   SurveyResultProps,
@@ -20,8 +21,11 @@ import type {
 import DefaultScoreCard from "../widgets/DefaultScoreCard.vue";
 import HideableSection from "./HideableSection.vue";
 import ResultActionIcon from "./ResultActionIcon.vue";
+import ResultCanvasBlock from "./ResultCanvasBlock.vue";
+import ResultHtmlBlock from "./ResultHtmlBlock.vue";
 import ResultImages from "./ResultImages.vue";
 import { useSurveyCreator } from "../../provider/surveyCreator.ts";
+import useBlockDrag from "../../composables/useBlockDrag.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
 import {
@@ -29,13 +33,32 @@ import {
   resolveActions,
   safeLinkUrl,
 } from "../../utils/resultContent.ts";
+import {
+  blockShownFor,
+  dropBlock,
+  htmlBlockName,
+  moveBlock,
+  resolveLayout,
+  type BlockDrag,
+} from "../../utils/resultLayout.ts";
+import {
+  fillHtmlPlaceholders,
+  isTemplateVariable,
+  sanitizeResultHtml,
+} from "../../utils/resultHtml.ts";
+import { pickLabel, tierIndex } from "../../utils/statusTiers.ts";
 
 // A template without scoreDisplay (hand-written or older JSON) still shows its score
 const props = withDefaults(
   defineProps<
     SurveyResultProps & {
-      /** In the result editor: links do not navigate, and every image shows, with its tier. */
+      /**
+       * In the result editor: links do not navigate, every block and image
+       * shows, and the blocks can be selected, dragged and hidden.
+       */
       preview?: boolean;
+      /** The block selected in the editor. */
+      selectedBlock?: string | null;
     }
   >(),
   { scoreDisplay: "default" },
@@ -50,9 +73,13 @@ const emit = defineEmits<{
   primary: [];
   /** @deprecated Listen to `action`; a button with the id `secondary` also emits this. */
   secondary: [];
+  /** In the preview: the layout after a drag, a move or a hide. */
+  "update:layout": [layout: ResultBlock[]];
+  /** In the preview: the block clicked, dragged or dropped. */
+  "update:selectedBlock": [id: string | null];
 }>();
 
-const { t, tm, rt } = useLocalI18n(surveyResult);
+const { t, tm, rt, locale } = useLocalI18n(surveyResult);
 
 const ui = computed(() => {
   const or = (v: string | undefined, fallback: string) =>
@@ -124,9 +151,10 @@ const buttonClass = (action: ResultAction) => {
 
 const hasText = (v: string | undefined) => !!v && v.trim().length > 0;
 
-const chartValue = computed(() =>
-  typeof props.score === "number" ? props.score : 0,
+const numericScore = computed(() =>
+  typeof props.score === "number" ? props.score : undefined,
 );
+const chartValue = computed(() => numericScore.value ?? 0);
 
 const statusLabels = computed<string[]>(() => {
   if (Array.isArray(props.statusLabels) && props.statusLabels.length) {
@@ -141,19 +169,31 @@ const statusLabels = computed<string[]>(() => {
   return ["Mild", "Moderate", "Severe", "Critical"];
 });
 
+/** The tier the score falls in; undefined without a score. */
+const scoreTier = computed(() =>
+  numericScore.value === undefined
+    ? undefined
+    : tierIndex(
+        numericScore.value,
+        props.min ?? 0,
+        props.max ?? 100,
+        statusLabels.value.length,
+      ),
+);
+
 // The editor shows every image; a respondent sees those for their score's tier
 const visibleImages = computed<ResultImage[]>(() => {
   const images = Array.isArray(props.images) ? props.images : [];
   if (props.preview) return images;
   return imagesForScore(
     images,
-    typeof props.score === "number" ? props.score : undefined,
+    numericScore.value,
     props.min ?? 0,
     props.max ?? 100,
     statusLabels.value.length,
   );
 });
-const imagesAt = (placement: ResultImagePlacement) =>
+const imagesAt = (placement: ResultImagePlacement | undefined) =>
   visibleImages.value.filter(
     (image) => (image.placement ?? "afterScore") === placement,
   );
@@ -163,30 +203,163 @@ const resolvedTableRows = computed<TableRow[]>(() => {
   return Array.isArray(raw) ? (raw as TableRow[]) : [];
 });
 
+// ---- layout ----
+
+const layout = computed(() => resolveLayout(props.layout));
+
+/** `{$score}` and the other template values, once there is a score to fill them from. */
+const templateValues = computed<Record<string, unknown> | undefined>(() => {
+  const score = numericScore.value;
+  if (score === undefined) return undefined;
+  const number = new Intl.NumberFormat(locale.value, {
+    maximumFractionDigits: 2,
+  });
+  return {
+    $score: number.format(score),
+    $status: pickLabel(statusLabels.value, scoreTier.value ?? 0, ""),
+    $min: number.format(props.min ?? 0),
+    $max: number.format(props.max ?? 100),
+  };
+});
+
+/** Each HTML block's markup, its template values filled and sanitized. */
+const blockHtml = computed(() => {
+  const values = templateValues.value;
+  const out: Record<string, string> = {};
+  for (const block of layout.value) {
+    if (block.type !== "html") continue;
+    const html = block.html ?? "";
+    out[block.id] = sanitizeResultHtml(
+      values ? fillHtmlPlaceholders(html, values, isTemplateVariable) : html,
+    );
+  }
+  return out;
+});
+
+function hasContent(block: ResultBlock): boolean {
+  switch (block.type) {
+    case "note":
+      return hasText(props.noteText);
+    case "images":
+      return imagesAt(block.placement).length > 0;
+    case "actions":
+      return actions.value.length > 0;
+    case "html":
+      // The editor shows an empty block, with a hint, so it can be found
+      return props.preview || !!blockHtml.value[block.id];
+    default:
+      return true;
+  }
+}
+
+// Respondents can hide a section from their own view (e.g. before printing)
+const dismissed = ref(new Set<string>());
+const HIDEABLE = ["hero", "score", "note", "actions"];
+
+const rendered = computed(() =>
+  layout.value.flatMap((block, index) => {
+    if (!props.preview) {
+      if (!blockShownFor(block, scoreTier.value)) return [];
+      if (dismissed.value.has(block.id)) return [];
+    }
+    return hasContent(block) ? [{ block, index }] : [];
+  }),
+);
+
+const isBanner = (block: ResultBlock) =>
+  block.type === "images" && block.placement === "banner";
+
+const blockLabel = (block: ResultBlock) => {
+  if (block.type === "images") return t(`blocks.images.${block.placement}`);
+  return (block.type === "html" && htmlBlockName(block.html)) || t(`blocks.${block.type}`);
+};
+
+const tierLabel = (block: ResultBlock) =>
+  block.tier === undefined
+    ? undefined
+    : statusLabels.value[block.tier] || `${block.tier + 1}`;
+
+function dismiss(id: string) {
+  dismissed.value = new Set(dismissed.value).add(id);
+}
+
+const restoreSections = () => {
+  dismissed.value = new Set();
+};
+
+// ---- editing in the preview ----
+
+const drag = useBlockDrag();
+
+function setLayout(next: ResultBlock[]) {
+  if (next !== layout.value) emit("update:layout", next);
+}
+
+function select(id: string | null) {
+  if (id !== props.selectedBlock) emit("update:selectedBlock", id);
+}
+
+/** Moves the block one place among the blocks the preview shows. */
+function moveShown(position: number, by: -1 | 1) {
+  const from = rendered.value[position]?.index;
+  const neighbour = rendered.value[position + by]?.index;
+  if (from === undefined || neighbour === undefined) return;
+  setLayout(moveBlock(layout.value, from, by === -1 ? neighbour : neighbour + 1));
+}
+
+function dropOn(index: number, side: "before" | "after", dragged: BlockDrag) {
+  setLayout(dropBlock(layout.value, dragged, side === "before" ? index : index + 1));
+  select(dragged.kind === "add" ? dragged.block.id : dragged.id);
+}
+
+function dropAtEnd(event: DragEvent) {
+  const dragged = drag.take(event);
+  if (dragged) dropOn(layout.value.length - 1, "after", dragged);
+}
+
+function toggleHidden(id: string) {
+  setLayout(
+    layout.value.map((b) => {
+      if (b.id !== id) return b;
+      const { hidden, ...rest } = b;
+      return hidden ? rest : { ...rest, hidden: true };
+    }),
+  );
+}
+
+/** What wraps a block: the editor's chrome, the respondent's hide button, or nothing. */
+function wrapperOf(block: ResultBlock): Component | string {
+  if (props.preview) return ResultCanvasBlock;
+  return HIDEABLE.includes(block.type) ? HideableSection : "div";
+}
+
+function wrapperBindings(block: ResultBlock, index: number, position: number) {
+  if (props.preview) {
+    return {
+      id: block.id,
+      label: blockLabel(block),
+      index: position,
+      count: rendered.value.length,
+      selected: props.selectedBlock === block.id,
+      hidden: !!block.hidden,
+      tierLabel: tierLabel(block),
+      onSelect: () => select(block.id),
+      onMove: (by: -1 | 1) => moveShown(position, by),
+      onToggleHidden: () => toggleHidden(block.id),
+      onDrop: (side: "before" | "after", dragged: BlockDrag) =>
+        dropOn(index, side, dragged),
+    };
+  }
+  return HIDEABLE.includes(block.type) ? { onHide: () => dismiss(block.id) } : {};
+}
+
+const first = computed(() => rendered.value[0]?.block);
+const last = computed(() => rendered.value.at(-1)?.block);
+
 const creator = useSurveyCreator();
 const themeVars = computed<Record<string, string>>(
   () => ({ ...(creator.theme?.cssVariables ?? {}) }) as Record<string, string>,
 );
-
-const heroVisible = ref(true);
-const scoreVisible = ref(true);
-const noteVisible = ref(true);
-const actionsVisible = ref(true);
-
-const allVisible = computed(
-  () =>
-    heroVisible.value &&
-    scoreVisible.value &&
-    noteVisible.value &&
-    actionsVisible.value,
-);
-
-const restoreSections = () => {
-  heroVisible.value = true;
-  scoreVisible.value = true;
-  noteVisible.value = true;
-  actionsVisible.value = true;
-};
 </script>
 
 <template>
@@ -229,7 +402,7 @@ const restoreSections = () => {
             >{{ ui.categoryChip }}</span
           >
           <button
-            v-if="!allVisible"
+            v-if="!preview && dismissed.size > 0"
             type="button"
             class="text-[11px] font-semibold text-[var(--sjs-general-forecolor-light)] bg-transparent border border-dashed border-[var(--sjs-border-default)] px-3 py-1.5 rounded-full cursor-pointer hover:text-[var(--sjs-primary-backcolor)] hover:border-[var(--sjs-primary-backcolor)]"
             @click="restoreSections"
@@ -239,181 +412,207 @@ const restoreSections = () => {
         </div>
       </header>
 
-      <ResultImages
-        banner
-        :images="imagesAt('banner')"
-        :preview="preview"
-        :status-labels="statusLabels"
-      />
+      <div
+        class="flex flex-col gap-7"
+        :class="[
+          first && !isBanner(first) ? 'pt-9.5' : '',
+          !last || !isBanner(last) ? 'pb-8.5' : '',
+        ]"
+      >
+        <div
+          v-for="({ block, index }, position) in rendered"
+          :key="block.id"
+          :class="isBanner(block) ? '' : 'px-9.5'"
+          :data-block="block.type"
+        >
+          <component
+            :is="wrapperOf(block)"
+            v-bind="wrapperBindings(block, index, position)"
+          >
+            <ResultImages
+              v-if="block.type === 'images'"
+              :banner="isBanner(block)"
+              :images="imagesAt(block.placement)"
+              :preview="preview"
+              :status-labels="statusLabels"
+            />
 
-      <div class="px-9.5 pt-9.5 pb-8.5">
-        <HideableSection v-if="heroVisible" @hide="heroVisible = false">
-          <div class="flex flex-col items-center text-center gap-3.25">
             <div
-              class="w-15 h-15 rounded-full bg-(--sjs-special-green-light) border border-[var(--sjs-special-green-light)] flex items-center justify-center"
+              v-else-if="block.type === 'hero'"
+              class="flex flex-col items-center text-center gap-3.25"
             >
-              <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+              <div
+                class="w-15 h-15 rounded-full bg-(--sjs-special-green-light) border border-[var(--sjs-special-green-light)] flex items-center justify-center"
+              >
+                <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M5 12.5l4 4L19 7"
+                    stroke="var(--sjs-special-green)"
+                    stroke-width="2.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h1
+                class="mt-0.5 text-[28px] font-extrabold text-[var(--sjs-general-forecolor)] tracking-[-0.01em]"
+                v-if="hasText(ui.title)"
+              >
+                {{ ui.title }}
+              </h1>
+              <div
+                class="text-[12.5px] font-bold text-[var(--sjs-primary-backcolor)] tracking-[0.04em]"
+                v-if="hasText(ui.subtitle)"
+              >
+                {{ ui.subtitle }}
+              </div>
+              <p
+                v-if="hasText(props.description)"
+                class="mt-1 text-[15px] leading-[1.85] text-[var(--sjs-general-forecolor)] max-w-107.5"
+              >
+                {{ ui.description }}
+              </p>
+            </div>
+
+            <template v-else-if="block.type === 'score'">
+              <DefaultScoreCard
+                v-if="scoreDisplay === 'default'"
+                :value="chartValue"
+                :min="min"
+                :max="max"
+                :status-labels="statusLabels"
+              />
+              <div v-else class="flex justify-center" dir="ltr">
+                <LinearHealthGauge
+                  v-if="scoreDisplay === 'linear'"
+                  :model-value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <RadialGauge
+                  v-else-if="scoreDisplay === 'radial'"
+                  :value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <TemperatureGauge
+                  v-else-if="scoreDisplay === 'temperature'"
+                  :model-value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <DonutGauge
+                  v-else-if="scoreDisplay === 'donut'"
+                  :value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <BulletChart
+                  v-else-if="scoreDisplay === 'bullet'"
+                  :value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <VerticalThermometer
+                  v-else-if="scoreDisplay === 'thermometer'"
+                  :value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <SegmentedPills
+                  v-else-if="scoreDisplay === 'pills'"
+                  :value="chartValue"
+                  :min="min"
+                  :max="max"
+                  :status-labels="statusLabels"
+                />
+                <Table
+                  v-else-if="scoreDisplay === 'table'"
+                  :rows="resolvedTableRows"
+                  :status-labels="statusLabels"
+                />
+              </div>
+            </template>
+
+            <div
+              v-else-if="block.type === 'note'"
+              class="flex items-start gap-2.5 px-0.5"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                class="flex-none mt-px"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9.5"
+                  stroke="var(--sjs-general-forecolor-light)"
+                  stroke-width="1.6"
+                />
                 <path
-                  d="M5 12.5l4 4L19 7"
-                  stroke="var(--sjs-special-green)"
-                  stroke-width="2.6"
+                  d="M12 11v5M12 7.6v.4"
+                  stroke="var(--sjs-general-forecolor-light)"
+                  stroke-width="1.8"
                   stroke-linecap="round"
-                  stroke-linejoin="round"
                 />
               </svg>
+              <p
+                class="m-0 text-[13.5px] leading-[1.75] text-[var(--sjs-general-forecolor-light)]"
+              >
+                {{ ui.noteText }}
+              </p>
             </div>
-            <h1
-              class="mt-0.5 text-[28px] font-extrabold text-[var(--sjs-general-forecolor)] tracking-[-0.01em]"
-              v-if="hasText(ui.title)"
-            >
-              {{ ui.title }}
-            </h1>
-            <div
-              class="text-[12.5px] font-bold text-[var(--sjs-primary-backcolor)] tracking-[0.04em]"
-              v-if="hasText(ui.subtitle)"
-            >
-              {{ ui.subtitle }}
-            </div>
-            <p
-              v-if="hasText(props.description)"
-              class="mt-1 text-[15px] leading-[1.85] text-[var(--sjs-general-forecolor)] max-w-107.5"
-            >
-              {{ ui.description }}
-            </p>
-          </div>
-        </HideableSection>
 
-        <HideableSection
-          v-if="scoreVisible"
-          class="mt-7"
-          @hide="scoreVisible = false"
-        >
-          <DefaultScoreCard
-            v-if="scoreDisplay === 'default'"
-            :value="chartValue"
-            :min="min"
-            :max="max"
-            :status-labels="statusLabels"
-          />
-          <div v-else class="flex justify-center" dir="ltr">
-            <LinearHealthGauge
-              v-if="scoreDisplay === 'linear'"
-              :model-value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
+            <ResultHtmlBlock
+              v-else-if="block.type === 'html'"
+              :html="blockHtml[block.id]"
+              :preview="preview"
             />
-            <RadialGauge
-              v-else-if="scoreDisplay === 'radial'"
-              :value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <TemperatureGauge
-              v-else-if="scoreDisplay === 'temperature'"
-              :model-value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <DonutGauge
-              v-else-if="scoreDisplay === 'donut'"
-              :value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <BulletChart
-              v-else-if="scoreDisplay === 'bullet'"
-              :value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <VerticalThermometer
-              v-else-if="scoreDisplay === 'thermometer'"
-              :value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <SegmentedPills
-              v-else-if="scoreDisplay === 'pills'"
-              :value="chartValue"
-              :min="min"
-              :max="max"
-              :status-labels="statusLabels"
-            />
-            <Table
-              v-else-if="scoreDisplay === 'table'"
-              :rows="resolvedTableRows"
-              :status-labels="statusLabels"
-            />
-          </div>
-        </HideableSection>
 
-        <ResultImages
-          class="mt-6"
-          :images="imagesAt('afterScore')"
-          :preview="preview"
-          :status-labels="statusLabels"
-        />
+            <hr
+              v-else-if="block.type === 'divider'"
+              class="m-0 border-0 border-t border-[var(--sjs-border-light)]"
+            />
 
-        <HideableSection
-          v-if="noteVisible && hasText(props.noteText)"
-          class="mt-4.5"
-          @hide="noteVisible = false"
-        >
-          <div class="flex items-start gap-2.5 px-0.5">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              class="flex-none mt-px"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="9.5"
-                stroke="var(--sjs-general-forecolor-light)"
-                stroke-width="1.6"
-              />
-              <path
-                d="M12 11v5M12 7.6v.4"
-                stroke="var(--sjs-general-forecolor-light)"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              />
-            </svg>
-            <p
-              class="m-0 text-[13.5px] leading-[1.75] text-[var(--sjs-general-forecolor-light)]"
-            >
-              {{ ui.noteText }}
-            </p>
-          </div>
-        </HideableSection>
-
-        <ResultImages
-          class="mt-6"
-          :images="imagesAt('beforeActions')"
-          :preview="preview"
-          :status-labels="statusLabels"
-        />
-
-        <HideableSection
-          v-if="actionsVisible && actions.length"
-          class="mt-7"
-          @hide="actionsVisible = false"
-        >
-          <div class="flex flex-col gap-3">
-            <div
-              v-for="(row, r) in buttonRows"
-              :key="r"
-              class="flex flex-col gap-3 sm:flex-row sm:flex-wrap"
-            >
-              <template v-for="action in row" :key="action.id">
+            <div v-else-if="block.type === 'actions'" class="flex flex-col gap-3">
+              <div
+                v-for="(row, r) in buttonRows"
+                :key="r"
+                class="flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+              >
+                <template v-for="action in row" :key="action.id">
+                  <a
+                    v-if="hrefOf(action)"
+                    :href="hrefOf(action)"
+                    :target="action.newTab ? '_blank' : undefined"
+                    :rel="action.newTab ? 'noopener noreferrer' : undefined"
+                    :class="buttonClass(action)"
+                    @click="onAction(action, $event)"
+                  >
+                    <ResultActionIcon :name="action.icon" />
+                    <span class="min-w-0 text-balance">{{ action.label }}</span>
+                  </a>
+                  <button
+                    v-else
+                    type="button"
+                    :class="buttonClass(action)"
+                    @click="onAction(action, $event)"
+                  >
+                    <ResultActionIcon :name="action.icon" />
+                    <span class="min-w-0 text-balance">{{ action.label }}</span>
+                  </button>
+                </template>
+              </div>
+              <template v-for="action in textActions" :key="action.id">
                 <a
                   v-if="hrefOf(action)"
                   :href="hrefOf(action)"
@@ -423,7 +622,7 @@ const restoreSections = () => {
                   @click="onAction(action, $event)"
                 >
                   <ResultActionIcon :name="action.icon" />
-                  <span class="min-w-0 text-balance">{{ action.label }}</span>
+                  {{ action.label }}
                 </a>
                 <button
                   v-else
@@ -432,34 +631,23 @@ const restoreSections = () => {
                   @click="onAction(action, $event)"
                 >
                   <ResultActionIcon :name="action.icon" />
-                  <span class="min-w-0 text-balance">{{ action.label }}</span>
+                  {{ action.label }}
                 </button>
               </template>
             </div>
-            <template v-for="action in textActions" :key="action.id">
-              <a
-                v-if="hrefOf(action)"
-                :href="hrefOf(action)"
-                :target="action.newTab ? '_blank' : undefined"
-                :rel="action.newTab ? 'noopener noreferrer' : undefined"
-                :class="buttonClass(action)"
-                @click="onAction(action, $event)"
-              >
-                <ResultActionIcon :name="action.icon" />
-                {{ action.label }}
-              </a>
-              <button
-                v-else
-                type="button"
-                :class="buttonClass(action)"
-                @click="onAction(action, $event)"
-              >
-                <ResultActionIcon :name="action.icon" />
-                {{ action.label }}
-              </button>
-            </template>
-          </div>
-        </HideableSection>
+          </component>
+        </div>
+
+        <!-- In the editor: a place to drop after the last block, or on an empty page -->
+        <div
+          v-if="preview && (drag.dragging.value || rendered.length === 0)"
+          class="mx-9.5 grid min-h-16 place-items-center rounded-xl border-2 border-dashed border-[var(--sjs-border-default)] px-4 py-3 text-center text-[13px] text-[var(--sjs-general-forecolor-light)]"
+          data-drop-end
+          @dragover="drag.over($event)"
+          @drop="dropAtEnd"
+        >
+          {{ rendered.length ? t("canvas.dropHere") : t("canvas.emptyLayout") }}
+        </div>
       </div>
     </div>
   </div>

@@ -3,7 +3,7 @@ import useCreatorToolbarAction from "../composables/useCreatorToolbarAction";
 import { useSurveyResultTemplate } from "../provider/surveyResultTemplate";
 import { surveyResultEditor } from "../locales/index.ts";
 import { useSurveyCreator } from "../provider/surveyCreator";
-import type { SurveyResultProps } from "../types/index.ts";
+import type { ResultBlock, SurveyResultProps } from "../types/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import SurveyResultEditor from "./SurveyResultEditor.vue";
 import { editableProps, getDefaultProps } from "../schemas/templates";
@@ -43,10 +43,17 @@ const themeVars = computed<Record<string, string>>(() => {
 });
 
 const editedProps = ref<SurveyResultProps>(getDefaultProps(locale.value));
+// The block picked on the preview or in the Layout panel, shown in both
+const selectedBlock = ref<string | null>(null);
+
+function setLayout(layout: ResultBlock[]) {
+  editedProps.value = { ...editedProps.value, layout };
+}
 
 function loadStored() {
   const stored = creator.JSON?.resultTemplate as SurveyResultProps | undefined;
   editedProps.value = editableProps(stored, locale.value);
+  selectedBlock.value = null;
 }
 
 function close() {
@@ -137,7 +144,9 @@ useCreatorToolbarAction(
           <component
             :is="activeTemplate.component"
             v-bind="editedProps"
+            v-model:selected-block="selectedBlock"
             preview
+            @update:layout="setLayout"
           />
         </div>
 
@@ -146,6 +155,7 @@ useCreatorToolbarAction(
             <component
               :is="activeTemplate.editor ?? SurveyResultEditor"
               v-model:props="editedProps"
+              v-model:selected-block="selectedBlock"
             />
           </div>
 

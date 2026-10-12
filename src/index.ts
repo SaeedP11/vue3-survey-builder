@@ -34,6 +34,8 @@ export type {
   ResultActionIcon,
   ResultActionType,
   ResultActionVariant,
+  ResultBlock,
+  ResultBlockType,
   ResultImage,
   ResultImagePlacement,
   ScoreDisplayVariant,

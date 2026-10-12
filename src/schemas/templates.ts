@@ -3,6 +3,7 @@ import SurveyResultEditor from "../components/SurveyResultEditor.vue";
 import SurveyResult from "../components/templates/SurveyResult.vue";
 import { surveyResult } from "../locales/index.ts";
 import { legacyActions } from "../utils/resultContent.ts";
+import { defaultLayout, resolveLayout } from "../utils/resultLayout.ts";
 
 type DefaultProps = Required<
   Omit<SurveyResultProps, "primaryLabel" | "secondaryLabel" | "closeLabel">
@@ -33,6 +34,7 @@ export function getDefaultProps(locale: string): DefaultProps {
     description: copy.description,
     noteText: copy.noteText,
     images: [],
+    layout: defaultLayout(),
     actions: [
       {
         id: "primary",
@@ -61,8 +63,9 @@ export function getDefaultProps(locale: string): DefaultProps {
 }
 
 /**
- * A stored template ready to edit: the defaults under it, and a template from
- * before `actions` with its labels turned into buttons and the labels dropped.
+  * A stored template ready to edit: the defaults under it, a template from
+ * before `actions` with its labels turned into buttons and the labels dropped,
+ * and its layout (or the standard one) cleaned up.
  */
 export function editableProps(
   stored: SurveyResultProps | undefined,
@@ -76,6 +79,7 @@ export function editableProps(
       resultCopy(locale),
     );
   }
+  merged.layout = resolveLayout(stored?.layout);
   return merged;
 }
 

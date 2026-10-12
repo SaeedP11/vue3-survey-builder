@@ -25,7 +25,8 @@
     "copy": "Copy",
     "segments": "Status labels",
     "images": "Images",
-    "actions": "Buttons"
+    "actions": "Buttons",
+    "layout": "Layout"
   },
   "fields": {
     "scoreDisplay": {
@@ -168,6 +169,32 @@
       "message": "Message",
       "share": "Share",
       "restart": "Restart"
+    }
+  },
+  "layout": {
+    "help": "Drag the blocks to arrange the result page, here or on the preview. A hidden block stays in the layout without showing.",
+    "empty": "The page has no blocks. Add one below.",
+    "drag": "Drag to reorder: {block}",
+    "remove": "Remove block",
+    "hide": "Hide",
+    "show": "Show",
+    "hidden": "Hidden",
+    "nothingToShow": "Nothing to show yet",
+    "edit": "Edit",
+    "tier": "Show for",
+    "everyResult": "Every result",
+    "add": "Add a block",
+    "addHelp": "Drag a block into the list or onto the preview, or click it to add it after the selected block.",
+    "full": "The layout is full: it holds up to {max} blocks.",
+    "dropHere": "Drop here",
+    "html": {
+      "label": "HTML",
+      "help": "Write HTML with inline styles. Scripts, forms, buttons, frames and style tags are removed, and links must use http(s), mailto: or tel:.",
+      "variables": "Insert a value",
+      "variablesHelp": "An answer's name in braces shows that answer; {'{'}$score{'}'} and {'{'}$status{'}'} show the score and its status label.",
+      "count": "{n} / {max} characters",
+      "starterTitle": "What happens next",
+      "starterText": "Write your message here."
     }
   },
   "moveUp": "Move up",
