@@ -9,7 +9,12 @@
   "noteText": "Your result falls within the moderate risk range. To reduce your risk level, we recommend regularly monitoring your health status and making simple lifestyle changes.",
   "primaryLabel": "Book a consultation",
   "secondaryLabel": "Download results (PDF)",
-  "statusLabels": ["Mild", "Moderate", "Severe", "Critical"],
+  "statusLabels": [
+    "Mild",
+    "Moderate",
+    "Severe",
+    "Critical"
+  ],
   "hideSection": "Hide this section",
   "restoreHidden": "Restore hidden sections",
   "table": {
@@ -17,5 +22,10 @@
     "currentValue": "Current value",
     "normalRange": "Normal range",
     "status": "Status"
+  },
+  "images": {
+    "failed": "Image could not be loaded",
+    "empty": "No image yet",
+    "onlyFor": "Only for: {tier}"
   }
 }

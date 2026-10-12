@@ -551,7 +551,42 @@ in the survey JSON under `resultTemplate` (a hidden survey property):
 | `min`, `max` | Score range |
 | `statusLabels` | Tier labels shared by every display; the range is split into this many tiers |
 | `tableRows` | Rows for the `table` display: `metric`, `value` (a variable name or a number), `min`, `max`, `unit` |
-| Brand and copy | `logoSrc`, `brandName`, `brandTagline`, `categoryChip`, `title`, `subtitle`, `description`, `noteText`, button labels |
+| Brand and copy | `logoSrc`, `brandName`, `brandTagline`, `categoryChip`, `title`, `subtitle`, `description`, `noteText` |
+| `images` | `{ id, src, alt?, caption?, placement?, fit?, tier? }[]`: see below |
+| `actions` | `{ id, label, type, variant?, icon?, url?, newTab? }[]`: the page's buttons, see below |
+
+**Images.** `placement` is `banner` (full width under the header),
+`afterScore` (the default) or `beforeActions`; `fit` is `cover` (fill and
+crop) or `contain`. With `tier` set (an index into `statusLabels`), the image
+shows only when the score lands in that tier, so each tier can have its own
+illustration. The editor uploads a file through the creator's
+[`onUploadFile`](https://surveyjs.io/survey-creator/documentation/api-reference/survey-creator#onUploadFile)
+event (with `elementType: "resultImage"` and `propertyName: "resultTemplate"`),
+so a host that handles it stores images on its own server; without a handler
+the image is saved in the survey JSON as a data URL, up to 1 MB. The logo
+field uploads the same way. Only http(s), relative, `blob:` and raster
+`data:image` addresses are shown.
+
+**Buttons.** `variant` is `primary`, `secondary` or `text`; up to two filled
+buttons share a row, with more the primary ones get their own row, and text
+buttons go last. `icon` is one of `none`, `arrow`, `external`, `download`,
+`print`, `calendar`, `phone`, `message`, `share`, `restart`. `type` says what
+a click does:
+
+| `type` | Click |
+| ------ | ----- |
+| `link` | Opens `url` (http(s), `mailto:`, `tel:` or relative; other schemes are refused). `{name}` in it is replaced with that answer or calculated value, URL-encoded: `https://clinic.example/book?score={riskScore}` |
+| `restart` | Emits `restart`; the Preview tab starts the survey again |
+| `close` | Emits `close`; the Preview tab hides the result |
+| `print` | Opens the browser's print dialog (which also saves as PDF) |
+| `custom` | Nothing but the `action` event: the host tells buttons apart by `id` |
+
+Every click emits `action` with the button. A template saved before `actions`
+existed keeps `primaryLabel`, `secondaryLabel` and `closeLabel` (now
+deprecated): it shows those three buttons, which still emit `primary`,
+`secondary` and `close`, and the editor turns them into `actions` when it is
+next saved. The template editor's preview never follows links or prints, and
+it shows every image, marking those that belong to one tier.
 
 When a survey is completed in the designer's **Preview** tab, the template
 is rendered over the preview with the score read from the answers. Saving a

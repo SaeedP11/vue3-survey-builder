@@ -16,8 +16,46 @@ import { provideSurveyResultTemplate } from "../../src/provider/surveyResultTemp
 import { getDefaultProps } from "../../src/schemas/templates.ts";
 import type { ScoreDisplayVariant, SurveyResultProps } from "../../src/types/index.ts";
 import { mountWithCreator } from "./helpers.ts";
+import ResultImages from "../../src/components/templates/ResultImages.vue";
+import type { ResultAction, ResultImage } from "../../src/types/index.ts";
+import { vi } from "vitest";
 
 describe("RenderResult", () => {
+  test("fills a link's placeholders with the answers and passes clicks on", async () => {
+    const action: ResultAction = {
+      id: "book",
+      label: "Book",
+      type: "link",
+      url: "https://example.com/book?score={riskScore}&name={ name }&x={missing}",
+    };
+    const { wrapper, child } = mountWithCreator(RenderResult, {
+      props: { templateProps: { actions: [action] }, result: { riskScore: 42, name: "A B" } },
+    });
+    const link = wrapper.find("a");
+    expect(link.attributes("href")).toBe("https://example.com/book?score=42&name=A%20B&x=");
+    link.element.addEventListener("click", (e) => e.preventDefault());
+    await link.trigger("click");
+    expect(child.emitted("action")?.[0][0]).toMatchObject({ id: "book" });
+  });
+
+  test("passes restart and close on", async () => {
+    const { wrapper, child } = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: {
+          actions: [
+            { id: "r", label: "Again", type: "restart" },
+            { id: "c", label: "Close it", type: "close", variant: "text" },
+          ],
+        },
+        result: {},
+      },
+    });
+    for (const b of wrapper.findAll("button").filter((b) => ["Again", "Close it"].includes(b.text())))
+      await b.trigger("click");
+    expect(child.emitted("restart")).toHaveLength(1);
+    expect(child.emitted("close")).toHaveLength(1);
+  });
+
   /** Renders with a stand-in template that records the props it gets. */
   function render(templateProps: SurveyResultProps | undefined, result: Record<string, unknown>) {
     let received: Record<string, unknown> | undefined;
@@ -156,8 +194,8 @@ describe("SurveyResult", () => {
     expect(render({ scoreDisplay: "table", tableRows: rows }).findComponent(Table).props("rows")).toEqual(rows);
   });
 
-  test("emits primary, secondary and close from its buttons", async () => {
-    const view = render(getDefaultProps("en"));
+  test("a template from before buttons were editable emits primary, secondary and close", async () => {
+    const view = render({ title: "Old" });
     const buttons = view.findAll("button").filter((b) =>
       [surveyResult.en.primaryLabel, surveyResult.en.secondaryLabel, surveyResult.en.close].includes(
         b.text(),
@@ -185,5 +223,173 @@ describe("SurveyResult", () => {
     await nextTick();
     expect(view.text()).toContain("Hide me");
     expect(restore()).toBeUndefined();
+  });
+});
+
+describe("SurveyResult buttons", () => {
+  function render(props: object, locale = "en") {
+    return mountWithCreator(SurveyResult, { props, locale }).child;
+  }
+  const actionEls = (view: ReturnType<typeof render>) =>
+    view.findAll("a, button").filter((el) => !el.attributes("title"));
+
+  test("shows the template's buttons in order, primary and secondary before text ones", () => {
+    const view = render({
+      actions: [
+        { id: "a", label: "Later", type: "close", variant: "text" },
+        { id: "b", label: "First", type: "custom", variant: "primary" },
+        { id: "c", label: "Second", type: "print", variant: "secondary" },
+        { id: "d", label: "  ", type: "custom" },
+      ],
+    });
+    expect(actionEls(view).map((b) => b.text())).toEqual(["First", "Second", "Later"]);
+  });
+
+  test("no buttons leaves out the buttons section", () => {
+    const view = render({ actions: [], noteText: "Note" });
+    expect(view.findAll(`button[title="${surveyResult.en.hideSection}"]`)).toHaveLength(3);
+  });
+
+  test("a link is an anchor; a new-tab link drops the opener", () => {
+    const view = render({
+      actions: [
+        { id: "a", label: "Same", type: "link", url: "/next" },
+        { id: "b", label: "New", type: "link", url: "https://x.test", newTab: true },
+      ],
+    });
+    const [same, next] = view.findAll("a");
+    expect(same.attributes()).toMatchObject({ href: "/next" });
+    expect(same.attributes("target")).toBeUndefined();
+    expect(next.attributes()).toMatchObject({ target: "_blank", rel: "noopener noreferrer" });
+  });
+
+  test("a link with a script address is a plain button", () => {
+    const view = render({
+      actions: [{ id: "x", label: "Bad", type: "link", url: "javascript:alert(1)" }],
+    });
+    expect(view.find("a").exists()).toBe(false);
+    expect(actionEls(view).map((b) => b.text())).toEqual(["Bad"]);
+  });
+
+  test("emits action for every click, and close or restart for those types", async () => {
+    const actions: ResultAction[] = [
+      { id: "c", label: "C", type: "custom" },
+      { id: "r", label: "R", type: "restart" },
+      { id: "x", label: "X", type: "close" },
+    ];
+    const view = render({ actions });
+    for (const b of actionEls(view)) await b.trigger("click");
+    expect(view.emitted("action")?.map((e) => (e[0] as ResultAction).id)).toEqual(["c", "r", "x"]);
+    expect(view.emitted("restart")).toHaveLength(1);
+    expect(view.emitted("close")).toHaveLength(1);
+    expect(view.emitted("primary")).toBeUndefined();
+  });
+
+  test("print opens the print dialog, except in the editor's preview", async () => {
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    const actions: ResultAction[] = [{ id: "p", label: "Print", type: "print" }];
+    await actionEls(render({ actions })).at(0)!.trigger("click");
+    expect(print).toHaveBeenCalledTimes(1);
+    await actionEls(render({ actions, preview: true })).at(0)!.trigger("click");
+    expect(print).toHaveBeenCalledTimes(1);
+    print.mockRestore();
+  });
+
+  test("a link does not navigate in the editor's preview", async () => {
+    const view = render({
+      preview: true,
+      actions: [{ id: "a", label: "Go", type: "link", url: "https://x.test" }],
+    });
+    const event = new MouseEvent("click", { cancelable: true });
+    view.find("a").element.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+  });
+});
+
+describe("SurveyResult images", () => {
+  const img = (over: Partial<ResultImage>): ResultImage => ({
+    id: Math.random().toString(36),
+    src: "https://img.test/a.png",
+    ...over,
+  });
+  function render(props: object) {
+    return mountWithCreator(SurveyResult, { props }).child;
+  }
+  const srcs = (view: ReturnType<typeof render>) => view.findAll("img").map((i) => i.attributes("src"));
+
+  test("puts each image at its placement", () => {
+    const view = render({
+      images: [
+        img({ src: "https://img.test/banner.png", placement: "banner", alt: "Banner" }),
+        img({ src: "https://img.test/score.png" }),
+        img({ src: "https://img.test/actions.png", placement: "beforeActions" }),
+      ],
+    });
+    const groups = view.findAllComponents(ResultImages);
+    expect(groups.map((g) => g.findAll("img").map((i) => i.attributes("src")))).toEqual([
+      ["https://img.test/banner.png"],
+      ["https://img.test/score.png"],
+      ["https://img.test/actions.png"],
+    ]);
+    expect(view.find("img").attributes("alt")).toBe("Banner");
+  });
+
+  test("shows a tier's image only when the score lands in that tier", () => {
+    const images = [
+      img({ src: "https://img.test/all.png" }),
+      img({ src: "https://img.test/low.png", tier: 0 }),
+      img({ src: "https://img.test/high.png", tier: 1 }),
+    ];
+    const base = { images, min: 0, max: 100, statusLabels: ["Low", "High"] };
+    expect(srcs(render({ ...base, score: 10 }))).toEqual(["https://img.test/all.png", "https://img.test/low.png"]);
+    expect(srcs(render({ ...base, score: 90 }))).toEqual(["https://img.test/all.png", "https://img.test/high.png"]);
+    expect(srcs(render({ ...base, score: undefined }))).toEqual(["https://img.test/all.png"]);
+  });
+
+  test("the editor's preview shows every image, naming a tier's", () => {
+    const view = render({
+      preview: true,
+      statusLabels: ["Low", "High"],
+      images: [img({ tier: 1 }), img({ src: "" })],
+    });
+    expect(view.findAll("img")).toHaveLength(1);
+    expect(view.text()).toContain("Only for: High");
+    expect(view.text()).toContain(surveyResult.en.images.empty);
+  });
+
+  test("leaves out an image that fails to load, or has an unsafe address", async () => {
+    const view = render({ images: [img({}), img({ src: "javascript:alert(1)" })] });
+    expect(view.findAll("img")).toHaveLength(1);
+    await view.find("img").trigger("error");
+    expect(view.findAll("img")).toHaveLength(0);
+    expect(view.findComponent(ResultImages).find("figure").exists()).toBe(false);
+  });
+
+  test("shows a caption", () => {
+    expect(render({ images: [img({ caption: "Your heart" })] }).find("figcaption").text()).toBe("Your heart");
+  });
+});
+
+describe("SurveyResult button rows", () => {
+  const rows = (actions: ResultAction[]) =>
+    mountWithCreator(SurveyResult, { props: { actions } })
+      .child.findAll("div.sm\\:flex-row")
+      .map((row) => row.findAll("button, a").map((b) => b.text()));
+  const a = (label: string, variant: ResultAction["variant"]): ResultAction => ({
+    id: label,
+    label,
+    type: "custom",
+    variant,
+  });
+
+  test("two filled buttons share a row", () => {
+    expect(rows([a("S", "secondary"), a("P", "primary")])).toEqual([["S", "P"]]);
+  });
+
+  test("with three or more, the primary ones get the first row", () => {
+    expect(rows([a("S1", "secondary"), a("P", "primary"), a("S2", "secondary")])).toEqual([
+      ["P"],
+      ["S1", "S2"],
+    ]);
   });
 });

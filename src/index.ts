@@ -30,6 +30,12 @@ export * from "survey-core";
 export type {
   AsyncDropdownHandlers,
   ItemType,
+  ResultAction,
+  ResultActionIcon,
+  ResultActionType,
+  ResultActionVariant,
+  ResultImage,
+  ResultImagePlacement,
   ScoreDisplayVariant,
   SurveyAiAssitantConfig,
   SurveyResultProps,

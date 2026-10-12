@@ -3,6 +3,7 @@ import SurveyResultEditorModal from "./SurveyResultEditorModal.vue";
 import SurveyResultRequiredToast from "./SurveyResultRequiredToast.vue";
 import { initSurveyCreator } from "../provider/surveyCreator.ts";
 import { SurveyCreatorComponent } from "survey-creator-vue";
+import type { SurveyModel } from "survey-core";
 import handleComplete from "../utils/handleComplete.ts";
 import registerJsonEditor from "../utils/registerJsonEditor.ts";
 import useJsonFormatAction from "../composables/useJsonFormatAction.ts";
@@ -72,12 +73,20 @@ watch(
   },
 );
 
+let completedSurvey: SurveyModel | undefined;
 handleComplete(creator, (sender) => {
   sender.showCompletedPage = false;
   sender.showCompletePage = false;
+  completedSurvey = sender;
   result.value = sender.data;
   showResult.value = true;
 });
+
+// The Preview tab's result page: restart runs the survey again from its first page
+function restartPreview() {
+  showResult.value = false;
+  completedSurvey?.clear(true, true);
+}
 </script>
 
 <template>
@@ -97,7 +106,12 @@ handleComplete(creator, (sender) => {
       v-if="showResult"
       to=".svd-simulator-content .sd-root-modern .sv-scroll__wrapper"
     >
-      <RenderResult :templateProps="creator.JSON?.resultTemplate" :result />
+      <RenderResult
+        :templateProps="creator.JSON?.resultTemplate"
+        :result
+        @restart="restartPreview"
+        @close="showResult = false"
+      />
     </Teleport>
   </div>
 </template>

@@ -8,6 +8,8 @@ import SurveyResult from "../../src/components/templates/SurveyResult.vue";
 import { surveyResultEditor } from "../../src/locales/index.ts";
 import { provideSurveyResultTemplate } from "../../src/provider/surveyResultTemplate.ts";
 import { getDefaultProps } from "../../src/schemas/templates.ts";
+import { surveyResult } from "../../src/locales/index.ts";
+import { legacyActions } from "../../src/utils/resultContent.ts";
 import "../../src/utils/serilizers.ts";
 import { mountWithCreator, newCreator } from "./helpers.ts";
 import { mount } from "@vue/test-utils";
@@ -56,6 +58,8 @@ describe("SurveyResultEditorModal", () => {
       ...getDefaultProps("en"),
       title: "Stored",
       max: 40,
+      // A template from before buttons were editable keeps the buttons it showed
+      actions: legacyActions({}, surveyResult.en),
     });
     expect(child.findComponent(SurveyResult).props("title")).toBe("Stored");
   });

@@ -168,7 +168,6 @@ describe("status labels", () => {
 test("binds the brand and copy fields", async () => {
   const { control, model } = setup();
   const fields: [string, keyof SurveyResultProps][] = [
-    [T.fields.logoSrc.label, "logoSrc"],
     [T.fields.brandName.label, "brandName"],
     [T.fields.brandTagline.label, "brandTagline"],
     [T.fields.categoryChip.label, "categoryChip"],
@@ -176,9 +175,6 @@ test("binds the brand and copy fields", async () => {
     [T.fields.subtitle.label, "subtitle"],
     [T.fields.description.label, "description"],
     [T.fields.noteText.label, "noteText"],
-    [T.fields.primaryLabel.label, "primaryLabel"],
-    [T.fields.secondaryLabel.label, "secondaryLabel"],
-    [T.fields.closeLabel.label, "closeLabel"],
   ];
   for (const [label, key] of fields) {
     const input = control(label);
@@ -186,4 +182,112 @@ test("binds the brand and copy fields", async () => {
     await input.setValue(`new ${key}`);
     expect(model[key]).toBe(`new ${key}`);
   }
+});
+
+describe("logo", () => {
+  test("its address field sets logoSrc", async () => {
+    const { control, model } = setup();
+    await control(T.fields.logoSrc.label).setValue("https://img.test/logo.png");
+    expect(model.logoSrc).toBe("https://img.test/logo.png");
+  });
+
+  test("an uploaded file is stored as the host's upload handler answers", async () => {
+    const { child, creator, model } = setup();
+    creator.onUploadFile.add((_, options) => options.callback("success", "https://cdn.test/up.png"));
+    const input = child.find('input[type="file"]');
+    const file = new File(["x"], "logo.png", { type: "image/png" });
+    Object.defineProperty(input.element, "files", { value: [file] });
+    await input.trigger("change");
+    expect(model.logoSrc).toBe("https://cdn.test/up.png");
+  });
+
+  test("refuses a file that is not an image", async () => {
+    const { child, model } = setup();
+    const input = child.find('input[type="file"]');
+    Object.defineProperty(input.element, "files", {
+      value: [new File(["x"], "a.txt", { type: "text/plain" })],
+    });
+    await input.trigger("change");
+    expect(model.logoSrc).toBe("");
+    expect(child.text()).toContain(T.imageField.notImage);
+  });
+});
+
+describe("images", () => {
+  test("adds, edits, orders and removes images", async () => {
+    const { button, child, model } = setup();
+    expect(child.text()).toContain(T.images.empty);
+    await button(T.images.add)!.trigger("click");
+    await button(T.images.add)!.trigger("click");
+    expect(model.images).toHaveLength(2);
+
+    await child.findAll("input").find((i) => i.attributes("id")?.includes("-alt-0"))!.setValue("A heart");
+    expect(model.images![0].alt).toBe("A heart");
+
+    const first = model.images![0].id;
+    await child.find(`button[aria-label="${T.moveDown}: Image 1"]`).trigger("click");
+    expect(model.images![1].id).toBe(first);
+
+    await child.find(`button[aria-label="${T.remove}: Image 1"]`).trigger("click");
+    expect(model.images!.map((i) => i.id)).toEqual([first]);
+  });
+
+  test("offers every result or one of the status labels", async () => {
+    const { button, child, model } = setup(WITH_SOURCES, { statusLabels: ["Low", "High"] });
+    await button(T.images.add)!.trigger("click");
+    const select = child.findAll("select").find((s) => s.attributes("id")?.includes("-tier-0"))!;
+    expect(select.findAll("option").map((o) => o.text())).toEqual([T.images.everyResult, "Low", "High"]);
+    await select.setValue("1");
+    expect(model.images![0].tier).toBe(1);
+    await select.setValue("");
+    expect(model.images![0].tier).toBeUndefined();
+  });
+});
+
+describe("buttons", () => {
+  const field = (child: ReturnType<typeof setup>["child"], name: string, index = 0) =>
+    child.findAll("input, select").find((el) => el.attributes("id")?.endsWith(`-${name}-${index}`));
+
+  test("lists the template's buttons and adds a link button", async () => {
+    const { button, child, model } = setup();
+    expect(model.actions).toHaveLength(3);
+    await button(T.actions.add)!.trigger("click");
+    expect(model.actions![3]).toMatchObject({ type: "link", variant: "secondary", newTab: true });
+    expect(field(child, "url", 3)).toBeDefined();
+  });
+
+  test("a link's address is checked, and a custom button's id shown", async () => {
+    const { child, model } = setup(WITH_SOURCES, {
+      actions: [{ id: "a", label: "A", type: "link", url: "" }],
+    });
+    await field(child, "url")!.setValue("javascript:alert(1)");
+    expect(child.text()).toContain(T.actions.urlInvalid);
+    await field(child, "url")!.setValue("https://x.test/?s={riskScore}");
+    expect(child.text()).not.toContain(T.actions.urlInvalid);
+    expect(model.actions![0].url).toBe("https://x.test/?s={riskScore}");
+
+    await field(child, "type")!.setValue("custom");
+    expect(model.actions![0]).toMatchObject({ type: "custom", icon: "none" });
+    expect(field(child, "url")).toBeUndefined();
+    expect(field(child, "id")).toBeDefined();
+  });
+
+  test("warns about two buttons with one id", () => {
+    const { child } = setup(WITH_SOURCES, {
+      actions: [
+        { id: "same", label: "A", type: "custom" },
+        { id: "same", label: "B", type: "custom" },
+      ],
+    });
+    expect(child.text()).toContain(T.actions.idDuplicate);
+  });
+
+  test("sets the style", async () => {
+    const { child, model } = setup();
+    const secondary = child
+      .findAll('input[type="radio"]')
+      .find((r) => r.attributes("value") === "secondary")!;
+    await secondary.setValue(true);
+    expect(model.actions![0].variant).toBe("secondary");
+  });
 });

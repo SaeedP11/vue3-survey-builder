@@ -3,11 +3,16 @@ import { useSurveyCreator } from "../provider/surveyCreator";
 import { surveyResultEditor } from "../locales/index.ts";
 import { computed, onBeforeUnmount, ref } from "vue";
 import type {
+  ResultAction,
+  ResultImage,
   ScoreDisplayVariant,
   SurveyResultProps,
   TableRow,
 } from "../types/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
+import ImageSourceField from "./ImageSourceField.vue";
+import ResultActionsEditor from "./ResultActionsEditor.vue";
+import ResultImagesEditor from "./ResultImagesEditor.vue";
 
 const props = defineModel<SurveyResultProps>("props", { required: true });
 const { t } = useLocalI18n(surveyResultEditor);
@@ -94,6 +99,27 @@ function updateStatusLabel(index: number, raw: string) {
   if (index >= labels.length) return;
   labels[index] = raw;
 }
+
+const logoSrc = computed<string>({
+  get: () => props.value.logoSrc ?? "",
+  set: (next) => {
+    props.value.logoSrc = next;
+  },
+});
+
+const images = computed<ResultImage[]>({
+  get: () => (Array.isArray(props.value.images) ? props.value.images : []),
+  set: (next) => {
+    props.value.images = next;
+  },
+});
+
+const actions = computed<ResultAction[]>({
+  get: () => (Array.isArray(props.value.actions) ? props.value.actions : []),
+  set: (next) => {
+    props.value.actions = next;
+  },
+});
 
 const tableRows = computed<TableRow[]>({
   get: () => {
@@ -435,17 +461,10 @@ function updateTableRow(
         {{ t("groups.brand") }}
       </h3>
       <div class="mt-3 space-y-3.5">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("fields.logoSrc.label")
-          }}</label>
-          <input
-            v-model="props.logoSrc"
-            type="text"
-            :placeholder="t('fields.logoSrc.placeholder')"
-            class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
-          />
-        </div>
+        <ImageSourceField
+          v-model="logoSrc"
+          :label="t('fields.logoSrc.label')"
+        />
         <div class="flex flex-col gap-1.5">
           <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
             t("fields.brandName.label")
@@ -527,36 +546,30 @@ function updateTableRow(
             class="resize-y rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm leading-relaxed text-fb-fg outline-none focus:border-fb-accent"
           />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("fields.primaryLabel.label")
-          }}</label>
-          <input
-            v-model="props.primaryLabel"
-            type="text"
-            class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("fields.secondaryLabel.label")
-          }}</label>
-          <input
-            v-model="props.secondaryLabel"
-            type="text"
-            class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[12px] font-semibold text-fb-fg-secondary">{{
-            t("fields.closeLabel.label")
-          }}</label>
-          <input
-            v-model="props.closeLabel"
-            type="text"
-            class="rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent"
-          />
-        </div>
+      </div>
+    </section>
+
+    <!-- Images -->
+    <section>
+      <h3
+        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+      >
+        {{ t("groups.images") }}
+      </h3>
+      <div class="mt-3">
+        <ResultImagesEditor v-model="images" :status-labels="statusLabels" />
+      </div>
+    </section>
+
+    <!-- Buttons -->
+    <section>
+      <h3
+        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+      >
+        {{ t("groups.actions") }}
+      </h3>
+      <div class="mt-3">
+        <ResultActionsEditor v-model="actions" />
       </div>
     </section>
 

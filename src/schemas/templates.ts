@@ -2,11 +2,21 @@ import type { SurveyResultProps, TemplateDefinition } from "../types/index.ts";
 import SurveyResultEditor from "../components/SurveyResultEditor.vue";
 import SurveyResult from "../components/templates/SurveyResult.vue";
 import { surveyResult } from "../locales/index.ts";
+import { legacyActions } from "../utils/resultContent.ts";
+
+type DefaultProps = Required<
+  Omit<SurveyResultProps, "primaryLabel" | "secondaryLabel" | "closeLabel">
+>;
+
+/** The copy for `locale`'s language, English when there is none. */
+export function resultCopy(locale: string) {
+  const lang = locale.split("-")[0] as keyof typeof surveyResult;
+  return surveyResult[lang] ?? surveyResult.en;
+}
 
 /** Starting values for a new result template, with the copy in `locale`. */
-export function getDefaultProps(locale: string): Required<SurveyResultProps> {
-  const lang = locale.split("-")[0] as keyof typeof surveyResult;
-  const copy = surveyResult[lang] ?? surveyResult.en;
+export function getDefaultProps(locale: string): DefaultProps {
+  const copy = resultCopy(locale);
 
   return {
     score: "",
@@ -22,11 +32,51 @@ export function getDefaultProps(locale: string): Required<SurveyResultProps> {
     subtitle: copy.subtitle,
     description: copy.description,
     noteText: copy.noteText,
-    primaryLabel: copy.primaryLabel,
-    secondaryLabel: copy.secondaryLabel,
-    closeLabel: copy.close,
+    images: [],
+    actions: [
+      {
+        id: "primary",
+        type: "custom",
+        variant: "primary",
+        icon: "calendar",
+        label: copy.primaryLabel,
+      },
+      {
+        id: "print",
+        type: "print",
+        variant: "secondary",
+        icon: "download",
+        label: copy.secondaryLabel,
+      },
+      {
+        id: "close",
+        type: "close",
+        variant: "text",
+        icon: "none",
+        label: copy.close,
+      },
+    ],
     statusLabels: [...copy.statusLabels],
   };
+}
+
+/**
+ * A stored template ready to edit: the defaults under it, and a template from
+ * before `actions` with its labels turned into buttons and the labels dropped.
+ */
+export function editableProps(
+  stored: SurveyResultProps | undefined,
+  locale: string,
+): SurveyResultProps {
+  const { primaryLabel, secondaryLabel, closeLabel, ...rest } = stored ?? {};
+  const merged: SurveyResultProps = { ...getDefaultProps(locale), ...rest };
+  if (stored && !Array.isArray(stored.actions)) {
+    merged.actions = legacyActions(
+      { primaryLabel, secondaryLabel, closeLabel },
+      resultCopy(locale),
+    );
+  }
+  return merged;
 }
 
 export const surveyResultTemplate: TemplateDefinition<SurveyResultProps> = {

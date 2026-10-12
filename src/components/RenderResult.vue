@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { useSurveyResultTemplate } from "../provider/surveyResultTemplate.ts";
-import type { SurveyResultProps } from "../types";
+import type { ResultAction, SurveyResultProps } from "../types";
+import { fillPlaceholders } from "../utils/resultContent.ts";
 import { computed } from "vue";
 
 const props = defineProps<{
   templateProps?: SurveyResultProps;
   result: Record<string, unknown>;
+}>();
+
+const emit = defineEmits<{
+  /** Every button click, with the button (its link already filled in). */
+  action: [action: ResultAction];
+  restart: [];
+  close: [];
+  primary: [];
+  secondary: [];
 }>();
 
 const activeTemplate = useSurveyResultTemplate();
@@ -30,6 +40,12 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
       ...row,
       value: resolveNumber(row.value) ?? "",
     })),
+    // `{name}` in a link becomes that answer, so a link can carry the result
+    actions: templateProps.actions?.map((action) =>
+      action.type === "link" && action.url
+        ? { ...action, url: fillPlaceholders(action.url, props.result) }
+        : action,
+    ),
   };
 });
 </script>
@@ -40,5 +56,10 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
     v-if="resolvedProps"
     v-bind="resolvedProps"
     class="w-full"
+    @action="(action: ResultAction) => emit('action', action)"
+    @restart="emit('restart')"
+    @close="emit('close')"
+    @primary="emit('primary')"
+    @secondary="emit('secondary')"
   />
 </template>

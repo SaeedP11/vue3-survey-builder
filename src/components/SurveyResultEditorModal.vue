@@ -6,7 +6,7 @@ import { useSurveyCreator } from "../provider/surveyCreator";
 import type { SurveyResultProps } from "../types/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import SurveyResultEditor from "./SurveyResultEditor.vue";
-import { getDefaultProps } from "../schemas/templates";
+import { editableProps, getDefaultProps } from "../schemas/templates";
 import { computed, ref, watch } from "vue";
 
 const emit = defineEmits<{
@@ -46,7 +46,7 @@ const editedProps = ref<SurveyResultProps>(getDefaultProps(locale.value));
 
 function loadStored() {
   const stored = creator.JSON?.resultTemplate as SurveyResultProps | undefined;
-  editedProps.value = { ...getDefaultProps(locale.value), ...(stored ?? {}) };
+  editedProps.value = editableProps(stored, locale.value);
 }
 
 function close() {
@@ -134,7 +134,11 @@ useCreatorToolbarAction(
         <div
           class="overflow-auto bg-fb-surface-muted border-e border-fb-border"
         >
-          <component :is="activeTemplate.component" v-bind="editedProps" />
+          <component
+            :is="activeTemplate.component"
+            v-bind="editedProps"
+            preview
+          />
         </div>
 
         <div class="relative flex flex-col bg-fb-surface min-h-0">

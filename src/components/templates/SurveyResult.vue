@@ -10,22 +10,46 @@ import BulletChart from "../widgets/BulletChart.vue";
 import VerticalThermometer from "../widgets/VerticalThermometer.vue";
 import SegmentedPills from "../widgets/SegmentedPills.vue";
 import Table from "../widgets/Table.vue";
-import type { SurveyResultProps, TableRow } from "../../types/index.ts";
+import type {
+  ResultAction,
+  ResultImage,
+  ResultImagePlacement,
+  SurveyResultProps,
+  TableRow,
+} from "../../types/index.ts";
 import DefaultScoreCard from "../widgets/DefaultScoreCard.vue";
 import HideableSection from "./HideableSection.vue";
+import ResultActionIcon from "./ResultActionIcon.vue";
+import ResultImages from "./ResultImages.vue";
 import { useSurveyCreator } from "../../provider/surveyCreator.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
+import {
+  imagesForScore,
+  resolveActions,
+  safeLinkUrl,
+} from "../../utils/resultContent.ts";
 
 // A template without scoreDisplay (hand-written or older JSON) still shows its score
-const props = withDefaults(defineProps<SurveyResultProps>(), {
-  scoreDisplay: "default",
-});
+const props = withDefaults(
+  defineProps<
+    SurveyResultProps & {
+      /** In the result editor: links do not navigate, and every image shows, with its tier. */
+      preview?: boolean;
+    }
+  >(),
+  { scoreDisplay: "default" },
+);
 
 const emit = defineEmits<{
-  primary: [];
-  secondary: [];
+  /** Every button click, with the button. */
+  action: [action: ResultAction];
+  restart: [];
   close: [];
+  /** @deprecated Listen to `action`; a button with the id `primary` also emits this. */
+  primary: [];
+  /** @deprecated Listen to `action`; a button with the id `secondary` also emits this. */
+  secondary: [];
 }>();
 
 const { t, tm, rt } = useLocalI18n(surveyResult);
@@ -42,11 +66,61 @@ const ui = computed(() => {
     subtitle: or(props.subtitle, t("subtitle")),
     description: or(props.description, t("description")),
     noteText: or(props.noteText, t("noteText")),
-    primaryLabel: or(props.primaryLabel, t("primaryLabel")),
-    secondaryLabel: or(props.secondaryLabel, t("secondaryLabel")),
-    closeLabel: or(props.closeLabel, t("close")),
   };
 });
+
+const actions = computed(() =>
+  resolveActions(props, {
+    primaryLabel: t("primaryLabel"),
+    secondaryLabel: t("secondaryLabel"),
+    close: t("close"),
+  }).filter((a) => a.label && a.label.trim().length > 0),
+);
+// Filled buttons share a row; text buttons sit under it, as the close button did
+const buttonActions = computed(() =>
+  actions.value.filter((a) => (a.variant ?? "primary") !== "text"),
+);
+// Two filled buttons share a row; with more, the primary ones get a row of their own
+// above the rest, so the main call to action never shrinks
+const buttonRows = computed<ResultAction[][]>(() => {
+  const filled = buttonActions.value;
+  if (filled.length <= 2) return filled.length ? [filled] : [];
+  const primary = filled.filter((a) => (a.variant ?? "primary") === "primary");
+  const rest = filled.filter((a) => (a.variant ?? "primary") !== "primary");
+  return [primary, rest].filter((row) => row.length > 0);
+});
+const textActions = computed(() =>
+  actions.value.filter((a) => a.variant === "text"),
+);
+
+/** A link button's address, when it has a safe one. */
+const hrefOf = (action: ResultAction) =>
+  action.type === "link" ? safeLinkUrl(action.url) : undefined;
+
+function onAction(action: ResultAction, event: MouseEvent) {
+  // The editor's preview stays put
+  if (props.preview && action.type === "link") event.preventDefault();
+  emit("action", action);
+  if (action.type === "close") emit("close");
+  else if (action.type === "restart") emit("restart");
+  else if (action.type === "print" && !props.preview) window.print();
+  else if (action.type === "custom" && action.id === "primary") emit("primary");
+  else if (action.type === "custom" && action.id === "secondary")
+    emit("secondary");
+}
+
+const buttonClass = (action: ResultAction) => {
+  const base =
+    "flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-[15px] font-bold no-underline cursor-pointer font-[Cairo,sans-serif] transition-[filter,background-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sjs-primary-backcolor)]";
+  switch (action.variant ?? "primary") {
+    case "secondary":
+      return `${base} flex-[1_1_11rem] min-w-0 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] border-[1.5px] border-[var(--sjs-border-default)] hover:bg-[var(--sjs-general-backcolor-dim)]`;
+    case "text":
+      return `${base} w-full min-h-11 bg-transparent text-[var(--sjs-general-forecolor-light)] text-sm font-semibold border-0 hover:text-[var(--sjs-general-forecolor)]`;
+    default:
+      return `${base} flex-[1_1_11rem] min-w-0 bg-[var(--sjs-primary-backcolor)] text-[var(--sjs-primary-forecolor)] border-0 hover:brightness-95`;
+  }
+};
 
 const hasText = (v: string | undefined) => !!v && v.trim().length > 0;
 
@@ -66,6 +140,23 @@ const statusLabels = computed<string[]>(() => {
   }
   return ["Mild", "Moderate", "Severe", "Critical"];
 });
+
+// The editor shows every image; a respondent sees those for their score's tier
+const visibleImages = computed<ResultImage[]>(() => {
+  const images = Array.isArray(props.images) ? props.images : [];
+  if (props.preview) return images;
+  return imagesForScore(
+    images,
+    typeof props.score === "number" ? props.score : undefined,
+    props.min ?? 0,
+    props.max ?? 100,
+    statusLabels.value.length,
+  );
+});
+const imagesAt = (placement: ResultImagePlacement) =>
+  visibleImages.value.filter(
+    (image) => (image.placement ?? "afterScore") === placement,
+  );
 
 const resolvedTableRows = computed<TableRow[]>(() => {
   const raw = props.tableRows;
@@ -147,6 +238,13 @@ const restoreSections = () => {
           </button>
         </div>
       </header>
+
+      <ResultImages
+        banner
+        :images="imagesAt('banner')"
+        :preview="preview"
+        :status-labels="statusLabels"
+      />
 
       <div class="px-9.5 pt-9.5 pb-8.5">
         <HideableSection v-if="heroVisible" @hide="heroVisible = false">
@@ -255,6 +353,13 @@ const restoreSections = () => {
           </div>
         </HideableSection>
 
+        <ResultImages
+          class="mt-6"
+          :images="imagesAt('afterScore')"
+          :preview="preview"
+          :status-labels="statusLabels"
+        />
+
         <HideableSection
           v-if="noteVisible && hasText(props.noteText)"
           class="mt-4.5"
@@ -290,44 +395,69 @@ const restoreSections = () => {
           </div>
         </HideableSection>
 
+        <ResultImages
+          class="mt-6"
+          :images="imagesAt('beforeActions')"
+          :preview="preview"
+          :status-labels="statusLabels"
+        />
+
         <HideableSection
-          v-if="actionsVisible"
+          v-if="actionsVisible && actions.length"
           class="mt-7"
           @hide="actionsVisible = false"
         >
-          <div>
-            <div class="flex gap-3">
-              <button
-                type="button"
-                class="flex-1 bg-[var(--sjs-primary-backcolor)] text-[var(--sjs-primary-forecolor)] border-0 rounded-xl py-3.75 text-[15px] font-bold cursor-pointer font-[Cairo,sans-serif]"
-                @click="emit('primary')"
-              >
-                {{ ui.primaryLabel }}
-              </button>
-              <button
-                type="button"
-                class="flex-1 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] border-[1.5px] border-[var(--sjs-border-default)] rounded-xl py-3.5 text-sm font-bold cursor-pointer flex items-center justify-center gap-2 font-[Cairo,sans-serif]"
-                @click="emit('secondary')"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14"
-                    stroke="var(--sjs-general-forecolor)"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                {{ ui.secondaryLabel }}
-              </button>
-            </div>
-            <button
-              type="button"
-              class="w-full bg-transparent text-[var(--sjs-general-forecolor-light)] border-0 py-1.75 mt-3 text-sm font-semibold cursor-pointer font-[Cairo,sans-serif]"
-              @click="emit('close')"
+          <div class="flex flex-col gap-3">
+            <div
+              v-for="(row, r) in buttonRows"
+              :key="r"
+              class="flex flex-col gap-3 sm:flex-row sm:flex-wrap"
             >
-              {{ ui.closeLabel }}
-            </button>
+              <template v-for="action in row" :key="action.id">
+                <a
+                  v-if="hrefOf(action)"
+                  :href="hrefOf(action)"
+                  :target="action.newTab ? '_blank' : undefined"
+                  :rel="action.newTab ? 'noopener noreferrer' : undefined"
+                  :class="buttonClass(action)"
+                  @click="onAction(action, $event)"
+                >
+                  <ResultActionIcon :name="action.icon" />
+                  <span class="min-w-0 text-balance">{{ action.label }}</span>
+                </a>
+                <button
+                  v-else
+                  type="button"
+                  :class="buttonClass(action)"
+                  @click="onAction(action, $event)"
+                >
+                  <ResultActionIcon :name="action.icon" />
+                  <span class="min-w-0 text-balance">{{ action.label }}</span>
+                </button>
+              </template>
+            </div>
+            <template v-for="action in textActions" :key="action.id">
+              <a
+                v-if="hrefOf(action)"
+                :href="hrefOf(action)"
+                :target="action.newTab ? '_blank' : undefined"
+                :rel="action.newTab ? 'noopener noreferrer' : undefined"
+                :class="buttonClass(action)"
+                @click="onAction(action, $event)"
+              >
+                <ResultActionIcon :name="action.icon" />
+                {{ action.label }}
+              </a>
+              <button
+                v-else
+                type="button"
+                :class="buttonClass(action)"
+                @click="onAction(action, $event)"
+              >
+                <ResultActionIcon :name="action.icon" />
+                {{ action.label }}
+              </button>
+            </template>
           </div>
         </HideableSection>
       </div>

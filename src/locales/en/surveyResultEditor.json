@@ -23,32 +23,65 @@
     "score": "Score",
     "brand": "Brand",
     "copy": "Copy",
-    "segments": "Status labels"
+    "segments": "Status labels",
+    "images": "Images",
+    "actions": "Buttons"
   },
   "fields": {
-    "scoreDisplay": { "label": "Metric display" },
-    "score": { "label": "Score variable", "placeholder": "Pick a calculated value" },
-    "max": { "label": "Max" },
-    "min": { "label": "Min" },
-    "logoSrc": { "label": "Logo URL", "placeholder": "https://" },
-    "brandName": { "label": "Brand name" },
-    "brandTagline": { "label": "Tagline" },
-    "categoryChip": { "label": "Category chip" },
-    "title": { "label": "Title" },
-    "subtitle": { "label": "Subtitle" },
-    "description": { "label": "Description" },
-    "noteText": { "label": "Note text" },
-    "primaryLabel": { "label": "Primary button" },
-    "secondaryLabel": { "label": "Secondary button" },
-    "closeLabel": { "label": "Close button" },
+    "scoreDisplay": {
+      "label": "Metric display"
+    },
+    "score": {
+      "label": "Score variable",
+      "placeholder": "Pick a calculated value"
+    },
+    "max": {
+      "label": "Max"
+    },
+    "min": {
+      "label": "Min"
+    },
+    "logoSrc": {
+      "label": "Logo",
+      "placeholder": "https://"
+    },
+    "brandName": {
+      "label": "Brand name"
+    },
+    "brandTagline": {
+      "label": "Tagline"
+    },
+    "categoryChip": {
+      "label": "Category chip"
+    },
+    "title": {
+      "label": "Title"
+    },
+    "subtitle": {
+      "label": "Subtitle"
+    },
+    "description": {
+      "label": "Description"
+    },
+    "noteText": {
+      "label": "Note text"
+    },
     "statusLabels": {
       "label": "Status labels",
       "help": "Shared across every widget. The widget's value range is split into this many tiers, each showing its label."
     },
-    "tableRows": { "label": "Table rows" },
-    "metric": { "label": "Metric" },
-    "unit": { "label": "Unit" },
-    "valueVariable": { "label": "Value variable" }
+    "tableRows": {
+      "label": "Table rows"
+    },
+    "metric": {
+      "label": "Metric"
+    },
+    "unit": {
+      "label": "Unit"
+    },
+    "valueVariable": {
+      "label": "Value variable"
+    }
   },
   "options": {
     "scoreDisplay": {
@@ -62,5 +95,81 @@
       "pills": "Segmented pills",
       "table": "Table"
     }
-  }
+  },
+  "imageField": {
+    "upload": "Upload image",
+    "uploading": "Uploading…",
+    "replace": "Replace",
+    "clear": "Remove image",
+    "url": "Image",
+    "embedded": "Uploaded and saved in the form. Paste a URL to use a linked image instead.",
+    "tooLarge": "This image is over {max}. Upload a smaller one or paste a link to it.",
+    "notImage": "Pick an image file (PNG, JPG, WebP or GIF).",
+    "failed": "The upload failed. Try again, or paste a link to the image.",
+    "badUrl": "Use an https:// address."
+  },
+  "images": {
+    "help": "A banner, an illustration for each status tier, or a diagram. Images for a tier show only when the score lands in it.",
+    "empty": "No images yet.",
+    "add": "+ Add image",
+    "item": "Image {n}",
+    "alt": "Alt text",
+    "altHelp": "Describes the image for screen readers. Leave it empty if the image is only decoration.",
+    "caption": "Caption",
+    "placement": "Position",
+    "fit": "Sizing",
+    "fitCover": "Fill and crop",
+    "fitContain": "Show whole image",
+    "tier": "Show for",
+    "everyResult": "Every result",
+    "placements": {
+      "banner": "Banner at the top",
+      "afterScore": "Under the score",
+      "beforeActions": "Above the buttons"
+    }
+  },
+  "actions": {
+    "help": "Up to two primary or secondary buttons share a row; with more, primary ones get their own row on top. Text buttons go last.",
+    "empty": "No buttons: respondents only see their result.",
+    "add": "+ Add button",
+    "item": "Button {n}",
+    "label": "Label",
+    "newLabel": "New button",
+    "style": "Style",
+    "variants": {
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "text": "Text"
+    },
+    "type": "When clicked",
+    "types": {
+      "link": "Open a link",
+      "restart": "Fill in the form again",
+      "close": "Close the result",
+      "print": "Print or save as PDF",
+      "custom": "Let the app handle it"
+    },
+    "url": "Link",
+    "urlHelp": "Put a question's or calculated value's name in braces to add its answer: https://example.com/book?score={'{'}riskScore{'}'}",
+    "urlInvalid": "Use an http(s)://, mailto: or tel: address.",
+    "newTab": "Open in a new tab",
+    "id": "Action id",
+    "idHelp": "The app gets this id when the button is clicked.",
+    "idDuplicate": "Another button has this id.",
+    "icon": "Icon",
+    "icons": {
+      "none": "No icon",
+      "arrow": "Arrow",
+      "external": "External link",
+      "download": "Download",
+      "print": "Printer",
+      "calendar": "Calendar",
+      "phone": "Phone",
+      "message": "Message",
+      "share": "Share",
+      "restart": "Restart"
+    }
+  },
+  "moveUp": "Move up",
+  "moveDown": "Move down"
 }

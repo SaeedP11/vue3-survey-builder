@@ -13,7 +13,16 @@ describe("getDefaultProps", () => {
     const fa = getDefaultProps("fa");
     expect(en.title).toBe(surveyResult.en.title);
     expect(fa.title).toBe(surveyResult.fa.title);
-    expect(en.closeLabel).toBe(surveyResult.en.close);
+    expect(en.actions.map((a) => a.label)).toEqual([
+      surveyResult.en.primaryLabel,
+      surveyResult.en.secondaryLabel,
+      surveyResult.en.close,
+    ]);
+    expect(fa.actions.map((a) => a.label)).toEqual([
+      surveyResult.fa.primaryLabel,
+      surveyResult.fa.secondaryLabel,
+      surveyResult.fa.close,
+    ]);
     expect(fa.statusLabels).toEqual(surveyResult.fa.statusLabels);
   });
 
@@ -34,6 +43,7 @@ describe("getDefaultProps", () => {
       scoreDisplay: "default",
       tableRows: [],
       logoSrc: "",
+      images: [],
     });
     for (const [key, value] of Object.entries(props)) {
       expect(value, key).not.toBeUndefined();
