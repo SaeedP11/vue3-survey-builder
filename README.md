@@ -120,6 +120,23 @@ the app, and scrolls to the first invalid question on validation. It must be
 called from a component's `setup()`. A Persian survey renders right to left on
 its own; an English one takes the page's direction.
 
+#### Without the designer: `vue3-survey-builder/runtime`
+
+A page that only shows surveys can import from the `runtime` entry instead. It
+has everything above, survey-core's exports, the chart question and the
+survey's own properties (`icon`, `repetition`, `resultTemplate`), but not the
+designer, so survey-creator-core and its stylesheet stay out of the page
+(about 450 KB of script and 120 KB of CSS, brotli).
+
+```ts
+import { SurveyComponent, useSurveyModel } from "vue3-survey-builder/runtime";
+import "vue3-survey-builder/runtime.css";
+```
+
+Both entries share one copy of their common code, so an app that uses the
+designer on some pages and the runtime on others registers everything once.
+The runtime entry is ES only; the UMD build is the full library.
+
 ---
 
 ## 🎨 Styling

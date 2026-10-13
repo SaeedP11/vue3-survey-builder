@@ -108,6 +108,22 @@ describe("the bundle", () => {
     expect(bundle.length).toBeLessThan(1.5 * 1024 * 1024);
   });
 
+  test("the runtime entry and the chunks it imports load no designer package", () => {
+    const seen = new Set<string>();
+    const visit = (file: string) => {
+      if (seen.has(file)) return;
+      seen.add(file);
+      const source = read(join("dist", file));
+      for (const [, local] of source.matchAll(/from\s*["']\.\/([^"']+)["']/g)) visit(local);
+      for (const specifier of bareImports(source)) {
+        expect(peers, `${file}: ${specifier}`).toContain(packageOf(specifier));
+        expect(specifier, file).not.toMatch(/^survey-creator/);
+      }
+    };
+    visit("runtime.mjs");
+    expect(seen.size).toBeGreaterThan(1);
+  });
+
   test("loads SurveyJS's Persian strings for the designer and the survey", () => {
     const imports = bareImports(read("dist/form-builder.mjs"));
     expect(imports).toContain("survey-core/i18n/persian");
@@ -126,6 +142,16 @@ describe("style.css", () => {
   test("carries the bridge from the --color-formbilder-* variables", () => {
     expect(css).toContain("--color-formbilder-primary");
     expect(css).toContain("--color-formbilder-background");
+  });
+});
+
+describe("runtime.css", () => {
+  const css = read("dist/runtime.css");
+
+  test("carries survey-core's stylesheet and the bridge, without the designer's", () => {
+    expect(css).toContain(".sd-root-modern");
+    expect(css).toContain("--color-formbilder-primary");
+    expect(css).not.toContain(".svc-creator");
   });
 });
 
@@ -267,7 +293,10 @@ describe("the published files", () => {
       "dist/form-builder.mjs",
       "dist/form-builder.umd.js",
       "dist/form-builder.css",
+      "dist/runtime.mjs",
+      "dist/runtime.css",
       "dist/types/index.d.ts",
+      "dist/types/runtime.d.ts",
       "src/styles/tailwind.css",
       "src/index.ts",
     ]) {
