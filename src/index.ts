@@ -7,10 +7,12 @@ import useScrollToError from "./composables/useScrollToError";
 import { SurveySchemaPrompt } from "./utils/prefixPrompts";
 import FormBuilder from "./components/FormBuilder.vue";
 import registerChartQuestion from "./utils/registerChartQuestion";
+import registerChartQuestionDesigner from "./utils/registerChartQuestionDesigner";
 
 // Built in: the chart question needs nothing from the host, so the designer
 // and every survey rendered with this library know it from import
 registerChartQuestion();
+registerChartQuestionDesigner();
 
 export {
   provideSurveyResultTemplate,

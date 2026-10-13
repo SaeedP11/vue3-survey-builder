@@ -7,9 +7,12 @@ import ChartQuestion from "../../src/components/ChartQuestion.vue";
 import registerChartQuestion, {
   QuestionChartModel,
 } from "../../src/utils/registerChartQuestion.ts";
+import registerChartQuestionDesigner from "../../src/utils/registerChartQuestionDesigner.ts";
 import { createTestI18n, flush, newCreator } from "./helpers.ts";
 
+// As the full entry does: the survey side, then the designer's strings.
 registerChartQuestion();
+registerChartQuestionDesigner();
 
 const JSON_ = {
   elements: [

@@ -9,8 +9,6 @@ import {
   type HashTable,
   type ISurvey,
 } from "survey-core";
-import { editorLocalization } from "survey-creator-core";
-import "survey-creator-core/i18n/persian";
 import { ComponentFactory } from "survey-vue3-ui";
 import ChartQuestion from "../components/ChartQuestion.vue";
 
@@ -171,84 +169,13 @@ function toNumber(value: unknown): number | null {
 
 const CHART_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 3V21H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17V13M12 17V8M17 17V11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 
-// The designer's strings. pe.<class> holds property names for that class only
-// (SurveyJS walks the class chain), so a shared pe.items stays untouched.
-const LOCALES = {
-  en: {
-    qt: { [CHART_QUESTION_TYPE]: "Chart" },
-    pe: {
-      [CHART_QUESTION_TYPE]: {
-        chartType: "Chart type",
-        items: "Data",
-        unit: "Unit",
-        maxValue: "Axis maximum",
-      },
-      chartitem: { expression: "Expression", color: "Color" },
-    },
-    pehelp: {
-      [CHART_QUESTION_TYPE]: {
-        items:
-          "Each row is one bar, point or slice: a label and an expression over the answers, such as {weight} or {a} + {b}.",
-        maxValue: "Leave empty to fit the largest value.",
-      },
-    },
-    pv: {
-      chartType: {
-        bar: "Bar",
-        horizontalBar: "Horizontal bar",
-        line: "Line",
-        donut: "Donut",
-      },
-    },
-  },
-  fa: {
-    qt: { [CHART_QUESTION_TYPE]: "نمودار" },
-    pe: {
-      [CHART_QUESTION_TYPE]: {
-        chartType: "نوع نمودار",
-        items: "داده‌ها",
-        unit: "واحد",
-        maxValue: "بیشینه محور",
-      },
-      chartitem: { expression: "عبارت", color: "رنگ" },
-    },
-    pehelp: {
-      [CHART_QUESTION_TYPE]: {
-        items:
-          "هر ردیف یک ستون، نقطه یا برش است: یک برچسب و یک عبارت روی پاسخ‌ها، مانند {weight} یا {a} + {b}.",
-        maxValue: "برای هم‌اندازه شدن با بزرگ‌ترین مقدار خالی بگذارید.",
-      },
-    },
-    pv: {
-      chartType: {
-        bar: "ستونی",
-        horizontalBar: "میله‌ای افقی",
-        line: "خطی",
-        donut: "دونات",
-      },
-    },
-  },
-};
-
-function localize() {
-  for (const [code, strings] of Object.entries(LOCALES)) {
-    const locale = editorLocalization.getLocale(code);
-    if (!locale) continue;
-    for (const [section, entries] of Object.entries(strings)) {
-      const target = (locale[section] ??= {});
-      for (const [key, value] of Object.entries(entries)) {
-        target[key] =
-          typeof value === "object" ? { ...target[key], ...value } : value;
-      }
-    }
-  }
-}
-
 let registered = false;
 
 /**
- * Registers the chart question: its JSON classes, the designer's toolbox
- * entry and strings, and the renderer. Idempotent; the library calls it on
+ * Registers the chart question: its JSON classes, toolbox icon and renderer,
+ * everything a survey needs to show it. The designer's strings are separate
+ * (registerChartQuestionDesigner), so rendering a survey does not load
+ * survey-creator-core. Idempotent; the library calls it on
  * import, so a host never needs to.
  */
 export default function registerChartQuestion() {
@@ -313,5 +240,4 @@ export default function registerChartQuestion() {
   );
 
   SvgRegistry.registerIcon("icon-" + CHART_QUESTION_TYPE, CHART_ICON);
-  localize();
 }

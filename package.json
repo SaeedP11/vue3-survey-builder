@@ -18,12 +18,17 @@
       "require": "./dist/form-builder.umd.js",
       "types": "./dist/types/index.d.ts"
     },
+    "./runtime": {
+      "import": "./dist/runtime.mjs",
+      "types": "./dist/types/runtime.d.ts"
+    },
+    "./runtime.css": "./dist/runtime.css",
     "./style.css": "./dist/form-builder.css",
     "./tailwind.css": "./src/styles/tailwind.css"
   },
   "scripts": {
     "dev": "vite --config demo/vite.config.ts",
-    "build": "vite build && npm run build:types",
+    "build": "vite build && BUILD_UMD=1 vite build && npm run build:types",
     "build:types": "vue-tsc -p tsconfig.build.json --declaration --emitDeclarationOnly --outDir dist/types",
     "preview": "vite preview --config demo/vite.config.ts",
     "typecheck": "vue-tsc -p tsconfig.app.json --noEmit && vue-tsc -p tsconfig.test.json --noEmit",

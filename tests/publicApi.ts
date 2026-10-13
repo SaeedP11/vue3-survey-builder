@@ -18,3 +18,12 @@ export const OWN_EXPORTS = [
   "useSurveyModel",
   "useSurveyResultTemplate",
 ].sort();
+
+/** What `vue3-survey-builder/runtime` adds to survey-core's exports: rendering a survey, no designer. */
+export const RUNTIME_EXPORTS = [
+  "ChartItemValue",
+  "QuestionChartModel",
+  "SurveyComponent",
+  "useScrollToError",
+  "useSurveyModel",
+].sort();
