@@ -1,6 +1,6 @@
 {
   "name": "vue3-survey-builder",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "main": "./dist/form-builder.umd.js",
   "module": "./dist/form-builder.mjs",
   "types": "./dist/types/index.d.ts",
