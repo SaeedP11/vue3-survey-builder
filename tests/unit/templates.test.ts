@@ -25,7 +25,6 @@ describe("getDefaultProps", () => {
       surveyResult.fa.secondaryLabel,
       surveyResult.fa.close,
     ]);
-    expect(fa.statusLabels).toEqual(surveyResult.fa.statusLabels);
   });
 
   test("uses the language of a regional locale", () => {
@@ -46,17 +45,18 @@ describe("getDefaultProps", () => {
       tableRows: [],
       logoSrc: "",
       images: [],
+      statusLabels: [],
     });
     for (const [key, value] of Object.entries(props)) {
       expect(value, key).not.toBeUndefined();
     }
   });
 
-  test("returns fresh arrays, so editing one template leaves the locale alone", () => {
+  test("returns fresh arrays, so editing one template leaves the next alone", () => {
     const props = getDefaultProps("en");
     props.statusLabels.push("Extra");
     props.tableRows.push({ metric: "m", value: 1, min: 0, max: 1 });
-    expect(surveyResult.en.statusLabels).not.toContain("Extra");
+    expect(getDefaultProps("en").statusLabels).toEqual([]);
     expect(getDefaultProps("en").tableRows).toEqual([]);
   });
 });

@@ -58,7 +58,7 @@ export function getDefaultProps(locale: string): DefaultProps {
         label: copy.close,
       },
     ],
-    statusLabels: [...copy.statusLabels],
+    statusLabels: [],
   };
 }
 
