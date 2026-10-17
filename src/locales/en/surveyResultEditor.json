@@ -1,5 +1,7 @@
 {
   "title": "Edit result template",
+  "description": "The page respondents see after they finish the survey.",
+  "unsaved": "Unsaved changes",
   "save": "Save",
   "cancel": "Cancel",
   "resultTemplateRequired": {

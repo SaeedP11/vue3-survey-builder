@@ -31,7 +31,7 @@ test.describe("result template editor", () => {
   test("edits and saves the template into the survey JSON", async ({ playground, page }) => {
     await playground.loadSample("Heart risk (result template)");
     await playground.toolbarButton("Edit result template").click();
-    const dialog = page.locator(".fixed.inset-0").filter({ hasText: "Edit result template" });
+    const dialog = page.getByRole("dialog", { name: "Edit result template" });
     await expect(dialog).toBeVisible();
 
     await dialog.getByRole("button", { name: "+ Add status label" }).click();
