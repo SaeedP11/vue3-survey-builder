@@ -176,6 +176,40 @@ describe("tailwind.css", () => {
     expect(used.size).toBeGreaterThan(5);
     for (const colour of used) expect(defined, colour).toContain(colour);
   });
+
+  test("maps font-fb onto the host's --font-formbilder-family", () => {
+    expect(entry).toMatch(/@theme inline\s*{[^}]*--font-fb:\s*var\(--font-formbilder-family\);/);
+  });
+
+  test("components name no text font of their own, only font-fb (monospace stays for code)", () => {
+    for (const file of files(join(ROOT, "src/components")).filter((f) => f.endsWith(".vue"))) {
+      const source = readFileSync(file, "utf8");
+      const name = relative(ROOT, file);
+      expect(source, name).not.toMatch(/\bfont-(?:sans|serif)\b/);
+      for (const [, family] of source.matchAll(/\bfont-\[([^\]]*[,'"][^\]]*)\]/g)) {
+        expect(family, name).toMatch(/monospace/);
+      }
+      for (const [, family] of source.matchAll(/font-family:\s*([^;]+);/g)) {
+        expect(family.trim(), name).toBe("inherit");
+      }
+    }
+  });
+});
+
+describe("sv-creator-bridge.css", () => {
+  const bridge = read("src/styles/sv-creator-bridge.css");
+
+  test("points every SurveyJS font family variable at --font-formbilder-family", () => {
+    for (const variable of [
+      "--sjs-font-family",
+      "--ctr-font-family",
+      "--lbr-font-family",
+      "--sjs2-typography-font-family-text",
+      "--sjs2-typography-font-family-default",
+    ]) {
+      expect(bridge, variable).toMatch(new RegExp(`${variable}:\\s*var\\(\\s*--font-formbilder-family`));
+    }
+  });
 });
 
 describe("type declarations", () => {

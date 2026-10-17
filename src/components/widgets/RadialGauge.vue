@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex w-full max-w-2xl flex-col items-center justify-center p-8 rounded-2xl mx-auto font-sans"
+    class="flex w-full max-w-2xl flex-col items-center justify-center p-8 rounded-2xl mx-auto font-fb"
   >
     <div class="relative w-full aspect-[2/1.2] flex items-end justify-center">
       <svg

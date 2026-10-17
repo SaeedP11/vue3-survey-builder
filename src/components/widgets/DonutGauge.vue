@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex w-full max-w-md flex-col items-center p-6 mx-auto font-sans"
+    class="flex w-full max-w-md flex-col items-center p-6 mx-auto font-fb"
   >
     <div class="relative w-full max-w-[260px] aspect-square">
       <svg viewBox="0 0 200 200" class="w-full h-full -rotate-90">

@@ -59,6 +59,9 @@
     "Segoe UI"
   ) !important;
   --sjs-font-family: var(--font-formbilder-family, "Segoe UI") !important;
+  /* The creator (ctr) and its controls (lbr) read these before --sjs-font-family. */
+  --ctr-font-family: var(--font-formbilder-family, "Segoe UI") !important;
+  --lbr-font-family: var(--font-formbilder-family, "Segoe UI") !important;
 
   --sjs-font-pagedescription-weight: var(
     --font-formbilder-weight,
@@ -81,6 +84,10 @@
     --font-formbilder-family,
     "Segoe UI"
   ) !important;
+  --sjs2-typography-font-family-default: var(
+    --font-formbilder-family,
+    "Segoe UI"
+  ) !important;
   --sjs2-typography-font-size-default: var(
     --font-formbilder-size,
     14px
@@ -99,4 +106,9 @@
   --sjs2-radius-semantic-form-item: var(--radius-formbilder, 4px) !important;
   --sjs2-radius-control-action: var(--radius-formbilder, 4px) !important;
   --sjs2-radius-control-button: var(--radius-formbilder, 4px) !important;
+}
+
+/* survey-core names Open Sans outright here, not through a variable. */
+.sv-popup__body-header {
+  font-family: var(--sjs-font-family) !important;
 }

@@ -14,7 +14,7 @@ const iconButton =
 <template>
   <div class="flex items-center justify-between gap-2">
     <span
-      class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+      class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >{{ title }}</span
     >
     <div class="flex items-center gap-1">

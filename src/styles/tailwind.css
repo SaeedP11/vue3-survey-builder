@@ -8,6 +8,9 @@
  * source here. The fb-* colours are registered so their utilities
  * (bg-fb-surface, text-fb-fg, ...) are generated. The components set these
  * variables inline from the creator theme; the values below are fallbacks.
+ * Their text uses font-fb, the host's --font-formbilder-family; inline, so the
+ * variable is read where the element sits, and an unset one leaves the
+ * inherited font.
  */
 @source "../";
 
@@ -24,4 +27,8 @@
   --color-fb-accent: #19b394;
   --color-fb-accent-soft: #e6f7f3;
   --color-fb-accent-on: #ffffff;
+}
+
+@theme inline {
+  --font-fb: var(--font-formbilder-family);
 }

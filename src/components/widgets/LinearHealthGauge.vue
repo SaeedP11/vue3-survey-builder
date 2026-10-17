@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative w-full max-w-2xl mx-auto p-8 font-sans select-none"
+    class="relative w-full max-w-2xl mx-auto p-8 font-fb select-none"
     aria-label="Health metric gauge"
   >
     <div class="relative w-full h-6 mb-8 text-xs font-medium text-gray-500">

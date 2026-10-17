@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center gap-8 p-6 mx-auto font-sans">
+  <div class="flex items-center justify-center gap-8 p-6 mx-auto font-fb">
     <div class="relative w-10 h-72">
       <div class="absolute inset-0 bg-slate-100 rounded-full shadow-inner"></div>
 

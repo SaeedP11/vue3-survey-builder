@@ -170,7 +170,8 @@ maps them onto SurveyJS's own variables:
 | `--color-formbilder-surface-background` | Panels and the designer surface |
 | `--color-formbilder-primary` | Brand and accent colour |
 | `--color-formbilder-error`, `--color-formbilder-error-light` | Validation errors |
-| `--font-formbilder-family`, `--font-formbilder-size`, `--font-formbilder-question-size`, `--font-formbilder-weight` | Typography |
+| `--font-formbilder-family` | Font of the whole builder and of surveys: SurveyJS and the library's own components (`font-fb`). Set it to your app's font, e.g. `var(--font-sans)`; code views stay monospace |
+| `--font-formbilder-size`, `--font-formbilder-question-size`, `--font-formbilder-weight` | Typography |
 | `--radius-formbilder` | Corner radius of forms, inputs and buttons |
 | `--color-formbilder-json-key`, `-string`, `-number`, `-boolean`, `-null`, `-punctuation`, `-comment` | Token colours in the JSON Editor tab (light and dark defaults otherwise) |
 

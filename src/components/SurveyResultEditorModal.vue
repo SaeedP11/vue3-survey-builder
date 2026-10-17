@@ -96,7 +96,7 @@ useCreatorToolbarAction(
 
 <template>
   <div
-    class="fixed inset-0 z-9998 flex items-center justify-center p-8 box-border bg-fb-overlay backdrop-blur-sm text-fb-fg font-['Plus_Jakarta_Sans',system-ui,sans-serif] antialiased"
+    class="fixed inset-0 z-9998 flex items-center justify-center p-8 box-border bg-fb-overlay backdrop-blur-sm text-fb-fg font-fb antialiased"
     :style="themeVars"
     style="animation: fb-fade 0.15s ease"
     v-if="isOpen"

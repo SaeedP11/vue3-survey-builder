@@ -48,7 +48,7 @@ function configure() {
   <Transition name="fb-toast">
     <div
       v-if="props.open"
-      class="fixed bottom-5 end-5 z-9999 w-88 overflow-hidden rounded-xl bg-fb-shell shadow-2xl ring-1 ring-fb-border text-fb-fg font-['Plus_Jakarta_Sans',system-ui,sans-serif] antialiased"
+      class="fixed bottom-5 end-5 z-9999 w-88 overflow-hidden rounded-xl bg-fb-shell shadow-2xl ring-1 ring-fb-border text-fb-fg font-fb antialiased"
       :style="themeVars"
     >
       <div class="flex items-start gap-3 px-4 pt-4 pb-3.5">

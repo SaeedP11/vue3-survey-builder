@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full max-w-5xl mx-auto rounded-2xl border border-[var(--sjs-border-inside)] shadow-sm overflow-hidden font-sans bg-[var(--sjs-general-backcolor)]"
+    class="w-full max-w-5xl mx-auto rounded-2xl border border-[var(--sjs-border-inside)] shadow-sm overflow-hidden font-fb bg-[var(--sjs-general-backcolor)]"
   >
     <div class="w-full overflow-x-auto">
       <table class="w-full text-start border-collapse">
@@ -47,13 +47,13 @@
             >
               {{ row.currentValue }}
               <span
-                class="text-xs font-sans font-medium text-[var(--sjs-general-forecolor-light)] ms-0.5"
+                class="text-xs font-fb font-medium text-[var(--sjs-general-forecolor-light)] ms-0.5"
                 >{{ row.displayUnit }}</span
               >
             </td>
 
             <td
-              class="py-4 px-6 text-center font-mono text-xs text-[var(--sjs-general-forecolor-light)]"
+              class="py-4 px-6 text-center font-fb tabular-nums text-xs text-[var(--sjs-general-forecolor-light)]"
             >
               {{ row.displayRange }}
             </td>

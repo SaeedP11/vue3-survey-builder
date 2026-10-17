@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex w-full max-w-lg flex-col items-center p-6 mx-auto font-sans"
+    class="flex w-full max-w-lg flex-col items-center p-6 mx-auto font-fb"
   >
     <div class="flex items-baseline gap-2 mb-5">
       <span class="text-5xl font-bold tracking-tight text-slate-900 tabular-nums">{{

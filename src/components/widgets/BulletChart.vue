@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col p-6 w-full max-w-2xl mx-auto font-sans">
+  <div class="flex flex-col p-6 w-full max-w-2xl mx-auto font-fb">
     <div class="flex items-baseline justify-between mb-3.5">
       <h3
         class="text-xs font-bold uppercase tracking-widest text-slate-600"

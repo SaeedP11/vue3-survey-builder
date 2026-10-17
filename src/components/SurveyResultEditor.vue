@@ -213,7 +213,7 @@ function updateTableRow(
     <!-- Layout -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.layout") }}
       </h3>
@@ -231,7 +231,7 @@ function updateTableRow(
     <!-- Score -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.score") }}
       </h3>
@@ -330,7 +330,7 @@ function updateTableRow(
           class="rounded-xl border border-fb-border bg-fb-surface-muted/40 p-3.5 space-y-3"
         >
           <span
-            class="block font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+            class="block font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
           >
             {{ t("fields.tableRows.label") }}
           </span>
@@ -342,7 +342,7 @@ function updateTableRow(
             >
               <div class="flex items-center justify-between gap-2">
                 <span
-                  class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+                  class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
                   >{{ t("row") }} {{ index + 1 }}</span
                 >
                 <button
@@ -508,7 +508,7 @@ function updateTableRow(
     <!-- Brand -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.brand") }}
       </h3>
@@ -553,7 +553,7 @@ function updateTableRow(
     <!-- Copy -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.copy") }}
       </h3>
@@ -604,7 +604,7 @@ function updateTableRow(
     <!-- Images -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.images") }}
       </h3>
@@ -616,7 +616,7 @@ function updateTableRow(
     <!-- Buttons -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.actions") }}
       </h3>
@@ -628,7 +628,7 @@ function updateTableRow(
     <!-- Status labels -->
     <section>
       <h3
-        class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted"
+        class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted"
       >
         {{ t("groups.segments") }}
       </h3>
@@ -647,7 +647,7 @@ function updateTableRow(
               class="flex items-center gap-2"
             >
               <span
-                class="font-['JetBrains_Mono',ui-monospace,monospace] text-[10px] uppercase tracking-wider text-fb-fg-muted w-6 shrink-0"
+                class="font-fb text-[10px] uppercase tracking-wider text-fb-fg-muted w-6 shrink-0"
                 >{{ index + 1 }}</span
               >
               <input

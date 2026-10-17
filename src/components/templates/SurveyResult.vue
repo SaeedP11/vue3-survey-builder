@@ -138,7 +138,7 @@ function onAction(action: ResultAction, event: MouseEvent) {
 
 const buttonClass = (action: ResultAction) => {
   const base =
-    "flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-[15px] font-bold no-underline cursor-pointer font-[Cairo,sans-serif] transition-[filter,background-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sjs-primary-backcolor)]";
+    "flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-[15px] font-bold no-underline cursor-pointer font-fb transition-[filter,background-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sjs-primary-backcolor)]";
   switch (action.variant ?? "primary") {
     case "secondary":
       return `${base} flex-[1_1_11rem] min-w-0 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] border-[1.5px] border-[var(--sjs-border-default)] hover:bg-[var(--sjs-general-backcolor-dim)]`;
@@ -364,7 +364,7 @@ const themeVars = computed<Record<string, string>>(
 
 <template>
   <div
-    class="min-h-screen w-full flex items-center justify-center px-5 py-12 bg-[var(--sjs-general-backcolor-dim)] font-[Cairo,sans-serif] box-border"
+    class="min-h-screen w-full flex items-center justify-center px-5 py-12 bg-[var(--sjs-general-backcolor-dim)] font-fb box-border"
     :style="themeVars"
   >
     <div
