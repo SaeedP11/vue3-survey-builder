@@ -5,7 +5,7 @@ import type { Page } from "@playwright/test";
 async function openEditor(playground: Playground, page: Page) {
   await playground.loadSample("Heart risk (result template)");
   await playground.toolbarButton("Edit result template").click();
-  const dialog = page.locator(".fixed.inset-0").filter({ hasText: "Edit result template" });
+  const dialog = page.getByRole("dialog", { name: "Edit result template" });
   await expect(dialog).toBeVisible();
   return {
     dialog,

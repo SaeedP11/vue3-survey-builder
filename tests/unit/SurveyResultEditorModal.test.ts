@@ -19,9 +19,14 @@ import { mount } from "@vue/test-utils";
 const T = surveyResultEditor.en;
 
 describe("SurveyResultEditorModal", () => {
+  // Mounted on the page, an open dialog would keep its document listeners
+  const mountedWrappers: { unmount: () => void }[] = [];
+  afterEach(() => mountedWrappers.splice(0).forEach((w) => w.unmount()));
+
   function setup({ json = {}, locale = "en", setup: extra }: { json?: object; locale?: string; setup?: () => void } = {}) {
     const creator = newCreator({ elements: [{ type: "text", name: "q" }], ...json });
     const mounted = mountWithCreator(SurveyResultEditorModal, { creator, locale, setup: extra });
+    mountedWrappers.push(mounted.wrapper);
     const open = async () => {
       creator.toolbar.getActionById("ui").action();
       await nextTick();
@@ -103,6 +108,127 @@ describe("SurveyResultEditorModal", () => {
       expect(creator.JSON.resultTemplate).toBeUndefined();
     }
     expect(child.emitted("close")).toHaveLength(2);
+  });
+
+  test("is a modal dialog named and described by its header", async () => {
+    for (const locale of ["en", "fa"] as const) {
+      const { child, open } = setup({ locale });
+      await open();
+      const dialog = child.find('[role="dialog"]');
+      expect(dialog.attributes("aria-modal")).toBe("true");
+      const name = document.getElementById(dialog.attributes("aria-labelledby")!);
+      const description = document.getElementById(dialog.attributes("aria-describedby")!);
+      expect(name?.textContent?.trim()).toBe(surveyResultEditor[locale].title);
+      expect(description?.textContent?.trim()).toBe(surveyResultEditor[locale].description);
+      expect(child.text()).not.toContain("FormKit");
+      mountedWrappers.splice(0).forEach((w) => w.unmount());
+    }
+  });
+
+  test("takes focus when it opens and gives it back when it closes", async () => {
+    const { child, open, button } = setup();
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    await open();
+    expect(document.activeElement).toBe(child.find('[role="dialog"]').element);
+    await button(T.cancel)!.trigger("click");
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  test("keeps the page behind from scrolling while open", async () => {
+    const { open, button } = setup();
+    document.documentElement.style.overflow = "auto";
+    await open();
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    await button(T.cancel)!.trigger("click");
+    expect(document.documentElement.style.overflow).toBe("auto");
+
+    await open();
+    mountedWrappers.splice(0).forEach((w) => w.unmount());
+    expect(document.documentElement.style.overflow).toBe("auto");
+    document.documentElement.style.overflow = "";
+  });
+
+  test("Escape closes it without saving", async () => {
+    const { child, open, creator } = setup();
+    await open();
+    child.findComponent(SurveyResultEditor).props("props").title = "Discarded";
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true }));
+    await nextTick();
+    expect(child.findComponent(SurveyResultEditor).exists()).toBe(false);
+    expect(creator.JSON.resultTemplate).toBeUndefined();
+    expect(child.emitted("close")).toHaveLength(1);
+  });
+
+  test("an Escape a control inside handles itself leaves it open", async () => {
+    const { child, open } = setup();
+    await open();
+    const input = child.find("input").element;
+    input.addEventListener("keydown", (e) => e.preventDefault());
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await nextTick();
+    expect(child.findComponent(SurveyResultEditor).exists()).toBe(true);
+  });
+
+  test("Ctrl+S and Cmd+S save", async () => {
+    for (const modifier of ["ctrlKey", "metaKey"]) {
+      const { child, open, creator } = setup();
+      await open();
+      child.findComponent(SurveyResultEditor).props("props").title = "By keyboard";
+      const event = new KeyboardEvent("keydown", { key: "s", [modifier]: true, cancelable: true });
+      document.dispatchEvent(event);
+      await nextTick();
+      expect(event.defaultPrevented).toBe(true);
+      expect(creator.JSON.resultTemplate).toMatchObject({ title: "By keyboard" });
+      expect(child.findComponent(SurveyResultEditor).exists()).toBe(false);
+      mountedWrappers.splice(0).forEach((w) => w.unmount());
+    }
+  });
+
+  test("its keys do nothing once it is closed", async () => {
+    const { child, open, button } = setup();
+    await open();
+    await button(T.cancel)!.trigger("click");
+    const event = new KeyboardEvent("keydown", { key: "s", ctrlKey: true, cancelable: true });
+    document.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(child.emitted("apply")).toBeUndefined();
+  });
+
+  test("Tab cycles inside the dialog", async () => {
+    const { child, open } = setup();
+    await open();
+    const buttons = child.find('[role="dialog"]').findAll("button");
+    const first = buttons[0].element;
+    const last = buttons[buttons.length - 1].element;
+    const tab = (shiftKey = false) => {
+      const event = new KeyboardEvent("keydown", { key: "Tab", shiftKey, bubbles: true, cancelable: true });
+      document.activeElement!.dispatchEvent(event);
+      return event;
+    };
+
+    // From the dialog itself, Shift+Tab goes round to the last control
+    expect(tab(true).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(last);
+    expect(tab().defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(first);
+    expect(tab(true).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(last);
+  });
+
+  test("shows when there are unsaved changes", async () => {
+    const { child, open, button } = setup();
+    await open();
+    expect(child.find('[data-testid="unsaved"]').exists()).toBe(false);
+    child.findComponent(SurveyResultEditor).props("props").title = "Edited";
+    await nextTick();
+    expect(child.find('[data-testid="unsaved"]').text()).toBe(T.unsaved);
+
+    await button(T.cancel)!.trigger("click");
+    await open();
+    expect(child.find('[data-testid="unsaved"]').exists()).toBe(false);
   });
 
   test("uses a provided template component and editor", async () => {
