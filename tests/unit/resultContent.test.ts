@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  actionShownFor,
   fillPlaceholders,
   imagesForScore,
   legacyActions,
@@ -9,7 +10,7 @@ import {
 } from "../../src/utils/resultContent.ts";
 import { editableProps, getDefaultProps } from "../../src/schemas/templates.ts";
 import { surveyResult } from "../../src/locales/index.ts";
-import type { ResultImage } from "../../src/types/index.ts";
+import type { ResultAction, ResultImage } from "../../src/types/index.ts";
 
 const COPY = { primaryLabel: "P", secondaryLabel: "S", close: "C" };
 
@@ -129,5 +130,39 @@ describe("imagesForScore", () => {
 
   test("without a score keeps only the images for every result", () => {
     expect(ids(imagesForScore(images, undefined, 0, 90, 3))).toEqual(["all"]);
+  });
+});
+
+describe("actionShownFor", () => {
+  const action = (over: Partial<ResultAction>): ResultAction => ({
+    id: "a",
+    label: "A",
+    type: "custom",
+    ...over,
+  });
+
+  test("a button without a condition shows for every result, with or without a score", () => {
+    expect(actionShownFor(action({}), 10, 0)).toBe(true);
+    expect(actionShownFor(action({}), undefined, undefined)).toBe(true);
+  });
+
+  test("a tier's button shows only for that tier", () => {
+    expect(actionShownFor(action({ tier: 1 }), 60, 1)).toBe(true);
+    expect(actionShownFor(action({ tier: 1 }), 10, 0)).toBe(false);
+    // Tier 0 is a condition too, not "unset"
+    expect(actionShownFor(action({ tier: 0 }), 60, 1)).toBe(false);
+  });
+
+  test("a score range includes its ends, and an open end has no limit", () => {
+    const range = action({ scoreMin: 40, scoreMax: 60 });
+    expect([39, 40, 60, 61].map((s) => actionShownFor(range, s, 0))).toEqual([false, true, true, false]);
+    expect(actionShownFor(action({ scoreMin: 40 }), 1000, 0)).toBe(true);
+    expect(actionShownFor(action({ scoreMax: 40 }), -5, 0)).toBe(true);
+    expect(actionShownFor(action({ scoreMax: 40 }), 41, 0)).toBe(false);
+  });
+
+  test("a button limited to some scores stays hidden without a score", () => {
+    expect(actionShownFor(action({ tier: 0 }), undefined, undefined)).toBe(false);
+    expect(actionShownFor(action({ scoreMin: 0 }), undefined, undefined)).toBe(false);
   });
 });

@@ -661,7 +661,12 @@ watch(selectedBlock, (id) => {
       :aria-labelledby="`${uid}-tab-actions`"
       class="px-4 py-5 sm:px-6"
     >
-      <ResultActionsEditor v-model="actions" />
+      <ResultActionsEditor
+        v-model="actions"
+        :status-labels="statusLabels"
+        :min="props.min"
+        :max="props.max"
+      />
     </div>
   </div>
 </template>

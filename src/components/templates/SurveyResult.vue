@@ -29,6 +29,8 @@ import useBlockDrag from "../../composables/useBlockDrag.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
 import {
+  actionHasCondition,
+  actionShownFor,
   imagesForScore,
   resolveActions,
   safeLinkUrl,
@@ -96,12 +98,18 @@ const ui = computed(() => {
   };
 });
 
+// The editor shows every button; a respondent sees those their score allows
 const actions = computed(() =>
   resolveActions(props, {
     primaryLabel: t("primaryLabel"),
     secondaryLabel: t("secondaryLabel"),
     close: t("close"),
-  }).filter((a) => a.label && a.label.trim().length > 0),
+  }).filter(
+    (a) =>
+      a.label &&
+      a.label.trim().length > 0 &&
+      (props.preview || actionShownFor(a, numericScore.value, scoreTier.value)),
+  ),
 );
 // Filled buttons share a row; text buttons sit under it, as the close button did
 const buttonActions = computed(() =>
@@ -273,6 +281,25 @@ const blockLabel = (block: ResultBlock) => {
   if (block.type === "images") return t(`blocks.images.${block.placement}`);
   return (block.type === "html" && htmlBlockName(block.html)) || t(`blocks.${block.type}`);
 };
+
+/** In the preview: the scores a button shows for, as its tier's label or a range. */
+function conditionLabel(action: ResultAction): string {
+  if (!props.preview || !actionHasCondition(action)) return "";
+  const number = new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 });
+  const parts: string[] = [];
+  if (typeof action.tier === "number") {
+    parts.push(statusLabels.value[action.tier] || `${action.tier + 1}`);
+  }
+  const { scoreMin: min, scoreMax: max } = action;
+  if (typeof min === "number" && typeof max === "number") {
+    parts.push(`${number.format(min)}–${number.format(max)}`);
+  } else if (typeof min === "number") {
+    parts.push(`≥ ${number.format(min)}`);
+  } else if (typeof max === "number") {
+    parts.push(`≤ ${number.format(max)}`);
+  }
+  return t("images.onlyFor", { tier: parts.join(", ") });
+}
 
 const tierLabel = (block: ResultBlock) =>
   block.tier === undefined
@@ -600,6 +627,12 @@ const themeVars = computed<Record<string, string>>(
                   >
                     <ResultActionIcon :name="action.icon" />
                     <span class="min-w-0 text-balance">{{ action.label }}</span>
+                    <span
+                      v-if="conditionLabel(action)"
+                      class="shrink-0 rounded-full bg-current/15 px-2 py-0.5 text-[11px] font-semibold"
+                      data-action-condition
+                      >{{ conditionLabel(action) }}</span
+                    >
                   </a>
                   <button
                     v-else
@@ -609,6 +642,12 @@ const themeVars = computed<Record<string, string>>(
                   >
                     <ResultActionIcon :name="action.icon" />
                     <span class="min-w-0 text-balance">{{ action.label }}</span>
+                    <span
+                      v-if="conditionLabel(action)"
+                      class="shrink-0 rounded-full bg-current/15 px-2 py-0.5 text-[11px] font-semibold"
+                      data-action-condition
+                      >{{ conditionLabel(action) }}</span
+                    >
                   </button>
                 </template>
               </div>
@@ -623,6 +662,12 @@ const themeVars = computed<Record<string, string>>(
                 >
                   <ResultActionIcon :name="action.icon" />
                   {{ action.label }}
+                  <span
+                    v-if="conditionLabel(action)"
+                    class="shrink-0 rounded-full bg-current/15 px-2 py-0.5 text-[11px] font-semibold"
+                    data-action-condition
+                    >{{ conditionLabel(action) }}</span
+                  >
                 </a>
                 <button
                   v-else
@@ -632,6 +677,12 @@ const themeVars = computed<Record<string, string>>(
                 >
                   <ResultActionIcon :name="action.icon" />
                   {{ action.label }}
+                  <span
+                    v-if="conditionLabel(action)"
+                    class="shrink-0 rounded-full bg-current/15 px-2 py-0.5 text-[11px] font-semibold"
+                    data-action-condition
+                    >{{ conditionLabel(action) }}</span
+                  >
                 </button>
               </template>
             </div>

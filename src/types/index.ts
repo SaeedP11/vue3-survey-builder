@@ -96,6 +96,15 @@ export interface ResultAction {
   url?: string;
   /** Opens a `link` button's address in a new tab. */
   newTab?: boolean;
+  /**
+   * Shows the button only while the score falls in this status tier (an index
+   * into `statusLabels`); unset shows it for every result.
+   */
+  tier?: number;
+  /** Shows the button only for a score of at least this. */
+  scoreMin?: number;
+  /** Shows the button only for a score of at most this. */
+  scoreMax?: number;
 }
 
 /** Where an image sits on the result page. */

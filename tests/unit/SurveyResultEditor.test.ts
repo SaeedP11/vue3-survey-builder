@@ -284,6 +284,45 @@ describe("buttons", () => {
     expect(child.text()).toContain(T.actions.idDuplicate);
   });
 
+  test("limits a button to a status tier or a score range, and back to every result", async () => {
+    const { child, model } = setup(WITH_SOURCES, {
+      min: 0,
+      max: 50,
+      statusLabels: ["Low", "High"],
+      actions: [{ id: "a", label: "A", type: "custom" }],
+    });
+    const show = () => field(child, "show")!;
+    expect((show().element as HTMLSelectElement).value).toBe("always");
+    expect(show().findAll("option").map((o) => o.text())).toEqual([
+      T.actions.everyResult,
+      "Low",
+      "High",
+      T.actions.scoreRange,
+    ]);
+
+    await show().setValue("tier-1");
+    expect(model.actions![0].tier).toBe(1);
+    expect(field(child, "score-min")).toBeUndefined();
+
+    // A range starts as the score's whole range, and drops the tier
+    await show().setValue("range");
+    expect(model.actions![0]).toMatchObject({ scoreMin: 0, scoreMax: 50 });
+    expect(model.actions![0].tier).toBeUndefined();
+
+    await field(child, "score-min")!.setValue("30");
+    await field(child, "score-max")!.setValue("");
+    expect(model.actions![0].scoreMin).toBe(30);
+    expect("scoreMax" in model.actions![0]).toBe(false);
+    expect((show().element as HTMLSelectElement).value).toBe("range");
+
+    await field(child, "score-max")!.setValue("20");
+    expect(child.text()).toContain(T.actions.rangeInvalid);
+
+    await show().setValue("always");
+    const { tier, scoreMin, scoreMax } = model.actions![0];
+    expect([tier, scoreMin, scoreMax]).toEqual([undefined, undefined, undefined]);
+  });
+
   test("sets the style", async () => {
     const { child, model } = setup();
     const secondary = child

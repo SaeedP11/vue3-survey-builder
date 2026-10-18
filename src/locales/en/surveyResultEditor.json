@@ -181,7 +181,15 @@
       "message": "Message",
       "share": "Share",
       "restart": "Restart"
-    }
+    },
+    "showFor": "Show for",
+    "everyResult": "Every result",
+    "tiers": "Status tier",
+    "scoreRange": "A score range",
+    "showForHelp": "Respondents whose score is outside this don't see the button. The preview shows every button.",
+    "scoreMin": "From score",
+    "scoreMax": "To score",
+    "rangeInvalid": "\"From\" is greater than \"To\": no score shows this button."
   },
   "layout": {
     "help": "Drag the blocks to arrange the result page, here or on the preview. A hidden block stays in the layout without showing.",

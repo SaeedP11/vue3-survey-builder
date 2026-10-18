@@ -1,7 +1,7 @@
 /**
  * The result page's buttons and images: the legacy labels turned into buttons,
  * the addresses a page may use, answers put into link addresses, and the
- * images a score's tier shows.
+ * images and buttons a score shows.
  */
 import type {
   ResultAction,
@@ -66,6 +66,31 @@ export function resolveActions(
   return Array.isArray(props.actions)
     ? props.actions
     : legacyActions(props, copy);
+}
+
+const isNumber = (v: unknown): v is number =>
+  typeof v === "number" && Number.isFinite(v);
+
+/** Whether the button shows only for some scores: a tier or a score range. */
+export function actionHasCondition(action: ResultAction): boolean {
+  return isNumber(action.tier) || isNumber(action.scoreMin) || isNumber(action.scoreMax);
+}
+
+/**
+ * Whether a respondent with `score` (in `tier`) sees the button. A button
+ * limited to some scores stays hidden without a score.
+ */
+export function actionShownFor(
+  action: ResultAction,
+  score: number | undefined,
+  tier: number | undefined,
+): boolean {
+  if (!actionHasCondition(action)) return true;
+  if (score === undefined) return false;
+  if (isNumber(action.tier) && action.tier !== tier) return false;
+  if (isNumber(action.scoreMin) && score < action.scoreMin) return false;
+  if (isNumber(action.scoreMax) && score > action.scoreMax) return false;
+  return true;
 }
 
 /** The address's scheme, read as a browser does: tabs, newlines and controls in it are dropped. */
