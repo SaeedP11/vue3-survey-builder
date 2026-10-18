@@ -410,6 +410,15 @@ describe("tabs", () => {
     expect(tabs(child).map((t) => t.attributes("tabindex"))).toEqual(["-1", "0", "-1", "-1", "-1"]);
   });
 
+  test("the tab strip hides its scrollbars against a host's forced ones", () => {
+    // phc-frontend gives every element `scrollbar-width: auto !important`, unlayered; only an
+    // important utility (layered) beats it, and the tabs' -mb-px must not scroll vertically
+    const { child } = setup();
+    const classes = child.find('[role="tablist"]').classes();
+    expect(classes).toContain("[scrollbar-width:none]!");
+    expect(classes).toContain("overflow-y-hidden");
+  });
+
   test("arrow keys, Home and End move between them", async () => {
     const { child } = setup();
     await tab(child, "layout").trigger("keydown", { key: "ArrowRight" });

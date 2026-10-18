@@ -290,10 +290,12 @@ watch(selectedBlock, (id) => {
 
 <template>
   <div ref="root" class="flex min-h-full flex-col">
+    <!-- The scrollbar stays hidden even when a host forces scrollbars on every element with
+         an unlayered !important rule (phc-frontend does); the tabs' -mb-px must not scroll -->
     <div
       role="tablist"
       :aria-label="t('tabs.label')"
-      class="sticky top-0 z-10 flex shrink-0 gap-1 overflow-x-auto border-b border-fb-border bg-fb-surface px-3 [scrollbar-width:none] sm:px-5"
+      class="sticky top-0 z-10 flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-fb-border bg-fb-surface px-3 [scrollbar-width:none]! sm:px-5"
     >
       <button
         v-for="(name, index) in TABS"
