@@ -295,6 +295,53 @@ describe("SurveyResult buttons", () => {
     print.mockRestore();
   });
 
+  test("shows a button only for the scores it is limited to", () => {
+    const base = {
+      min: 0,
+      max: 100,
+      statusLabels: ["Low", "High"],
+      actions: [
+        { id: "all", label: "Always", type: "close", variant: "text" },
+        { id: "high", label: "Book", type: "custom", tier: 1 },
+        { id: "low", label: "Relax", type: "custom", scoreMax: 30 },
+      ],
+    };
+    const labels = (score: unknown) =>
+      actionEls(render({ ...base, score })).map((b) => b.text());
+    expect(labels(10)).toEqual(["Relax", "Always"]);
+    expect(labels(45)).toEqual(["Always"]);
+    expect(labels(90)).toEqual(["Book", "Always"]);
+    // A score that is still a variable name has no value to compare
+    expect(labels("riskScore")).toEqual(["Always"]);
+  });
+
+  test("hides the buttons block when the score allows none of its buttons", () => {
+    const view = render({
+      score: 10,
+      layout: [{ id: "actions", type: "actions" }],
+      actions: [{ id: "a", label: "Book", type: "custom", scoreMin: 50 }],
+    });
+    expect(actionEls(view)).toHaveLength(0);
+  });
+
+  test("the editor's preview shows every button, naming the scores it is for", () => {
+    const view = render({
+      preview: true,
+      score: 10,
+      statusLabels: ["Low", "High"],
+      actions: [
+        { id: "a", label: "Book", type: "custom", tier: 1 },
+        { id: "b", label: "Call", type: "custom", scoreMin: 40, scoreMax: 60 },
+        { id: "c", label: "Later", type: "close", variant: "text", scoreMin: 70 },
+      ],
+    });
+    expect(view.findAll("[data-action-condition]").map((c) => c.text())).toEqual([
+      "Only for: High",
+      "Only for: 40–60",
+      "Only for: ≥ 70",
+    ]);
+  });
+
   test("a link does not navigate in the editor's preview", async () => {
     const view = render({
       preview: true,

@@ -112,6 +112,8 @@ export const SAMPLES: Sample[] = [
             // The answer goes into the link: try it from the Preview tab
             url: "https://example.com/book?score={riskScore}",
             newTab: true,
+            // Only a high score sees it; the result editor shows it with its range
+            scoreMin: 45,
           },
           {
             id: "print",
