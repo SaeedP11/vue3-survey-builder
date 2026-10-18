@@ -20,11 +20,20 @@
   "addStatusLabel": "+ Add status label",
   "remove": "Remove",
   "row": "Row",
+  "tabs": {
+    "label": "Template settings",
+    "layout": "Layout",
+    "content": "Content",
+    "score": "Score",
+    "images": "Images",
+    "actions": "Buttons",
+    "needsAttention": "needs attention"
+  },
   "groups": {
     "display": "Display",
     "score": "Score",
     "brand": "Brand",
-    "copy": "Copy",
+    "copy": "Text",
     "segments": "Status labels",
     "images": "Images",
     "actions": "Buttons",
@@ -36,7 +45,8 @@
     },
     "score": {
       "label": "Score variable",
-      "placeholder": "Pick a calculated value"
+      "placeholder": "Pick a calculated value",
+      "help": "Pick the value the score shows; without one the score block stays empty."
     },
     "max": {
       "label": "Max"
@@ -183,6 +193,7 @@
     "hidden": "Hidden",
     "nothingToShow": "Nothing to show yet",
     "edit": "Edit",
+    "editIn": "Edit in {tab}",
     "tier": "Show for",
     "everyResult": "Every result",
     "add": "Add a block",

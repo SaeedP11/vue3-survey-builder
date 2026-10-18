@@ -287,9 +287,17 @@ useCreatorToolbarAction(
           </div>
 
           <div class="flex min-h-0 flex-col bg-fb-surface">
-            <div class="min-h-0 flex-1 overflow-auto overscroll-contain px-4 py-5 sm:px-6">
-              <component
-                :is="activeTemplate.editor ?? SurveyResultEditor"
+            <!-- The built-in editor pads its own tabs, so their bar sticks to the top -->
+            <div class="min-h-0 flex-1 overflow-auto overscroll-contain">
+              <div v-if="activeTemplate.editor" class="px-4 py-5 sm:px-6">
+                <component
+                  :is="activeTemplate.editor"
+                  v-model:props="editedProps"
+                  v-model:selected-block="selectedBlock"
+                />
+              </div>
+              <SurveyResultEditor
+                v-else
                 v-model:props="editedProps"
                 v-model:selected-block="selectedBlock"
               />
