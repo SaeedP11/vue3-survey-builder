@@ -24,7 +24,10 @@ const props = defineProps<{
   variables: string[];
   /** Blocks with nothing to show yet (an empty note, an image slot without images). */
   emptyIds?: string[];
+  /** Where a block's content is edited, named for its link; none, no link. */
+  editLabel?: (block: ResultBlock) => string | undefined;
 }>();
+const emit = defineEmits<{ edit: [block: ResultBlock] }>();
 
 const { t } = useLocalI18n(surveyResultEditor);
 const uid = useId();
@@ -333,6 +336,18 @@ watch(selected, async (id) => {
             :id="`${uid}-settings-${index}`"
             class="space-y-3 border-t border-fb-border px-3 pt-2.5 pb-3"
           >
+            <button
+              v-if="editLabel?.(block)"
+              type="button"
+              class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-fb-border bg-fb-surface-muted/50 px-3 py-2 text-start text-[12.5px] font-semibold text-fb-fg hover:border-fb-accent hover:bg-fb-accent-soft focus-visible:outline-2 focus-visible:outline-fb-accent"
+              :data-edit="block.id"
+              @click="emit('edit', block)"
+            >
+              {{ t("layout.editIn", { tab: editLabel(block) }) }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="shrink-0 rtl:-scale-x-100" aria-hidden="true">
+                <path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
             <div class="flex flex-col gap-1">
               <label
                 :for="`${uid}-tier-${index}`"

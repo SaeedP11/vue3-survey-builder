@@ -297,7 +297,9 @@ describe("buttons", () => {
 describe("layout", () => {
   test("comes first, listing the page's blocks", () => {
     const { child } = setup();
-    expect(child.find("h3").text()).toBe(T.groups.layout);
+    const first = child.find('[role="tab"]');
+    expect(first.text()).toBe(T.tabs.layout);
+    expect(first.attributes("aria-selected")).toBe("true");
     const panel = child.findComponent(ResultLayoutEditor);
     expect(panel.props("modelValue")).toEqual(defaultLayout());
   });
@@ -336,5 +338,117 @@ describe("layout", () => {
     const { child } = setup();
     await child.find('li[data-block-id="score"] button[aria-expanded]').trigger("click");
     expect(child.emitted("update:selectedBlock")?.at(-1)).toEqual(["score"]);
+  });
+});
+
+describe("tabs", () => {
+  const tabs = (child: ReturnType<typeof setup>["child"]) => child.findAll('[role="tab"]');
+  const tab = (child: ReturnType<typeof setup>["child"], name: string) => child.find(`[role="tab"][data-tab="${name}"]`);
+  const shown = (child: ReturnType<typeof setup>["child"], name: string) => {
+    const id = tab(child, name).attributes("aria-controls");
+    return (child.find(`#${CSS.escape(id!)}`).element as HTMLElement).style.display !== "none";
+  };
+  const selected = (child: ReturnType<typeof setup>["child"]) =>
+    tabs(child).find((t) => t.attributes("aria-selected") === "true")!.attributes("data-tab");
+
+  test("group the settings, one panel showing at a time", async () => {
+    const { child } = setup();
+    expect(tabs(child).map((t) => t.element.firstChild!.textContent!.trim())).toEqual([
+      T.tabs.layout,
+      T.tabs.content,
+      T.tabs.score,
+      T.tabs.images,
+      T.tabs.actions,
+    ]);
+    expect(shown(child, "layout")).toBe(true);
+    expect(shown(child, "content")).toBe(false);
+
+    await tab(child, "content").trigger("click");
+    expect(selected(child)).toBe("content");
+    expect(shown(child, "content")).toBe(true);
+    expect(shown(child, "layout")).toBe(false);
+    // Only the selected tab is in the Tab order
+    expect(tabs(child).map((t) => t.attributes("tabindex"))).toEqual(["-1", "0", "-1", "-1", "-1"]);
+  });
+
+  test("arrow keys, Home and End move between them", async () => {
+    const { child } = setup();
+    await tab(child, "layout").trigger("keydown", { key: "ArrowRight" });
+    expect(selected(child)).toBe("content");
+    await tab(child, "content").trigger("keydown", { key: "ArrowLeft" });
+    await tab(child, "layout").trigger("keydown", { key: "ArrowLeft" });
+    expect(selected(child)).toBe("actions");
+    await tab(child, "actions").trigger("keydown", { key: "Home" });
+    expect(selected(child)).toBe("layout");
+    await tab(child, "layout").trigger("keydown", { key: "End" });
+    expect(selected(child)).toBe("actions");
+  });
+
+  test("count the images and buttons", () => {
+    const { child } = setup(WITH_SOURCES, {
+      images: [{ id: "i", src: "https://x.test/a.png" }],
+      actions: [],
+    });
+    expect(tab(child, "images").text()).toBe(`${T.tabs.images} 1`);
+    expect(tab(child, "actions").text()).toBe(T.tabs.actions);
+  });
+
+  test("flag a score display with no variable", async () => {
+    const { child, model } = setup(WITH_SOURCES, { score: "" });
+    expect(tab(child, "score").find('[data-testid="score-missing"]').text()).toBe(T.tabs.needsAttention);
+    expect(child.text()).toContain(T.fields.score.help);
+
+    model.score = "riskScore";
+    await nextTick();
+    expect(tab(child, "score").find('[data-testid="score-missing"]').exists()).toBe(false);
+    model.score = "";
+    model.scoreDisplay = "table";
+    await nextTick();
+    expect(tab(child, "score").find('[data-testid="score-missing"]').exists()).toBe(false);
+  });
+
+  test("a block's row links to the tab that edits its content", async () => {
+    const { child } = setup();
+    await child.find('li[data-block-id="hero"] button[aria-expanded]').trigger("click");
+    const link = child.find('[data-edit="hero"]');
+    expect(link.text()).toBe(T.layout.editIn.replace("{tab}", T.tabs.content));
+    await link.trigger("click");
+    expect(selected(child)).toBe("content");
+  });
+
+  test("a divider's row has no such link", async () => {
+    const { child } = setup(WITH_SOURCES, {
+      layout: [...defaultLayout(), { id: "d", type: "divider" }],
+    });
+    await child.find('li[data-block-id="d"] button[aria-expanded]').trigger("click");
+    expect(child.find('[data-edit="d"]').exists()).toBe(false);
+  });
+
+  /** Mounted with `selectedBlock` the test can set, as the preview does. */
+  function withSelection() {
+    const bound = reactive({
+      props: reactive<SurveyResultProps>(getDefaultProps("en")),
+      selectedBlock: null as string | null,
+    });
+    const { child } = mountWithCreator(SurveyResultEditor, { creator: newCreator(WITH_SOURCES), props: bound });
+    return { child, bound };
+  }
+
+  test("a block picked on the preview opens its content's tab", async () => {
+    const { child, bound } = withSelection();
+    await tab(child, "content").trigger("click");
+    bound.selectedBlock = "actions";
+    await nextTick();
+    expect(selected(child)).toBe("actions");
+    bound.selectedBlock = "score";
+    await nextTick();
+    expect(selected(child)).toBe("score");
+  });
+
+  test("while arranging the layout, a block picked on the preview stays there", async () => {
+    const { child, bound } = withSelection();
+    bound.selectedBlock = "actions";
+    await nextTick();
+    expect(selected(child)).toBe("layout");
   });
 });
