@@ -132,18 +132,6 @@ describe("hidden and tier blocks, for respondents", () => {
     expect(none.text()).not.toMatch(/Low advice|Top advice/);
     expect(none.text()).toContain("For everyone");
   });
-
-  test("lets a respondent hide a built-in section and bring it back", async () => {
-    const view = render({ ...getDefaultProps("en") });
-    const hide = view.findAll(`button[aria-label="${R.hideSection}"]`);
-    // The hero, score, note and buttons each have one
-    expect(hide).toHaveLength(4);
-    await hide[0].trigger("click");
-    expect(order(view)).not.toContain("hero");
-    const restore = view.findAll("button").find((b) => b.text() === R.restoreHidden)!;
-    await restore.trigger("click");
-    expect(order(view)).toContain("hero");
-  });
 });
 
 describe("HTML blocks", () => {
@@ -248,7 +236,7 @@ describe("editing on the preview", () => {
 
   const canvas = (view: VueWrapper, id: string) => view.find(`[data-block-id="${id}"]`);
 
-  test("wraps every block in the editor's chrome, without the respondent's hide buttons", () => {
+  test("wraps every block in the editor's chrome", () => {
     const view = preview();
     expect(view.findAllComponents(ResultCanvasBlock).map((b) => b.props("id"))).toEqual([
       "hero",
@@ -256,7 +244,6 @@ describe("editing on the preview", () => {
       "h1",
       "actions",
     ]);
-    expect(view.findAll(`button[aria-label="${R.hideSection}"]`)).toHaveLength(0);
     expect(canvas(view, "hero").attributes("aria-label")).toBe(R.blocks.hero);
     // An HTML block goes by its text, an empty one by its type
     expect(canvas(view, "h1").attributes("aria-label")).toBe("One");

@@ -15,8 +15,6 @@
     "Severe",
     "Critical"
   ],
-  "hideSection": "Hide this section",
-  "restoreHidden": "Restore hidden sections",
   "table": {
     "metric": "Metric / factor",
     "currentValue": "Current value",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type Component } from "vue";
+import { computed, type Component } from "vue";
 
 defineOptions({ inheritAttrs: false });
 import LinearHealthGauge from "../widgets/LinearHealthGauge.vue";
@@ -19,7 +19,6 @@ import type {
   TableRow,
 } from "../../types/index.ts";
 import DefaultScoreCard from "../widgets/DefaultScoreCard.vue";
-import HideableSection from "./HideableSection.vue";
 import ResultActionIcon from "./ResultActionIcon.vue";
 import ResultCanvasBlock from "./ResultCanvasBlock.vue";
 import ResultHtmlBlock from "./ResultHtmlBlock.vue";
@@ -267,16 +266,9 @@ function hasContent(block: ResultBlock): boolean {
   }
 }
 
-// Respondents can hide a section from their own view (e.g. before printing)
-const dismissed = ref(new Set<string>());
-const HIDEABLE = ["hero", "score", "note", "actions"];
-
 const rendered = computed(() =>
   layout.value.flatMap((block, index) => {
-    if (!props.preview) {
-      if (!blockShownFor(block, scoreTier.value)) return [];
-      if (dismissed.value.has(block.id)) return [];
-    }
+    if (!props.preview && !blockShownFor(block, scoreTier.value)) return [];
     return hasContent(block) ? [{ block, index }] : [];
   }),
 );
@@ -312,14 +304,6 @@ const tierLabel = (block: ResultBlock) =>
   block.tier === undefined
     ? undefined
     : statusLabels.value[block.tier] || `${block.tier + 1}`;
-
-function dismiss(id: string) {
-  dismissed.value = new Set(dismissed.value).add(id);
-}
-
-const restoreSections = () => {
-  dismissed.value = new Set();
-};
 
 // ---- editing in the preview ----
 
@@ -361,10 +345,10 @@ function toggleHidden(id: string) {
   );
 }
 
-/** What wraps a block: the editor's chrome, the respondent's hide button, or nothing. */
-function wrapperOf(block: ResultBlock): Component | string {
+/** What wraps a block: the editor's chrome, or a plain div. */
+function wrapperOf(_block: ResultBlock): Component | string {
   if (props.preview) return ResultCanvasBlock;
-  return HIDEABLE.includes(block.type) ? HideableSection : "div";
+  return "div";
 }
 
 function wrapperBindings(block: ResultBlock, index: number, position: number) {
@@ -384,7 +368,7 @@ function wrapperBindings(block: ResultBlock, index: number, position: number) {
         dropOn(index, side, dragged),
     };
   }
-  return HIDEABLE.includes(block.type) ? { onHide: () => dismiss(block.id) } : {};
+  return {};
 }
 
 const first = computed(() => rendered.value[0]?.block);
@@ -448,14 +432,6 @@ const themeVars = computed<Record<string, string>>(() => {
             class="text-[11px] font-bold text-[var(--sjs-special-green)] bg-[var(--sjs-special-green-light)] border border-[var(--sjs-special-green-light)] px-3 py-1.5 rounded-full"
             >{{ ui.categoryChip }}</span
           >
-          <button
-            v-if="!preview && dismissed.size > 0"
-            type="button"
-            class="text-[11px] font-semibold text-[var(--sjs-general-forecolor-light)] bg-transparent border border-dashed border-[var(--sjs-border-default)] px-3 py-1.5 rounded-full cursor-pointer hover:text-[var(--sjs-primary-backcolor)] hover:border-[var(--sjs-primary-backcolor)]"
-            @click="restoreSections"
-          >
-            {{ t("restoreHidden") }}
-          </button>
         </div>
       </header>
 

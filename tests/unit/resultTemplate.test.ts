@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { defineComponent, h, nextTick, type Component } from "vue";
+import { defineComponent, h, type Component } from "vue";
 import RenderResult from "../../src/components/RenderResult.vue";
 import SurveyResult from "../../src/components/templates/SurveyResult.vue";
 import BulletChart from "../../src/components/widgets/BulletChart.vue";
@@ -206,24 +206,6 @@ describe("SurveyResult", () => {
       expect.arrayContaining(["primary", "secondary", "close"]),
     );
   });
-
-  test("sections can be hidden and restored", async () => {
-    const view = render({ ...getDefaultProps("en"), title: "Hide me" });
-    const restore = () =>
-      view.findAll("button").find((b) => b.text() === surveyResult.en.restoreHidden);
-    expect(restore()).toBeUndefined();
-
-    const hideButtons = view.findAll(`button[title="${surveyResult.en.hideSection}"]`);
-    expect(hideButtons.length).toBe(4);
-    await hideButtons[0].trigger("click");
-    expect(view.text()).not.toContain("Hide me");
-    expect(restore()).toBeDefined();
-
-    await restore()!.trigger("click");
-    await nextTick();
-    expect(view.text()).toContain("Hide me");
-    expect(restore()).toBeUndefined();
-  });
 });
 
 describe("SurveyResult buttons", () => {
@@ -247,7 +229,7 @@ describe("SurveyResult buttons", () => {
 
   test("no buttons leaves out the buttons section", () => {
     const view = render({ actions: [], noteText: "Note" });
-    expect(view.findAll(`button[title="${surveyResult.en.hideSection}"]`)).toHaveLength(3);
+    expect(view.find("[data-block='actions']").exists()).toBe(false);
   });
 
   test("a link is an anchor; a new-tab link drops the opener", () => {
