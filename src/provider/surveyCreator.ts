@@ -7,15 +7,13 @@ import {
   DefaultLight,
   DefaultLightPanelless,
 } from "survey-core/themes";
-import { inject, provide, type InjectionKey } from "vue";
+import { inject, provide } from "vue";
 import { SurveyCreatorModel } from "survey-creator-core";
 import { DefaultDark } from "survey-creator-core/themes";
 import useColorMode from "../composables/useColorMode";
 import immediateWatch from "../utils/immediateWatch";
 import { useI18n } from "vue-i18n";
-
-const SURVEY_CREATOR_KEY: InjectionKey<SurveyCreatorModelType> =
-  Symbol("survey_creator");
+import { SURVEY_CREATOR_KEY } from "./surveyCreatorKey";
 
 export function initSurveyCreator(
   model?: SurveyCreatorModelType,
@@ -52,12 +50,12 @@ export function initSurveyCreator(
   return creator;
 }
 
-export function useSurveyCreator() {
+export function useSurveyCreator(): SurveyCreatorModelType {
   const creator = inject(SURVEY_CREATOR_KEY);
   if (!creator) {
     throw new Error(
       "useSurveyCreator() called without provideSurveyCreator() in an ancestor",
     );
   }
-  return creator;
+  return creator as SurveyCreatorModelType;
 }

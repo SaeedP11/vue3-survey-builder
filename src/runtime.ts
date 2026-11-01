@@ -11,6 +11,8 @@
 import registerChartQuestion from "./utils/registerChartQuestion";
 import useScrollToError from "./composables/useScrollToError";
 import "./utils/surveyProperties";
+import RenderResult from "./components/RenderResult.vue";
+import SurveyResult from "./components/templates/SurveyResult.vue";
 
 registerChartQuestion();
 
@@ -22,10 +24,30 @@ export { SurveyComponent } from "survey-vue3-ui";
 export * from "./composables/useSurveyModel.ts";
 export * from "survey-core";
 
+export { provideSurveyResultTemplate } from "./provider/surveyResultTemplateKey.ts";
+
+export type {
+  AsyncDropdownHandlers,
+  ItemType,
+  ResultAction,
+  ResultActionIcon,
+  ResultActionType,
+  ResultActionVariant,
+  ResultBlock,
+  ResultBlockType,
+  ResultImage,
+  ResultImagePlacement,
+  ScoreDisplayVariant,
+  SurveyAiAssitantConfig,
+  SurveyResultProps,
+  TableRow,
+  TemplateDefinition,
+} from "./types";
+
 export {
   ChartItemValue,
   QuestionChartModel,
   type ChartType,
 } from "./utils/registerChartQuestion";
 
-export { useScrollToError };
+export { RenderResult, SurveyResult, useScrollToError };

@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { useSurveyResultTemplate } from "../provider/surveyResultTemplate.ts";
+import { inject, computed } from "vue";
+import { SURVEY_RESULT_TEMPLATE_KEY } from "../provider/surveyResultTemplateKey.ts";
+import SurveyResult from "./templates/SurveyResult.vue";
 import type { ResultAction, SurveyResultProps } from "../types";
 import { fillPlaceholders } from "../utils/resultContent.ts";
 import { fillHtmlPlaceholders, isTemplateVariable } from "../utils/resultHtml.ts";
-import { computed } from "vue";
 
 const props = defineProps<{
   templateProps?: SurveyResultProps;
   result: Record<string, unknown>;
+  survey?: any;
+  embedded?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -19,22 +22,41 @@ const emit = defineEmits<{
   secondary: [];
 }>();
 
-const activeTemplate = useSurveyResultTemplate();
+const providedTemplate = inject(SURVEY_RESULT_TEMPLATE_KEY, null);
+const activeComponent = computed(() => providedTemplate?.component ?? SurveyResult);
 
-/** A variable name read from the answers, or a literal number; else undefined. */
+const mergedAnswers = computed<Record<string, unknown>>(() => {
+  const calculated: Record<string, unknown> = {};
+  if (Array.isArray(props.survey?.calculatedValues)) {
+    for (const cv of props.survey.calculatedValues) {
+      if (cv?.name) {
+        calculated[cv.name] = props.survey.getVariable?.(cv.name);
+      }
+    }
+  }
+  return { ...calculated, ...props.result };
+});
+
+/** A variable name read from the answers/calculated values, or a literal number; else undefined. */
 function resolveNumber(key: string | number | undefined): number | undefined {
-  const raw = typeof key === "string" ? props.result[key] : key;
+  const raw =
+    typeof key === "string"
+      ? (mergedAnswers.value[key] ?? props.survey?.getVariable?.(key))
+      : key;
   if (raw === undefined || raw === null || raw === "") return undefined;
   const value = Number(raw);
   return Number.isFinite(value) ? value : undefined;
 }
 
-const resolvedProps = computed<SurveyResultProps | undefined>(() => {
+const resolvedProps = computed<
+  (SurveyResultProps & { embedded?: boolean }) | undefined
+>(() => {
   const templateProps = props.templateProps;
   if (!templateProps) return undefined;
 
   return {
     ...templateProps,
+    embedded: props.embedded,
     score: resolveNumber(templateProps.score),
     // The editor stores each row's value as a variable name, like the score
     tableRows: templateProps.tableRows?.map((row) => ({
@@ -44,7 +66,7 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
     // `{name}` in a link becomes that answer, so a link can carry the result
     actions: templateProps.actions?.map((action) =>
       action.type === "link" && action.url
-        ? { ...action, url: fillPlaceholders(action.url, props.result) }
+        ? { ...action, url: fillPlaceholders(action.url, mergedAnswers.value) }
         : action,
     ),
     // ...and an HTML block shows answers as text. {$score} and the like are
@@ -56,7 +78,7 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
                 ...block,
                 html: fillHtmlPlaceholders(
                   block.html,
-                  props.result,
+                  mergedAnswers.value,
                   (name) => !isTemplateVariable(name),
                 ),
               }
@@ -69,7 +91,7 @@ const resolvedProps = computed<SurveyResultProps | undefined>(() => {
 
 <template>
   <component
-    :is="activeTemplate.component"
+    :is="activeComponent"
     v-if="resolvedProps"
     v-bind="resolvedProps"
     class="w-full"

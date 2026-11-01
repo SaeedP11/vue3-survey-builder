@@ -6,6 +6,8 @@ import registerCustomLogic from "./utils/registerCustomLogic";
 import useScrollToError from "./composables/useScrollToError";
 import { SurveySchemaPrompt } from "./utils/prefixPrompts";
 import FormBuilder from "./components/FormBuilder.vue";
+import RenderResult from "./components/RenderResult.vue";
+import SurveyResult from "./components/templates/SurveyResult.vue";
 import registerChartQuestion from "./utils/registerChartQuestion";
 import registerChartQuestionDesigner from "./utils/registerChartQuestionDesigner";
 
@@ -62,6 +64,8 @@ export type {
 
 export {
   FormBuilder,
+  RenderResult,
+  SurveyResult,
   SurveyResultEditor,
   SurveyResultEditorModal,
   SurveySchemaPrompt,
