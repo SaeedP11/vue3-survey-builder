@@ -24,7 +24,12 @@ import ResultActionIcon from "./ResultActionIcon.vue";
 import ResultCanvasBlock from "./ResultCanvasBlock.vue";
 import ResultHtmlBlock from "./ResultHtmlBlock.vue";
 import ResultImages from "./ResultImages.vue";
-import { useSurveyCreator } from "../../provider/surveyCreator.ts";
+import { useOptionalCreatorTheme } from "../../provider/surveyCreatorKey.ts";
+import useColorMode from "../../composables/useColorMode.ts";
+import {
+  DefaultDarkPanelless,
+  DefaultLightPanelless,
+} from "survey-core/themes";
 import useBlockDrag from "../../composables/useBlockDrag.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
@@ -61,6 +66,8 @@ const props = withDefaults(
       preview?: boolean;
       /** The block selected in the editor. */
       selectedBlock?: string | null;
+      /** Render embedded in a dialog/container rather than full-page. */
+      embedded?: boolean;
     }
   >(),
   { scoreDisplay: "default" },
@@ -383,19 +390,32 @@ function wrapperBindings(block: ResultBlock, index: number, position: number) {
 const first = computed(() => rendered.value[0]?.block);
 const last = computed(() => rendered.value.at(-1)?.block);
 
-const creator = useSurveyCreator();
-const themeVars = computed<Record<string, string>>(
-  () => ({ ...(creator.theme?.cssVariables ?? {}) }) as Record<string, string>,
-);
+const creator = useOptionalCreatorTheme();
+const { isDark } = useColorMode();
+const themeVars = computed<Record<string, string>>(() => {
+  if (creator?.theme?.cssVariables) {
+    return creator.theme.cssVariables as Record<string, string>;
+  }
+  const theme = isDark.value ? DefaultDarkPanelless : DefaultLightPanelless;
+  return (theme.cssVariables ?? {}) as Record<string, string>;
+});
 </script>
 
 <template>
   <div
-    class="min-h-screen w-full flex items-center justify-center px-5 py-12 bg-[var(--sjs-general-backcolor-dim)] font-fb box-border"
+    :class="[
+      props.embedded
+        ? 'w-full flex justify-center p-2 sm:p-4 bg-transparent font-fb box-border'
+        : 'min-h-screen w-full flex items-center justify-center px-5 py-12 bg-[var(--sjs-general-backcolor-dim)] font-fb box-border',
+    ]"
     :style="themeVars"
   >
     <div
-      class="w-4/5 max-w-155 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)]"
+      :class="[
+        props.embedded
+          ? 'w-full max-w-2xl bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] rounded-xl border border-[var(--sjs-border-light)] shadow-sm'
+          : 'w-4/5 max-w-155 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)]',
+      ]"
     >
       <header
         class="flex items-center justify-between px-7.5 py-5 border-b border-[var(--sjs-border-light)]"

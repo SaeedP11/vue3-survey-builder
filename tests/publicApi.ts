@@ -3,7 +3,9 @@ export const OWN_EXPORTS = [
   "ChartItemValue",
   "FormBuilder",
   "QuestionChartModel",
+  "RenderResult",
   "SurveyComponent",
+  "SurveyResult",
   "SurveyResultEditor",
   "SurveyResultEditorModal",
   "SurveySchemaPrompt",
@@ -23,7 +25,10 @@ export const OWN_EXPORTS = [
 export const RUNTIME_EXPORTS = [
   "ChartItemValue",
   "QuestionChartModel",
+  "RenderResult",
   "SurveyComponent",
+  "SurveyResult",
+  "provideSurveyResultTemplate",
   "useScrollToError",
   "useSurveyModel",
 ].sort();
