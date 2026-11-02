@@ -196,6 +196,7 @@ const emptyBlockIds = computed(() =>
         );
       }
       if (block.type === "html") return !block.html?.trim();
+      if (block.type === "metrics") return !block.metrics?.some((m) => m.value);
       return false;
     })
     .map((block) => block.id),

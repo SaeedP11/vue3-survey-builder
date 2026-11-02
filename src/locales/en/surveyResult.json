@@ -37,7 +37,8 @@
     },
     "actions": "Buttons",
     "html": "HTML",
-    "divider": "Divider"
+    "divider": "Divider",
+    "metrics": "Values"
   },
   "canvas": {
     "drag": "Drag to move",

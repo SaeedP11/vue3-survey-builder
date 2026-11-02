@@ -2,7 +2,7 @@
 import { inject, computed } from "vue";
 import { SURVEY_RESULT_TEMPLATE_KEY } from "../provider/surveyResultTemplateKey.ts";
 import SurveyResult from "./templates/SurveyResult.vue";
-import type { ResultAction, SurveyResultProps } from "../types";
+import type { ResultAction, ResultBlock, SurveyResultProps } from "../types";
 import { fillPlaceholders, fillText } from "../utils/resultContent.ts";
 import { fillHtmlPlaceholders, isTemplateVariable } from "../utils/resultHtml.ts";
 
@@ -54,6 +54,18 @@ const withAnswers = (text: string | undefined) =>
     ? fillText(text, mergedAnswers.value, (name) => !isTemplateVariable(name))
     : text;
 
+/** A metrics block's cards with each value turned into text; `$score` and the like are the template's own. */
+function withMetricText(block: ResultBlock): ResultBlock {
+  return {
+    ...block,
+    metrics: block.metrics?.map((metric) => {
+      const name = typeof metric?.value === "string" ? metric.value : "";
+      if (!name || isTemplateVariable(name)) return metric;
+      return { ...metric, text: fillText(`{${name}}`, mergedAnswers.value) };
+    }),
+  };
+}
+
 const resolvedProps = computed<
   (SurveyResultProps & { embedded?: boolean }) | undefined
 >(() => {
@@ -85,8 +97,11 @@ const resolvedProps = computed<
     // ...and an HTML block shows answers as text. {$score} and the like are
     // the template's own, filled from the score
     layout: Array.isArray(templateProps.layout)
-      ? templateProps.layout.map((block) =>
-          block?.type === "html" && typeof block.html === "string"
+      ? templateProps.layout.map((block) => {
+          if (block?.type === "metrics" && Array.isArray(block.metrics)) {
+            return withMetricText(block);
+          }
+          return block?.type === "html" && typeof block.html === "string"
             ? {
                 ...block,
                 html: fillHtmlPlaceholders(
@@ -95,8 +110,8 @@ const resolvedProps = computed<
                   (name) => !isTemplateVariable(name),
                 ),
               }
-            : block,
-        )
+            : block;
+        })
       : undefined,
   };
 });

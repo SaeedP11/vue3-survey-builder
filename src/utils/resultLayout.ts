@@ -7,6 +7,7 @@ import type {
   ResultBlock,
   ResultBlockType,
   ResultImagePlacement,
+  ResultMetric,
 } from "../types/index.ts";
 import { newId } from "./resultContent.ts";
 
@@ -14,6 +15,8 @@ import { newId } from "./resultContent.ts";
 export const MAX_BLOCKS = 24;
 /** An HTML block's markup is cut to this many characters. */
 export const MAX_HTML_LENGTH = 20_000;
+/** Cards a metrics block holds; beyond it, new cards are refused. */
+export const MAX_METRICS = 12;
 
 const PLACEMENTS: ResultImagePlacement[] = ["banner", "afterScore", "beforeActions"];
 const TYPES: ResultBlockType[] = [
@@ -24,6 +27,7 @@ const TYPES: ResultBlockType[] = [
   "actions",
   "html",
   "divider",
+  "metrics",
 ];
 /** The blocks a layout holds once at most; the author's own blocks repeat. */
 const SINGLE: ResultBlockType[] = ["hero", "score", "note", "images", "actions"];
@@ -55,6 +59,29 @@ const RESERVED = new Set(defaultLayout().map((b) => b.id));
 
 const isTier = (v: unknown): v is number =>
   typeof v === "number" && Number.isInteger(v) && v >= 0;
+
+/** A metrics block's cards, read leniently. A card without a value stays, for the editor; the page skips it. */
+export function resolveMetrics(raw: unknown): ResultMetric[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const out: ResultMetric[] = [];
+  raw.forEach((item, index) => {
+    if (out.length >= MAX_METRICS || !item || typeof item !== "object") return;
+    const entry = item as Partial<ResultMetric>;
+    let id = typeof entry.id === "string" && entry.id ? entry.id : `metric-${index}`;
+    while (seen.has(id)) id += "_";
+    seen.add(id);
+    const metric: ResultMetric = {
+      id,
+      label: typeof entry.label === "string" ? entry.label : "",
+      value: typeof entry.value === "string" ? entry.value.trim() : "",
+    };
+    if (typeof entry.unit === "string" && entry.unit) metric.unit = entry.unit;
+    if (typeof entry.text === "string") metric.text = entry.text;
+    out.push(metric);
+  });
+  return out;
+}
 
 /**
  * The layout to show: `layout` cleaned up, or the standard order when there is
@@ -89,6 +116,7 @@ export function resolveLayout(layout: unknown): ResultBlock[] {
     if (type === "html") {
       block.html = typeof entry.html === "string" ? entry.html.slice(0, MAX_HTML_LENGTH) : "";
     }
+    if (type === "metrics") block.metrics = resolveMetrics(entry.metrics);
     if (entry.hidden === true) block.hidden = true;
     if (isTier(entry.tier)) block.tier = entry.tier;
     out.push(block);
@@ -114,6 +142,7 @@ export function createBlock(
   }
   const block: ResultBlock = { id: newId(type), type };
   if (type === "html") block.html = options.html ?? "";
+  if (type === "metrics") block.metrics = [];
   return block;
 }
 

@@ -288,3 +288,33 @@ describe("htmlBlockName", () => {
     expect(htmlBlockName('<img src="a.png"><br>')).toBe("");
   });
 });
+
+describe("metrics blocks", () => {
+  test("keeps a block's cards, drops junk, caps the count", () => {
+    const [block] = resolveLayout([
+      {
+        type: "metrics",
+        id: "m",
+        metrics: [
+          { id: "a", label: "FVC", value: " fvc ", unit: "L" },
+          { id: "a", label: 3, value: "fev1" },
+          null,
+          { label: "none" },
+          ...Array.from({ length: 20 }, (_, i) => ({ id: `x${i}`, label: "", value: "v" })),
+        ],
+      },
+    ]);
+    expect(block.metrics![0]).toEqual({ id: "a", label: "FVC", value: "fvc", unit: "L" });
+    expect(block.metrics![1]).toMatchObject({ id: "a_", label: "", value: "fev1" });
+    expect(block.metrics).toHaveLength(12);
+  });
+
+  test("a metrics block without cards is kept empty, and may repeat", () => {
+    const layout = resolveLayout([{ type: "metrics", id: "a" }, { type: "metrics", id: "b" }]);
+    expect(layout.map((b) => b.metrics)).toEqual([[], []]);
+  });
+
+  test("createBlock makes an empty one", () => {
+    expect(createBlock("metrics")).toMatchObject({ type: "metrics", metrics: [] });
+  });
+});

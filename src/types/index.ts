@@ -142,7 +142,24 @@ export type ResultBlockType =
   /** The author's own HTML, sanitized; `{name}` puts in an answer. */
   | "html"
   /** A horizontal rule. */
-  | "divider";
+  | "divider"
+  /** The `metrics` as value cards: chosen answers or score values. */
+  | "metrics";
+
+/** One card of a `metrics` block. */
+export interface ResultMetric {
+  id: string;
+  label: string;
+  /**
+   * What the card shows: an answer's or calculated value's name, or one of
+   * `$score`, `$status`, `$min`, `$max`.
+   */
+  value: string;
+  /** Shown after the value, e.g. `L` or `%`. */
+  unit?: string;
+  /** The value as text; set when the page is rendered from the answers. */
+  text?: string;
+}
 
 export interface ResultBlock {
   /** Stable id; the built-in blocks use their type (and placement) as id. */
@@ -152,6 +169,8 @@ export interface ResultBlock {
   placement?: ResultImagePlacement;
   /** An `html` block's markup. */
   html?: string;
+  /** A `metrics` block's cards. */
+  metrics?: ResultMetric[];
   /** Kept in the layout but not shown. */
   hidden?: boolean;
   /**

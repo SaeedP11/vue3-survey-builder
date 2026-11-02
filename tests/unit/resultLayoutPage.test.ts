@@ -426,3 +426,60 @@ describe("editing on the preview", () => {
 
 // The drag in progress is shared across the page: none outlives a test
 afterEach(() => useBlockDrag().end());
+
+describe("the metrics block", () => {
+  const metrics = (extra = {}) => ({
+    ...getDefaultProps("en"),
+    score: 70,
+    min: 0,
+    max: 100,
+    statusLabels: ["Low", "High"],
+    layout: [
+      {
+        id: "m",
+        type: "metrics" as const,
+        metrics: [
+          { id: "1", label: "FVC", value: "fvc", unit: "L" },
+          { id: "2", label: "Status", value: "$status" },
+          { id: "3", label: "Gone", value: "missing" },
+        ],
+      },
+    ],
+    ...extra,
+  });
+
+  test("RenderResult shows answers and template values as cards, and skips an empty one", () => {
+    const view = mountWithCreator(RenderResult, {
+      props: { templateProps: metrics(), result: { fvc: 3.4 } },
+    }).child;
+    const text = view.text();
+    expect(text).toContain("FVC");
+    expect(text).toContain("3.4");
+    expect(text).toContain("L");
+    expect(text).toContain("High");
+    expect(text).not.toContain("Gone");
+  });
+
+  test("the editor's preview shows every card with the value's name", () => {
+    const view = render({ ...metrics(), preview: true });
+    expect(view.text()).toContain("{fvc}");
+    expect(view.text()).toContain("Gone");
+  });
+
+  test("a block whose cards are all empty shows nothing", () => {
+    const view = mountWithCreator(RenderResult, {
+      props: { templateProps: metrics(), result: {} },
+    }).child;
+    // $status still has a value, so the block stays
+    expect(view.text()).toContain("Status");
+    const none = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: metrics({
+          layout: [{ id: "m", type: "metrics", metrics: [{ id: "1", label: "X", value: "nope" }] }],
+        }),
+        result: {},
+      },
+    }).child;
+    expect(none.find("[data-block='metrics']").exists()).toBe(false);
+  });
+});

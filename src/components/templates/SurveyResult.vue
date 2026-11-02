@@ -269,6 +269,24 @@ const blockHtml = computed(() => {
   return out;
 });
 
+/** Each metrics block's cards as shown: the value as text, the empty ones left out (the preview shows the value's name). */
+const blockMetrics = computed(() => {
+  const values = templateValues.value;
+  const out: Record<string, { id: string; label: string; text: string; unit?: string }[]> = {};
+  for (const block of layout.value) {
+    if (block.type !== "metrics") continue;
+    out[block.id] = (block.metrics ?? []).flatMap((metric) => {
+      if (!metric.value) return [];
+      const text = isTemplateVariable(metric.value)
+        ? String(values?.[metric.value] ?? "")
+        : (metric.text ?? (props.preview ? `{${metric.value}}` : ""));
+      if (!text && !props.preview) return [];
+      return [{ id: metric.id, label: metric.label, text, unit: metric.unit }];
+    });
+  }
+  return out;
+});
+
 function hasContent(block: ResultBlock): boolean {
   switch (block.type) {
     case "note":
@@ -277,6 +295,8 @@ function hasContent(block: ResultBlock): boolean {
       return imagesAt(block.placement).length > 0;
     case "actions":
       return actions.value.length > 0;
+    case "metrics":
+      return props.preview || (blockMetrics.value[block.id]?.length ?? 0) > 0;
     case "html":
       // The editor shows an empty block, with a hint, so it can be found
       return props.preview || !!blockHtml.value[block.id];
@@ -624,6 +644,29 @@ const themeVars = computed<Record<string, string>>(() => {
               :html="blockHtml[block.id]"
               :preview="preview"
             />
+
+            <dl
+              v-else-if="block.type === 'metrics'"
+              class="m-0 grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-3"
+            >
+              <div
+                v-for="metric in blockMetrics[block.id]"
+                :key="metric.id"
+                class="flex min-w-0 flex-col gap-1 rounded-2xl border border-[var(--sjs-border-light)] px-4 py-3.5"
+              >
+                <dt class="text-[12.5px] leading-snug text-[var(--sjs-general-forecolor-light)]">
+                  {{ metric.label }}
+                </dt>
+                <dd class="m-0 flex items-baseline gap-1 break-words text-[22px] font-bold leading-tight text-[var(--sjs-general-forecolor)]">
+                  <span class="min-w-0">{{ metric.text || "—" }}</span>
+                  <span
+                    v-if="metric.unit"
+                    class="text-[13px] font-medium text-[var(--sjs-general-forecolor-light)]"
+                    >{{ metric.unit }}</span
+                  >
+                </dd>
+              </div>
+            </dl>
 
             <hr
               v-else-if="block.type === 'divider'"

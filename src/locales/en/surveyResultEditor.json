@@ -217,6 +217,16 @@
     "addHelp": "Drag a block into the list or onto the preview, or click it to add it after the selected block.",
     "full": "The layout is full: it holds up to {max} blocks.",
     "dropHere": "Drop here",
+    "metrics": {
+      "label": "Cards",
+      "empty": "No cards yet.",
+      "name": "Label",
+      "value": "Value",
+      "unit": "Unit",
+      "add": "Add a card",
+      "remove": "Remove card",
+      "help": "A card's value is an answer's name, or $score, $status, $min or $max. A card whose answer is empty is left out."
+    },
     "html": {
       "label": "HTML",
       "help": "Write HTML with inline styles. Scripts, forms, buttons, frames and style tags are removed, and links must use http(s), mailto: or tel:.",

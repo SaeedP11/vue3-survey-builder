@@ -220,11 +220,33 @@ describe("the HTML editor", () => {
   });
 });
 
+describe("metrics editing", () => {
+  test("adds, fills and removes cards", async () => {
+    const { paletteItem, wrapper, layout } = setup({ selected: "hero" });
+    await paletteItem("metrics").trigger("click");
+    const block = () => layout.value.find((b) => b.type === "metrics")!;
+    expect(block().metrics).toEqual([]);
+
+    await wrapper.get("[data-add-metric]").trigger("click");
+    expect(block().metrics).toHaveLength(1);
+
+    const inputs = wrapper.get("[data-metric]").findAll("input");
+    await inputs[0].setValue("FVC");
+    await inputs[1].setValue("fvc");
+    await inputs[2].setValue("L");
+    expect(block().metrics![0]).toMatchObject({ label: "FVC", value: "fvc", unit: "L" });
+
+    await wrapper.get("[data-remove-metric]").trigger("click");
+    expect(block().metrics).toEqual([]);
+  });
+});
+
 describe("the palette", () => {
   test("offers HTML, a divider and the built-in blocks left out", () => {
     const { wrapper } = setup({ layout: [{ id: "score", type: "score" }] });
     expect(wrapper.findAll("[data-palette]").map((b) => b.attributes("data-palette"))).toEqual([
       "html",
+      "metrics",
       "divider",
       "images-banner",
       "hero",

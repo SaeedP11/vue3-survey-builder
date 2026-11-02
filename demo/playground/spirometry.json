@@ -93,6 +93,30 @@
         "type": "score"
       },
       {
+        "id": "metrics",
+        "type": "metrics",
+        "metrics": [
+          {
+            "id": "m-fvc",
+            "label": "FVC",
+            "value": "fvc",
+            "unit": "L"
+          },
+          {
+            "id": "m-fev1",
+            "label": "FEV1",
+            "value": "fev1",
+            "unit": "L"
+          },
+          {
+            "id": "m-pef",
+            "label": "PEF",
+            "value": "pef",
+            "unit": "L/s"
+          }
+        ]
+      },
+      {
         "id": "images-afterScore",
         "type": "images",
         "placement": "afterScore"
