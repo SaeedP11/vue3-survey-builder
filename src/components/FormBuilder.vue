@@ -74,6 +74,12 @@ watch(
 );
 
 let completedSurvey: SurveyModel | undefined;
+// Each edit rebuilds the Preview tab's survey and its DOM: a result page left open
+// would teleport into the old, removed container and the new test would not render.
+creator.onSurveyInstanceCreated.add(() => {
+  showResult.value = false;
+  completedSurvey = undefined;
+});
 handleComplete(creator, (sender) => {
   sender.showCompletedPage = false;
   sender.showCompletePage = false;

@@ -2,6 +2,8 @@ import { mount } from "@vue/test-utils";
 import type { SurveyCreatorModel } from "survey-creator-core";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { defineComponent, h, nextTick, ref } from "vue";
+import { Model } from "survey-core";
+import RenderResult from "../../src/components/RenderResult.vue";
 import FormBuilder from "../../src/components/FormBuilder.vue";
 import SurveyResultRequiredToast from "../../src/components/SurveyResultRequiredToast.vue";
 import SurveyResult from "../../src/components/templates/SurveyResult.vue";
@@ -58,6 +60,25 @@ afterEach(() => {
 });
 
 describe("FormBuilder", () => {
+  test("a result page left open closes when an edit rebuilds the preview survey", async () => {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<div class="svd-simulator-content"><div class="sd-root-modern"><div class="sv-scroll__wrapper"></div></div></div>',
+    );
+    const { wrapper, creator } = setup();
+    const fire = () => {
+      const survey = new Model(SURVEY);
+      (creator.onSurveyInstanceCreated as any).fire(creator, { survey });
+      return survey;
+    };
+    fire().doComplete();
+    await flush();
+    expect(wrapper.findComponent(RenderResult).exists()).toBe(true);
+    fire();
+    await flush();
+    expect(wrapper.findComponent(RenderResult).exists()).toBe(false);
+  });
+
   test("loads the v-model JSON into the creator", () => {
     const { creator } = setup();
     expect(creator.survey.getAllQuestions().map((q) => q.name)).toEqual(["score"]);
