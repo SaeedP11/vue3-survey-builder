@@ -422,3 +422,52 @@ describe("SurveyResult button rows", () => {
     ]);
   });
 });
+
+describe("per-status copy and colours", () => {
+  const labels = ["Normal", "Mild", "Moderate"];
+  const base = {
+    score: 1,
+    min: 0,
+    max: 3,
+    scoreDisplay: "default" as const,
+    statusLabels: labels,
+    noteText: "General note",
+    tierNotes: ["", "Mild advice", "Moderate advice"],
+  };
+  const render = (props: object) => mountWithCreator(SurveyResult, { props }).child;
+
+  test("shows the note of the score's status, the note text where it has none", () => {
+    expect(render(base).text()).toContain("Mild advice");
+    expect(render({ ...base, score: 0 }).text()).toContain("General note");
+    expect(render({ ...base, score: 0 }).text()).not.toContain("Mild advice");
+  });
+
+  test("fills {$score}, {$status}, {$min} and {$max} into the text", () => {
+    const view = render({
+      ...base,
+      title: "{$status} result",
+      description: "{$score} of {$max} (from {$min})",
+      tierNotes: ["", "You are {$status}", ""],
+    });
+    expect(view.text()).toContain("Mild result");
+    expect(view.text()).toContain("1 of 3 (from 0)");
+    expect(view.text()).toContain("You are Mild");
+  });
+
+  test("RenderResult puts answers into the text and leaves the template's own", () => {
+    const { wrapper } = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: { ...base, description: "FEV1 {fev1} L, {$status}", tierNotes: ["", "Ratio {ratio}%", ""] },
+        result: { fev1: 2.5, ratio: 62 },
+      },
+    });
+    expect(wrapper.text()).toContain("FEV1 2.5 L, Mild");
+    expect(wrapper.text()).toContain("Ratio 62%");
+  });
+
+  test("colours the score card's bar and badge from the template", () => {
+    const view = render({ ...base, tierColors: ["#111111", "#222222", "#333333"] });
+    const styles = view.findAll("[style]").map((el) => el.attributes("style") ?? "");
+    expect(styles.some((s) => /background-color:\s*(#222222|rgb\(34, 34, 34\))/.test(s))).toBe(true);
+  });
+});

@@ -59,6 +59,8 @@ export function getDefaultProps(locale: string): DefaultProps {
       },
     ],
     statusLabels: [],
+    tierNotes: [],
+    tierColors: [],
   };
 }
 

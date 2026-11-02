@@ -42,3 +42,26 @@ export function pickColor(palette: string[], index: number): string {
 export function labelCount(labels: unknown): number {
   return Array.isArray(labels) ? labels.length : 0;
 }
+
+/** Green to red; the default colour of a tier, spread over as many tiers as there are. */
+const DEFAULT_TIER_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444", "#b91c1c"];
+
+/** Colours that are safe to put in a style: hex, rgb(a), hsl(a) or a var(--name). */
+const SAFE_COLOR =
+  /^(#[0-9a-f]{3,8}|(rgb|hsl)a?\([\d\s.,%/-]+\)|var\(--[\w-]+\))$/i;
+
+/**
+ * One colour per tier: the template's `tierColors` where it names a valid one,
+ * the green-to-red default elsewhere.
+ */
+export function resolveTierColors(custom: unknown, count: number): string[] {
+  const n = Math.max(count, 1);
+  const given = Array.isArray(custom) ? custom : [];
+  return Array.from({ length: n }, (_, i) => {
+    const c = given[i];
+    if (typeof c === "string" && SAFE_COLOR.test(c.trim())) return c.trim();
+    return DEFAULT_TIER_COLORS[
+      n <= 1 ? 0 : Math.round((i / (n - 1)) * (DEFAULT_TIER_COLORS.length - 1))
+    ];
+  });
+}

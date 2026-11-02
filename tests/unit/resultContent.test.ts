@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  fillText,
   actionShownFor,
   fillPlaceholders,
   imagesForScore,
@@ -164,5 +165,13 @@ describe("actionShownFor", () => {
   test("a button limited to some scores stays hidden without a score", () => {
     expect(actionShownFor(action({ tier: 0 }), undefined, undefined)).toBe(false);
     expect(actionShownFor(action({ scoreMin: 0 }), undefined, undefined)).toBe(false);
+  });
+});
+
+describe("fillText", () => {
+  test("fills the names it is allowed to, as plain text", () => {
+    const values = { $score: "3", name: "A & B", list: ["x", "y"], none: null };
+    expect(fillText("{$score} for {name} {list}{none}!", values)).toBe("3 for A & B x, y!");
+    expect(fillText("{$score} {name}", values, (n) => !n.startsWith("$"))).toBe("{$score} A & B");
   });
 });

@@ -134,3 +134,18 @@ describe("Table", () => {
     expect(fa).not.toEqual(en);
   });
 });
+
+describe("LinearHealthGauge tiers", () => {
+  test("labels every status tier on the bar, however many there are", async () => {
+    const labels = ["Normal", "Mild", "Moderate", "Severe", "Very severe"];
+    const wrapper = mount(LinearHealthGauge, {
+      props: { modelValue: 2, min: 0, max: 4, statusLabels: labels },
+      global: { plugins: [createTestI18n("en")] },
+    });
+    await settle(wrapper);
+    const text = wrapper.text();
+    for (const label of labels) expect(text).toContain(label);
+    expect(text).toContain("Moderate");
+    expect(wrapper.findAll("[style*='width']")).toHaveLength(labels.length);
+  });
+});

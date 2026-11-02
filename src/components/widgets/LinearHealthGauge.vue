@@ -3,12 +3,15 @@
     class="relative w-full max-w-2xl mx-auto p-8 font-fb select-none"
     aria-label="Health metric gauge"
   >
+    <!-- every tier's label, centred over its segment of the bar -->
     <div class="relative w-full h-6 mb-8 text-xs font-medium text-gray-500">
-      <div class="absolute w-[20%] text-center" style="left: 60%">
-        <span :style="{ color: upperLabels.third.color }">{{ upperLabels.third.text }}</span>
-      </div>
-      <div class="absolute w-[20%] text-center" style="left: 80%">
-        <span :style="{ color: upperLabels.fourth.color }">{{ upperLabels.fourth.text }}</span>
+      <div
+        v-for="(seg, i) in tiers"
+        :key="i"
+        class="absolute text-center"
+        :style="{ left: `${seg.from}%`, width: `${seg.to - seg.from}%` }"
+      >
+        <span :style="{ color: seg.color }">{{ seg.label }}</span>
       </div>
     </div>
 
@@ -36,24 +39,12 @@
           class="absolute inset-0 w-full h-full opacity-90 track-gradient"
         ></div>
 
-        <div class="absolute inset-0 flex justify-between px-[20%]">
-          <div
-            class="w-0.5 h-full bg-white/90 shadow-sm"
-            style="margin-left: 0%"
-          ></div>
-          <div
-            class="w-0.5 h-full bg-white/90 shadow-sm"
-            style="margin-left: 20%"
-          ></div>
-          <div
-            class="w-0.5 h-full bg-white/90 shadow-sm"
-            style="margin-left: 20%"
-          ></div>
-          <div
-            class="w-0.5 h-full bg-white/90 shadow-sm"
-            style="margin-left: 20%"
-          ></div>
-        </div>
+        <div
+          v-for="i in tiers.length - 1"
+          :key="i"
+          class="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-white/90 shadow-sm"
+          :style="{ left: `${tiers[i].from}%` }"
+        ></div>
       </div>
 
       <div
@@ -73,7 +64,7 @@
     </div>
 
     <div class="flex justify-between mt-4 text-sm font-medium text-gray-700">
-      <span v-for="tick in ticks" :key="tick">{{ tick }}</span>
+      <span v-for="tick in scaleTicks" :key="tick">{{ tick }}</span>
     </div>
 
     <div class="mt-8 text-center text-gray-600 font-medium text-lg">
@@ -91,58 +82,53 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { pickLabel, pickColor } from "../../utils/statusTiers.ts";
+import { tierIndex, pickLabel, resolveTierColors } from "../../utils/statusTiers.ts";
 
 const props = defineProps({
   modelValue: { type: Number, default: 20 },
-  min: { type: Number, default: 60 },
-  max: { type: Number, default: 110 },
-  unit: { type: String, default: "mmHg" },
+  min: { type: Number, default: 0 },
+  max: { type: Number, default: 100 },
+  unit: { type: String, default: "" },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
-  ticks: { type: Array, default: () => [60, 70, 80, 90, 100, 110] },
-  segments: {
-    type: Array,
-    default: () => [
-      { limit: 80, color: "#22c55e" },
-      { limit: 90, color: "#eab308" },
-      { limit: 100, color: "#f97316" },
-      { limit: 110, color: "#ef4444" },
-    ],
-  },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
+  // The scale's marks; by default its two ends
+  ticks: { type: Array, default: null },
 });
+
+const tierCount = computed(() => Math.max(props.statusLabels.length, 1));
+const colors = computed(() => resolveTierColors(props.tierColors, tierCount.value));
+
+// One equal slice of the bar per status label, the way tierIndex splits the range
+const tiers = computed(() =>
+  Array.from({ length: tierCount.value }, (_, i) => ({
+    from: (i / tierCount.value) * 100,
+    to: ((i + 1) / tierCount.value) * 100,
+    color: colors.value[i],
+    label: pickLabel(props.statusLabels, i, "—"),
+  })),
+);
+
+const scaleTicks = computed(() => props.ticks ?? [props.min, props.max]);
 
 const displayValue = ref(props.min);
 const isLoaded = ref(false);
 
 // Core Math: Map the value to a 0-100 percentage for CSS absolute positioning
 const percentage = computed(() => {
+  const range = props.max - props.min;
+  if (range <= 0) return 0;
   const clamped = Math.max(props.min, Math.min(props.max, displayValue.value));
-  return ((clamped - props.min) / (props.max - props.min)) * 100;
+  return ((clamped - props.min) / range) * 100;
 });
 
 // Determine active state based on the current animated value
-const currentSegment = computed(() => {
-  const found = props.segments.find((seg) => displayValue.value <= seg.limit);
-  const seg = found || props.segments[props.segments.length - 1];
-  const idx = props.segments.indexOf(seg);
-  return {
-    color: seg.color,
-    label: pickLabel(props.statusLabels, idx, "—"),
-  };
-});
-
-// Labels for the two upper-overlay tick markers (segments 3 and 4 by default)
-const upperLabels = computed(() => {
-  const count = props.segments.length;
-  const thirdIdx = Math.min(2, count - 1);
-  const fourthIdx = Math.min(3, count - 1);
-  const thirdColor = pickColor(props.segments.map((s) => s.color), thirdIdx);
-  const fourthColor = pickColor(props.segments.map((s) => s.color), fourthIdx);
-  return {
-    third: { text: pickLabel(props.statusLabels, thirdIdx, "—"), color: thirdColor },
-    fourth: { text: pickLabel(props.statusLabels, fourthIdx, "—"), color: fourthColor },
-  };
-});
+const currentSegment = computed(
+  () =>
+    tiers.value[
+      tierIndex(displayValue.value, props.min, props.max, tierCount.value)
+    ],
+);
 
 // 60fps Easing Animation logic
 const animateValue = (target) => {

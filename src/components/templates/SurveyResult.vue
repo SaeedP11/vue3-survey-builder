@@ -35,6 +35,7 @@ import { surveyResult } from "../../locales/index.ts";
 import {
   actionHasCondition,
   actionShownFor,
+  fillText,
   imagesForScore,
   resolveActions,
   safeLinkUrl,
@@ -52,7 +53,7 @@ import {
   isTemplateVariable,
   sanitizeResultHtml,
 } from "../../utils/resultHtml.ts";
-import { pickLabel, tierIndex } from "../../utils/statusTiers.ts";
+import { pickLabel, resolveTierColors, tierIndex } from "../../utils/statusTiers.ts";
 
 // A template without scoreDisplay (hand-written or older JSON) still shows its score
 const props = withDefaults(
@@ -88,21 +89,6 @@ const emit = defineEmits<{
 }>();
 
 const { t, tm, rt, locale } = useLocalI18n(surveyResult);
-
-const ui = computed(() => {
-  const or = (v: string | undefined, fallback: string) =>
-    v && v.trim().length > 0 ? v : fallback;
-
-  return {
-    brandName: or(props.brandName, t("brandName")),
-    brandTagline: or(props.brandTagline, t("brandTagline")),
-    categoryChip: or(props.categoryChip, t("categoryChip")),
-    title: or(props.title, t("title")),
-    subtitle: or(props.subtitle, t("subtitle")),
-    description: or(props.description, t("description")),
-    noteText: or(props.noteText, t("noteText")),
-  };
-});
 
 // The editor shows every button; a respondent sees those their score allows
 const actions = computed(() =>
@@ -195,6 +181,39 @@ const scoreTier = computed(() =>
       ),
 );
 
+// The text a tier shows: its own note, or the template's. `{$score}`, `{$status}`,
+// `{$min}` and `{$max}` in any text are filled from the score.
+const tierNote = computed(() => {
+  const notes = props.tierNotes;
+  const own =
+    scoreTier.value !== undefined && Array.isArray(notes)
+      ? notes[scoreTier.value]
+      : undefined;
+  return typeof own === "string" && own.trim().length > 0 ? own : props.noteText;
+});
+
+const ui = computed(() => {
+  const or = (v: string | undefined, fallback: string) =>
+    v && v.trim().length > 0 ? v : fallback;
+  const values = templateValues.value;
+  const fill = (text: string) =>
+    values ? fillText(text, values, (name) => name.startsWith("$")) : text;
+
+  return {
+    brandName: or(props.brandName, t("brandName")),
+    brandTagline: or(props.brandTagline, t("brandTagline")),
+    categoryChip: or(props.categoryChip, t("categoryChip")),
+    title: fill(or(props.title, t("title"))),
+    subtitle: fill(or(props.subtitle, t("subtitle"))),
+    description: fill(or(props.description, t("description"))),
+    noteText: fill(or(tierNote.value, t("noteText"))),
+  };
+});
+
+const tierColors = computed(() =>
+  resolveTierColors(props.tierColors, statusLabels.value.length),
+);
+
 // The editor shows every image; a respondent sees those for their score's tier
 const visibleImages = computed<ResultImage[]>(() => {
   const images = Array.isArray(props.images) ? props.images : [];
@@ -253,7 +272,7 @@ const blockHtml = computed(() => {
 function hasContent(block: ResultBlock): boolean {
   switch (block.type) {
     case "note":
-      return hasText(props.noteText);
+      return hasText(tierNote.value);
     case "images":
       return imagesAt(block.placement).length > 0;
     case "actions":
@@ -504,6 +523,7 @@ const themeVars = computed<Record<string, string>>(() => {
                 :min="min"
                 :max="max"
                 :status-labels="statusLabels"
+              :tier-colors="tierColors"
               />
               <div v-else class="flex justify-center" dir="ltr">
                 <LinearHealthGauge
@@ -512,6 +532,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                :tier-colors="tierColors"
                 />
                 <RadialGauge
                   v-else-if="scoreDisplay === 'radial'"
@@ -526,6 +547,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                :tier-colors="tierColors"
                 />
                 <DonutGauge
                   v-else-if="scoreDisplay === 'donut'"
@@ -533,6 +555,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                :tier-colors="tierColors"
                 />
                 <BulletChart
                   v-else-if="scoreDisplay === 'bullet'"
@@ -547,6 +570,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                :tier-colors="tierColors"
                 />
                 <SegmentedPills
                   v-else-if="scoreDisplay === 'pills'"

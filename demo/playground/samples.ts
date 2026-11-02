@@ -1,3 +1,6 @@
+import asqSe2 from "./asqSe2.json";
+import spirometry from "./spirometry.json";
+
 /** Surveys the playground can load into the designer. */
 export interface Sample {
   id: string;
@@ -246,5 +249,15 @@ export const SAMPLES: Sample[] = [
         },
       ],
     },
+  },
+  {
+    id: "asq-se2-2m",
+    name: "ASQ:SE-2, 2 months (fa)",
+    json: asqSe2,
+  },
+  {
+    id: "spirometry",
+    name: "Spirometry (fa, status gauge)",
+    json: spirometry,
   },
 ];

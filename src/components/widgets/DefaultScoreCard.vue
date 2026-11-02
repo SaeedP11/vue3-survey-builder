@@ -10,12 +10,15 @@ const props = withDefaults(
     min?: number;
     max?: number;
     statusLabels?: string[];
+    /** One colour per tier, from the template; without it the card's green, yellow and red. */
+    tierColors?: string[];
   }>(),
   {
     value: 0,
     min: 0,
     max: 100,
     statusLabels: () => ["Mild", "Moderate", "Severe", "Critical"],
+    tierColors: undefined,
   },
 );
 
@@ -57,7 +60,7 @@ const segmentPalettes = {
 
 const segmentBars = computed(() =>
   Array.from({ length: tierCount.value }, (_, i) => {
-    const base = pickColor([...segmentPalettes.bar], i);
+    const base = custom.value ? "" : pickColor([...segmentPalettes.bar], i);
     const isFirst = i === 0;
     const isLast = i === tierCount.value - 1;
     return `${base} ${isFirst ? "rounded-l-[7px]" : ""} ${isLast ? "rounded-r-[7px]" : ""}`.trim();
@@ -65,8 +68,22 @@ const segmentBars = computed(() =>
 );
 
 const badgeClass = computed(() =>
-  pickColor([...segmentPalettes.badge], tier.value),
+  props.tierColors?.length ? "" : pickColor([...segmentPalettes.badge], tier.value),
 );
+
+// Template colours: inline, so any colour works
+const custom = computed(() => props.tierColors?.length);
+const barStyle = (i: number) =>
+  custom.value ? { backgroundColor: pickColor(props.tierColors!, i) } : undefined;
+const badgeStyle = computed(() => {
+  if (!custom.value) return undefined;
+  const color = pickColor(props.tierColors!, tier.value);
+  return {
+    color,
+    backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`,
+    borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
+  };
+});
 
 const ranges = computed<string[]>(() => {
   const count = tierCount.value;
@@ -112,6 +129,7 @@ const segmentLabels = computed(() =>
       <span
         class="text-sm font-extrabold px-3.75 py-1.75 rounded-full border"
         :class="badgeClass"
+        :style="badgeStyle"
         >{{ statusText }}</span
       >
     </div>
@@ -136,6 +154,7 @@ const segmentLabels = computed(() =>
           :key="i"
           class="flex-1"
           :class="cls"
+          :style="barStyle(i)"
         />
       </div>
       <div

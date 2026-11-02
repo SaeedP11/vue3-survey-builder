@@ -3,7 +3,7 @@ import { inject, computed } from "vue";
 import { SURVEY_RESULT_TEMPLATE_KEY } from "../provider/surveyResultTemplateKey.ts";
 import SurveyResult from "./templates/SurveyResult.vue";
 import type { ResultAction, SurveyResultProps } from "../types";
-import { fillPlaceholders } from "../utils/resultContent.ts";
+import { fillPlaceholders, fillText } from "../utils/resultContent.ts";
 import { fillHtmlPlaceholders, isTemplateVariable } from "../utils/resultHtml.ts";
 
 const props = defineProps<{
@@ -48,6 +48,12 @@ function resolveNumber(key: string | number | undefined): number | undefined {
   return Number.isFinite(value) ? value : undefined;
 }
 
+/** `{name}` in a text becomes that answer; `{$score}` and the like are the template's own. */
+const withAnswers = (text: string | undefined) =>
+  typeof text === "string"
+    ? fillText(text, mergedAnswers.value, (name) => !isTemplateVariable(name))
+    : text;
+
 const resolvedProps = computed<
   (SurveyResultProps & { embedded?: boolean }) | undefined
 >(() => {
@@ -57,6 +63,13 @@ const resolvedProps = computed<
   return {
     ...templateProps,
     embedded: props.embedded,
+    title: withAnswers(templateProps.title),
+    subtitle: withAnswers(templateProps.subtitle),
+    description: withAnswers(templateProps.description),
+    noteText: withAnswers(templateProps.noteText),
+    tierNotes: Array.isArray(templateProps.tierNotes)
+      ? templateProps.tierNotes.map((note) => withAnswers(note) ?? "")
+      : undefined,
     score: resolveNumber(templateProps.score),
     // The editor stores each row's value as a variable name, like the score
     tableRows: templateProps.tableRows?.map((row) => ({

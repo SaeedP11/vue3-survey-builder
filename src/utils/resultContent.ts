@@ -151,3 +151,22 @@ export function imagesForScore(
     (image) => image.tier === undefined || image.tier === null || image.tier === tier,
   );
 }
+
+/**
+ * `{name}` in plain `text` replaced with that value, as text. `fill` picks
+ * the names to fill; a picked name without a value becomes empty and the
+ * others stay as they are.
+ */
+export function fillText(
+  text: string,
+  values: Record<string, unknown>,
+  fill: (name: string) => boolean = () => true,
+): string {
+  return text.replace(/\{\s*([^{}\s]+)\s*\}/g, (match, name: string) => {
+    if (!fill(name)) return match;
+    const value = values[name];
+    if (value === undefined || value === null) return "";
+    if (Array.isArray(value)) return value.join(", ");
+    return typeof value === "object" ? JSON.stringify(value) : String(value);
+  });
+}

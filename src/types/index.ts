@@ -196,6 +196,16 @@ export interface SurveyResultProps {
 
   /** Status labels shared across all widgets. Drives the per-tier status text. */
   statusLabels?: string[];
+  /**
+   * The note for each status tier, by the index of `statusLabels`. A tier
+   * without one shows `noteText`.
+   */
+  tierNotes?: string[];
+  /**
+   * The colour of each status tier (#hex, rgb(), hsl() or var(--name)), by the
+   * index of `statusLabels`. A tier without one gets a green-to-red default.
+   */
+  tierColors?: string[];
 }
 
 export interface RecurringSurveyData {

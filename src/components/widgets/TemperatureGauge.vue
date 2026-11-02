@@ -173,6 +173,8 @@ const props = defineProps({
     type: Array,
     default: () => ["Mild", "Moderate", "Severe", "Critical"],
   },
+  // One colour per tier, from the template; without it the gauge's own
+  tierColors: { type: Array, default: null },
   duration: {
     type: Number,
     default: 1200,
@@ -222,7 +224,9 @@ const statusText = computed(() =>
 );
 
 const statusColor = computed(() =>
-  pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
+  props.tierColors?.length
+    ? pickColor(props.tierColors, tier.value)
+    : pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
 );
 
 // Stroke offset required to dynamically expose active track portions via dash arrays

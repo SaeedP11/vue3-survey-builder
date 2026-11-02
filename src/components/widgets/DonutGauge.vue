@@ -79,6 +79,8 @@ const props = defineProps({
   max: { type: Number, default: 100 },
   unit: { type: String, default: "" },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
   duration: { type: Number, default: 1000 },
 });
 
@@ -110,7 +112,9 @@ const statusText = computed(() =>
 );
 
 const statusColor = computed(() =>
-  pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
+  props.tierColors?.length
+    ? pickColor(props.tierColors, tier.value)
+    : pickColor(["#10b981", "#f59e0b", "#ef4444"], tier.value),
 );
 
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);

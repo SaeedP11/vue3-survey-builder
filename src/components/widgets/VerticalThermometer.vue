@@ -65,6 +65,8 @@ const props = defineProps({
   unit: { type: String, default: "°" },
   title: { type: String, default: "Temperature" },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
   tickCount: { type: Number, default: 5 },
   duration: { type: Number, default: 1200 },
 });
@@ -99,7 +101,9 @@ const tier = computed(() => {
 });
 
 const bulbColor = computed(() =>
-  pickColor(["#0ea5e9", "#f59e0b", "#ef4444"], tier.value),
+  props.tierColors?.length
+    ? pickColor(props.tierColors, tier.value)
+    : pickColor(["#0ea5e9", "#f59e0b", "#ef4444"], tier.value),
 );
 
 const statusText = computed(() =>

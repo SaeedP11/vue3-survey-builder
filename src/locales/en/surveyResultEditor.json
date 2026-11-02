@@ -94,6 +94,15 @@
     },
     "valueVariable": {
       "label": "Value variable"
+    },
+    "tierColors": {
+      "label": "Colour",
+      "reset": "Reset colours"
+    },
+    "tierNotes": {
+      "label": "Note per status",
+      "help": "Shown instead of the note text when the score falls in that status. Leave empty to use the note text. Any text can use the variables $score, $status, $min and $max, or the name of an answer, each in curly braces.",
+      "placeholder": "Same as the note text"
     }
   },
   "options": {

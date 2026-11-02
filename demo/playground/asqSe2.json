@@ -1,0 +1,797 @@
+{
+  "locale": "fa",
+  "title": "پرسشنامه اجتماعی-هیجانی ASQ:SE-2 - 2 ماهگی",
+  "description": "غربالگری تکامل اجتماعی و هیجانی کودک",
+  "pages": [
+    {
+      "name": "introduction",
+      "title": "پرسشنامه غربالگری اجتماعی-هیجانی ASQ:SE-2",
+      "elements": [
+        {
+          "type": "html",
+          "name": "intro_text",
+          "html": "<div dir='rtl' style='font-family:inherit;color:#0f172a;line-height:2.1;text-align:right;'><div style='background:#ffffff;border:1px solid #e2e8f0;border-radius:22px;padding:26px;box-shadow:0 6px 24px rgba(15,23,42,0.05);'><div style='margin-bottom:24px;'><div style='display:inline-block;background:#f0fdf4;color:#15803d;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:700;margin-bottom:13px;'>ASQ:SE-2 • دوماهگی</div><h2 style='margin:0 0 10px;color:#0f172a;font-size:24px;font-weight:800;'>ارزیابی رشد اجتماعی و هیجانی کودک</h2><p style='margin:0;color:#475569;font-size:15px;line-height:2;'>این پرسشنامه برای بررسی رفتارهای اجتماعی و هیجانی کودک طراحی شده است. سؤالات آن موضوعاتی مانند آرام شدن کودک، ارتباط با مراقب، خواب، تغذیه، توجه به اطراف و واکنش‌های کودک را بررسی می‌کنند.</p></div><div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:14px 16px;margin-bottom:22px;color:#1e3a8a;font-size:14px;'><strong style='color:#1d4ed8;'>مناسب برای:</strong> کودکان با سن 1 ماه و 0 روز تا 2 ماه و 30 روز</div><div style='color:#0f172a;font-size:17px;font-weight:800;margin-bottom:13px;'>قبل از شروع</div><div style='display:flex;flex-direction:column;gap:11px;color:#334155;font-size:14px;'><div style='display:flex;gap:10px;align-items:flex-start;'><span style='color:#2563eb;font-weight:800;'>✓</span><span>بر اساس رفتارهای معمول کودک پاسخ دهید، نه رفتارهایی که فقط هنگام بیماری، خستگی زیاد یا گرسنگی مشاهده می‌شوند.</span></div><div style='display:flex;gap:10px;align-items:flex-start;'><span style='color:#2563eb;font-weight:800;'>✓</span><span>پرسشنامه بهتر است توسط پدر، مادر یا مراقبی تکمیل شود که کودک را به‌خوبی می‌شناسد و زمان کافی با او می‌گذراند.</span></div><div style='display:flex;gap:10px;align-items:flex-start;'><span style='color:#2563eb;font-weight:800;'>✓</span><span>برای هر سؤال گزینه‌ای را انتخاب کنید که بیشترین شباهت را به رفتار معمول کودک دارد.</span></div><div style='display:flex;gap:10px;align-items:flex-start;'><span style='color:#2563eb;font-weight:800;'>✓</span><span>اگر علاوه بر پاسخ سؤال، درباره همان رفتار نگرانی دارید، گزینه «در مورد این رفتار نگرانم» را نیز فعال کنید.</span></div></div><div style='margin-top:22px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:17px;color:#334155;font-size:14px;'><div style='font-weight:800;color:#0f172a;margin-bottom:11px;'>گزینه‌های پاسخ</div><div style='display:flex;flex-direction:column;gap:8px;'><div><strong style='color:#0f172a;'>اغلب یا همیشه:</strong> این رفتار در بیشتر مواقع مشاهده می‌شود.</div><div><strong style='color:#0f172a;'>گاهی:</strong> این رفتار بعضی مواقع مشاهده می‌شود.</div><div><strong style='color:#0f172a;'>به ندرت یا هرگز:</strong> این رفتار تقریباً مشاهده نمی‌شود.</div></div></div><div style='margin-top:18px;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:14px 16px;color:#9a3412;font-size:13px;line-height:1.9;'><strong style='color:#c2410c;'>توجه:</strong> امتیاز بیشتر در ASQ:SE-2 به معنی وجود نشانه‌های بیشتری است که ممکن است به پایش یا بررسی بیشتر نیاز داشته باشند. این پرسشنامه ابزار غربالگری است و به تنهایی تشخیص پزشکی محسوب نمی‌شود.</div></div></div>"
+        }
+      ]
+    },
+    {
+      "name": "questions_1_8",
+      "title": "رفتارهای کودک",
+      "description": "سؤالات 1 تا 8",
+      "elements": [
+        {
+          "type": "panel",
+          "name": "panel_q1",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q1",
+              "title": "1. وقتی کودکتان ناآرام و ناراحت است، آیا ظرف نیم ساعت آرام می‌شود؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q1_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q2",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q2",
+              "title": "2. آیا کودکتان دوست دارد که او را بردارند و بغلش کنند؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q2_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q3",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q3",
+              "title": "3. آیا وقتی کودکتان را بغل می‌کنید، او کمرش را سفت می‌کند و مانند کمان قوس می‌دهد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q3_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q4",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q4",
+              "title": "4. وقتی با کودکتان حرف می‌زنید، آیا به شما نگاه می‌کند و به نظر می‌آید که دارد گوش می‌دهد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q4_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q5",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q5",
+              "title": "5. آیا کودکتان به نحوی به شما می‌فهماند که گرسنه، خسته یا ناراحت است؟",
+              "description": "برای مثال آیا نق‌نق یا گریه می‌کند؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q5_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q6",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q6",
+              "title": "6. وقتی کودکتان بیدار است، آیا به نظر می‌رسد که از تماشا کردن یا گوش دادن به افراد دیگر لذت می‌برد؟",
+              "description": "برای مثال آیا سرش را برمی‌گرداند تا به کسی که در حال صحبت است نگاه کند؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q6_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q7",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q7",
+              "title": "7. آیا کودکتان می‌تواند خودش را آرام کند؟",
+              "description": "برای مثال با مکیدن دستش یا مکیدن پستانک.",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q7_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q8",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q8",
+              "title": "8. آیا کودکتان برای مدت‌های طولانی گریه می‌کند؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q8_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "questions_9_16",
+      "title": "رفتارهای کودک",
+      "description": "سؤالات 9 تا 16",
+      "elements": [
+        {
+          "type": "panel",
+          "name": "panel_q9",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q9",
+              "title": "9. آیا بدن کودکتان آرام و آسوده است؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q9_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q10",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q10",
+              "title": "10. آیا کودکتان برای مکیدن سینه یا شیشه شیر مشکل دارد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q10_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q11",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q11",
+              "title": "11. آیا شیر دادن به کودکتان بیشتر از 30 دقیقه طول می‌کشد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q11_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q12",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q12",
+              "title": "12. آیا شما و کودکتان با هم از زمان‌های شیر دادن لذت می‌برید؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q12_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q13",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q13",
+              "title": "13. آیا کودکتان هنگام خوردن مشکلاتی مانند عق زدن، استفراغ یا موارد مشابه دارد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "comment",
+              "name": "q13_explanation",
+              "visibleIf": "{q13} > 0",
+              "title": "لطفاً توضیح دهید."
+            },
+            {
+              "type": "boolean",
+              "name": "q13_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q14",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q14",
+              "title": "14. در طول روز، آیا کودکتان هر بار که بیدار می‌شود، به طور مداوم برای یک ساعت یا بیشتر بیدار می‌ماند؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q14_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q15",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q15",
+              "title": "15. آیا کودکتان در طول 24 ساعت، حداقل 10 ساعت می‌خوابد؟",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 0,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 10,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "name": "q15_concern",
+              "title": "آیا در مورد این رفتار کودکتان نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "panel",
+          "name": "panel_q16",
+          "elements": [
+            {
+              "type": "radiogroup",
+              "name": "q16",
+              "title": "16. آیا تاکنون کسی نگرانی خود را درباره رفتارهای کودکتان با شما در میان گذاشته است؟",
+              "description": "اگر پاسخ شما «گاهی» یا «اغلب یا همیشه» است، لطفاً توضیح دهید.",
+              "isRequired": true,
+              "choices": [
+                {
+                  "value": 10,
+                  "text": "اغلب یا همیشه"
+                },
+                {
+                  "value": 5,
+                  "text": "گاهی"
+                },
+                {
+                  "value": 0,
+                  "text": "به ندرت یا هرگز"
+                }
+              ]
+            },
+            {
+              "type": "comment",
+              "name": "q16_explanation",
+              "visibleIf": "{q16} > 0",
+              "title": "لطفاً توضیح دهید."
+            },
+            {
+              "type": "boolean",
+              "name": "q16_concern",
+              "title": "آیا در مورد این موضوع نگرانید؟",
+              "defaultValue": 0,
+              "renderAs": "checkbox",
+              "labelTrue": "بله، نگرانم",
+              "labelFalse": "خیر",
+              "valueTrue": 5,
+              "valueFalse": 0
+            }
+          ]
+        },
+        {
+          "type": "expression",
+          "name": "behavior_score",
+          "visible": false,
+          "expression": "{q1} + {q2} + {q3} + {q4} + {q5} + {q6} + {q7} + {q8} + {q9} + {q10} + {q11} + {q12} + {q13} + {q14} + {q15} + {q16}"
+        },
+        {
+          "type": "expression",
+          "name": "concern_score",
+          "visible": false,
+          "expression": "{q1_concern} + {q2_concern} + {q3_concern} + {q4_concern} + {q5_concern} + {q6_concern} + {q7_concern} + {q8_concern} + {q9_concern} + {q10_concern} + {q11_concern} + {q12_concern} + {q13_concern} + {q14_concern} + {q15_concern} + {q16_concern}"
+        },
+        {
+          "type": "expression",
+          "name": "total_score",
+          "visible": false,
+          "expression": "{behavior_score} + {concern_score}"
+        },
+        {
+          "type": "expression",
+          "name": "parent_concern_message",
+          "visible": false,
+          "expression": "iif({concern_score} > 0 or {overall_17} = true or {overall_18} = true, 'نگرانی والد یا مراقب ثبت شده است. حتی اگر امتیاز کل در محدوده طبیعی یا پایش باشد، این نگرانی باید مورد توجه قرار گیرد و با پزشک مطرح شود تا در صورت نیاز بررسی یا ارجاع تکمیلی انجام شود.', 'نگرانی خاصی از سوی والد یا مراقب ثبت نشده است.')"
+        }
+      ]
+    },
+    {
+      "name": "overall",
+      "title": "کلیات",
+      "description": "در این قسمت می‌توانید نگرانی‌ها و نکات مهم خود را بیان کنید.",
+      "elements": [
+        {
+          "type": "boolean",
+          "name": "overall_17",
+          "title": "17. آیا درباره خوردن یا خوابیدن فرزندتان نگرانی دارید؟",
+          "isRequired": true,
+          "labelTrue": "بله",
+          "labelFalse": "خیر"
+        },
+        {
+          "type": "comment",
+          "name": "overall_17_explanation",
+          "visibleIf": "{overall_17} = true",
+          "title": "لطفاً نگرانی خود را توضیح دهید.",
+          "isRequired": true,
+          "requiredIf": "{overall_17} = true"
+        },
+        {
+          "type": "boolean",
+          "name": "overall_18",
+          "title": "18. آیا چیزی درباره کودکتان شما را نگران می‌کند؟",
+          "isRequired": true,
+          "labelTrue": "بله",
+          "labelFalse": "خیر"
+        },
+        {
+          "type": "comment",
+          "name": "overall_18_explanation",
+          "visibleIf": "{overall_18} = true",
+          "title": "لطفاً نگرانی خود را توضیح دهید.",
+          "isRequired": true,
+          "requiredIf": "{overall_18} = true"
+        },
+        {
+          "type": "comment",
+          "name": "overall_19",
+          "title": "19. از چه چیز فرزندتان لذت می‌برید؟"
+        }
+      ]
+    }
+  ],
+  "showProgressBar": true,
+  "progressBarLocation": "bottom",
+  "pagePrevText": "قبلی",
+  "pageNextText": "بعدی",
+  "completeText": "ثبت و پایان",
+  "resultTemplate": {
+    "score": "total_score",
+    "min": 20,
+    "max": 50,
+    "scoreDisplay": "default",
+    "tableRows": [],
+    "logoSrc": "",
+    "brandName": "BehAyand",
+    "brandTagline": "غربالگری تکامل کودک",
+    "categoryChip": "ASQ:SE-2 • دوماهگی",
+    "title": "نتیجه غربالگری اجتماعی-هیجانی",
+    "subtitle": "پرسشنامه ASQ:SE-2 - 2 ماهگی",
+    "description": "امتیاز کودک با محدوده‌های ASQ:SE-2 دوماهگی مقایسه شده است.",
+    "noteText": "ASQ:SE-2 یک ابزار غربالگری است. نتیجه این پرسشنامه به تنهایی تشخیص قطعی اختلال اجتماعی، هیجانی یا رفتاری نیست و باید در کنار اطلاعات بالینی و نظر متخصص تفسیر شود.",
+    "statusLabels": [
+      "محدوده طبیعی",
+      "منطقه پایش",
+      "نیازمند بررسی و ارجاع"
+    ],
+    "images": [],
+    "layout": [
+      { "id": "hero", "type": "hero" },
+      {
+        "id": "score_summary",
+        "type": "html",
+        "html": "<div dir='rtl' style='background:var(--sjs-general-backcolor,#fff);border:1px solid var(--sjs-border-light,rgba(0,0,0,.09));border-radius:18px;padding:20px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='display:flex;justify-content:space-between;align-items:center;gap:15px;'><div><div style='font-size:14px;font-weight:700;margin-bottom:5px;'>امتیاز کل ASQ:SE-2</div><div style='font-size:13px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));'>امتیاز پاسخ‌ها ({behavior_score}) + امتیاز نگرانی‌های علامت‌خورده ({concern_score})</div></div><div style='font-size:28px;font-weight:900;background:var(--sjs-general-backcolor-dim-light,#f9f9f9);border:1px solid var(--sjs-border-light,rgba(0,0,0,.09));border-radius:15px;padding:8px 18px;'>{total_score}</div></div></div>"
+      },
+      { "id": "score", "type": "score", "hidden": true },
+      {
+        "id": "result_normal",
+        "type": "html",
+        "tier": 0,
+        "html": "<div dir='rtl' style='border:2px solid color-mix(in srgb,var(--sjs-special-green,#19b394) 45%,transparent);background:var(--sjs-special-green-light,rgba(25,179,148,.1));border-radius:22px;padding:23px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='display:flex;gap:13px;align-items:center;margin-bottom:12px;'><div style='width:46px;height:46px;background:var(--sjs-special-green,#19b394);color:#fff;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;'>✓</div><div><div style='font-size:21px;font-weight:900;color:var(--sjs-special-green,#19b394);'>محدوده طبیعی</div><div style='font-size:13px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));margin-top:3px;'>امتیاز کمتر از 30</div></div></div><div style='font-size:14px;line-height:2;'>بر اساس امتیاز پرسشنامه، تکامل اجتماعی و هیجانی کودک در زمان غربالگری در محدوده طبیعی قرار دارد.</div></div>"
+      },
+      {
+        "id": "result_monitor",
+        "type": "html",
+        "tier": 1,
+        "html": "<div dir='rtl' style='border:2px solid color-mix(in srgb,var(--sjs-special-yellow,#ff9814) 45%,transparent);background:var(--sjs-special-yellow-light,rgba(255,152,20,.1));border-radius:22px;padding:23px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='display:flex;gap:13px;align-items:center;margin-bottom:12px;'><div style='width:46px;height:46px;background:var(--sjs-special-yellow,#ff9814);color:#fff;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;'>●</div><div><div style='font-size:21px;font-weight:900;color:var(--sjs-special-yellow,#ff9814);'>منطقه پایش</div><div style='font-size:13px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));margin-top:3px;'>امتیاز 30 تا 35</div></div></div><div style='font-size:14px;line-height:2;'>امتیاز کودک در منطقه پایش قرار گرفته است. مطابق دستورالعمل، پیگیری، ارائه فعالیت‌های مناسب رشد اجتماعی-هیجانی و ارزیابی مجدد توصیه می‌شود.</div></div>"
+      },
+      {
+        "id": "result_referral",
+        "type": "html",
+        "tier": 2,
+        "html": "<div dir='rtl' style='border:2px solid color-mix(in srgb,var(--sjs-special-red,#e50a3e) 45%,transparent);background:var(--sjs-special-red-light,rgba(229,10,62,.1));border-radius:22px;padding:23px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='display:flex;gap:13px;align-items:center;margin-bottom:12px;'><div style='width:46px;height:46px;background:var(--sjs-special-red,#e50a3e);color:#fff;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;'>!</div><div><div style='font-size:21px;font-weight:900;color:var(--sjs-special-red,#e50a3e);'>نیازمند بررسی و ارجاع</div><div style='font-size:13px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));margin-top:3px;'>امتیاز بیشتر از 35</div></div></div><div style='font-size:14px;line-height:2;'>امتیاز کودک بالاتر از نقطه برش فرم دوماهگی است و نتیجه باید برای ارزیابی و تصمیم‌گیری بعدی توسط پزشک بررسی شود.</div></div>"
+      },
+      {
+        "id": "parent_concern_notice",
+        "type": "html",
+        "html": "<div dir='rtl' style='background:var(--sjs-general-backcolor-dim-light,#f9f9f9);border:1px solid var(--sjs-border-light,rgba(0,0,0,.09));border-inline-start:4px solid var(--sjs-special-yellow,#ff9814);border-radius:18px;padding:19px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='font-size:16px;font-weight:800;margin-bottom:6px;'>نگرانی والد یا مراقب</div><div style='font-size:13px;line-height:2;'>{parent_concern_message}</div></div>"
+      },
+      {
+        "id": "score_guide",
+        "type": "html",
+        "html": "<div dir='rtl' style='background:var(--sjs-general-backcolor-dim-light,#f9f9f9);border:1px solid var(--sjs-border-light,rgba(0,0,0,.09));border-radius:18px;padding:18px;color:var(--sjs-general-forecolor,rgba(0,0,0,.91));'><div style='font-size:15px;font-weight:800;margin-bottom:12px;'>راهنمای نتیجه</div><div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;'><div style='background:var(--sjs-special-green-light,rgba(25,179,148,.1));border:1px solid color-mix(in srgb,var(--sjs-special-green,#19b394) 35%,transparent);border-radius:12px;padding:12px;text-align:center;'><div style='color:var(--sjs-special-green,#19b394);font-weight:800;'>طبیعی</div><div style='font-size:12px;margin-top:4px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));'>کمتر از 30</div></div><div style='background:var(--sjs-special-yellow-light,rgba(255,152,20,.1));border:1px solid color-mix(in srgb,var(--sjs-special-yellow,#ff9814) 35%,transparent);border-radius:12px;padding:12px;text-align:center;'><div style='color:var(--sjs-special-yellow,#ff9814);font-weight:800;'>پایش</div><div style='font-size:12px;margin-top:4px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));'>30 تا 35</div></div><div style='background:var(--sjs-special-red-light,rgba(229,10,62,.1));border:1px solid color-mix(in srgb,var(--sjs-special-red,#e50a3e) 35%,transparent);border-radius:12px;padding:12px;text-align:center;'><div style='color:var(--sjs-special-red,#e50a3e);font-weight:800;'>بررسی بیشتر</div><div style='font-size:12px;margin-top:4px;color:var(--sjs-general-forecolor-light,rgba(0,0,0,.45));'>بیشتر از 35</div></div></div></div>"
+      },
+      { "id": "note", "type": "note" },
+      { "id": "actions", "type": "actions" }
+    ],
+    "actions": [
+      {
+        "id": "primary",
+        "type": "custom",
+        "variant": "primary",
+        "icon": "calendar",
+        "label": "رزرو مشاوره",
+        "scoreMin": 30
+      },
+      {
+        "id": "print",
+        "type": "print",
+        "variant": "secondary",
+        "icon": "download",
+        "label": "دانلود نتایج (PDF)"
+      },
+      {
+        "id": "close",
+        "type": "close",
+        "variant": "text",
+        "icon": "none",
+        "label": "بستن"
+      }
+    ]
+  }
+}

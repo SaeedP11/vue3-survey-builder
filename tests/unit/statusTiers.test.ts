@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  resolveTierColors,
   labelCount,
   pickColor,
   pickLabel,
@@ -77,5 +78,23 @@ describe("labelCount", () => {
     expect(labelCount(["a", "b"])).toBe(2);
     expect(labelCount(undefined)).toBe(0);
     expect(labelCount("ab")).toBe(0);
+  });
+});
+
+describe("resolveTierColors", () => {
+  test("spreads green to red over any number of tiers", () => {
+    expect(resolveTierColors(undefined, 1)).toEqual(["#22c55e"]);
+    const five = resolveTierColors([], 5);
+    expect(five[0]).toBe("#22c55e");
+    expect(five[4]).toBe("#b91c1c");
+    expect(new Set(five).size).toBe(5);
+  });
+
+  test("keeps the template's valid colours and defaults the rest", () => {
+    const colors = resolveTierColors(["#112233", "", "url(javascript:x)", "var(--brand)"], 4);
+    expect(colors[0]).toBe("#112233");
+    expect(colors[1]).not.toBe("");
+    expect(colors[2]).not.toContain("javascript");
+    expect(colors[3]).toBe("var(--brand)");
   });
 });

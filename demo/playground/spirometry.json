@@ -1,0 +1,159 @@
+{
+  "locale": "fa",
+  "title": "فاکتورهای اصلی اسپیرومتری",
+  "pages": [
+    {
+      "name": "spirometry_page",
+      "elements": [
+        {
+          "type": "text",
+          "name": "fvc",
+          "title": "FVC",
+          "description": "Forced Vital Capacity",
+          "isRequired": true,
+          "inputType": "number",
+          "placeholder": "مثلاً 3.80"
+        },
+        {
+          "type": "text",
+          "name": "fev1",
+          "title": "FEV1",
+          "description": "Forced Expiratory Volume in 1 Second",
+          "isRequired": true,
+          "inputType": "number",
+          "placeholder": "مثلاً 2.90"
+        },
+        {
+          "type": "text",
+          "name": "fev1_fvc",
+          "title": "FEV1 / FVC %",
+          "description": "نسبت FEV1 به FVC بر حسب درصد (خودکار از FEV1 و FVC محاسبه می‌شود)",
+          "setValueExpression": "iif({fvc} notempty and {fev1} notempty and {fvc} > 0, round({fev1} / {fvc} * 100, 2), \"\")",
+          "readOnly": true,
+          "inputType": "number",
+          "placeholder": "محاسبه خودکار"
+        },
+        {
+          "type": "text",
+          "name": "pef",
+          "title": "PEF",
+          "description": "Peak Expiratory Flow",
+          "inputType": "number",
+          "placeholder": "مثلاً 6.50"
+        },
+        {
+          "type": "file",
+          "name": "attachment",
+          "title": "پیوست نتیجه"
+        }
+      ]
+    }
+  ],
+  "calculatedValues": [
+    {
+      "name": "result_status",
+      "expression": "iif({fvc} empty or {fvc} <= 0 or {fev1} empty, 0, iif({fev1} / {fvc} >= 0.7, 0, iif({fev1} / {fvc} >= 0.6, 1, iif({fev1} / {fvc} >= 0.5, 2, iif({fev1} / {fvc} >= 0.35, 3, 4)))))",
+      "includeIntoResult": true
+    }
+  ],
+  "showPrevButton": false,
+  "clearInvisibleValues": "onHiddenContainer",
+  "checkErrorsMode": "onValueChanged",
+  "pagePrevText": "بازگشت و اصلاح",
+  "completeText": "ثبت و تکمیل",
+  "requiredMark": " *",
+  "widthMode": "responsive",
+  "resultTemplate": {
+    "score": "result_status",
+    "min": 0,
+    "max": 4,
+    "scoreDisplay": "linear",
+    "tableRows": [],
+    "logoSrc": "",
+    "brandName": "BehAyand",
+    "brandTagline": "مراقبت از سلامت قلب",
+    "categoryChip": "سلامت قلب",
+    "title": "ارزیابی تکمیل شد",
+    "subtitle": "ارزیابی فاکتورهای اصلی اسپیرومتری",
+    "description": "نسبت FEV1/FVC شما {fev1_fvc}٪ است و در وضعیت «{$status}» قرار می‌گیرد.",
+    "noteText": "این نتیجه جایگزین تشخیص پزشک نیست. برای تفسیر دقیق‌تر با پزشک خود مشورت کنید.",
+    "images": [],
+    "layout": [
+      {
+        "id": "images-banner",
+        "type": "images",
+        "placement": "banner"
+      },
+      {
+        "id": "hero",
+        "type": "hero"
+      },
+      {
+        "id": "score",
+        "type": "score"
+      },
+      {
+        "id": "images-afterScore",
+        "type": "images",
+        "placement": "afterScore"
+      },
+      {
+        "id": "note",
+        "type": "note"
+      },
+      {
+        "id": "images-beforeActions",
+        "type": "images",
+        "placement": "beforeActions"
+      },
+      {
+        "id": "actions",
+        "type": "actions"
+      }
+    ],
+    "actions": [
+      {
+        "id": "primary",
+        "type": "custom",
+        "variant": "primary",
+        "icon": "none",
+        "label": "رزرو مشاوره"
+      },
+      {
+        "id": "secondary",
+        "type": "custom",
+        "variant": "secondary",
+        "icon": "download",
+        "label": "دانلود نتایج (PDF)"
+      },
+      {
+        "id": "close",
+        "type": "close",
+        "variant": "text",
+        "icon": "none",
+        "label": "بستن"
+      }
+    ],
+    "statusLabels": [
+      "نرمال",
+      "خفیف",
+      "متوسط",
+      "شدید",
+      "خیلی شدید"
+    ],
+    "tierNotes": [
+      "عملکرد ریه شما در محدوده نرمال است. همین سبک زندگی سالم را ادامه دهید.",
+      "کاهش خفیف دیده می‌شود. پیگیری دوره‌ای و پرهیز از دخانیات توصیه می‌شود.",
+      "کاهش متوسط دیده می‌شود. برای ارزیابی بیشتر با پزشک مشورت کنید.",
+      "کاهش شدید دیده می‌شود. مراجعه به پزشک متخصص ریه را به تعویق نیندازید.",
+      "کاهش بسیار شدید دیده می‌شود. هرچه زودتر به پزشک مراجعه کنید."
+    ],
+    "tierColors": [
+      "#16a34a",
+      "#84cc16",
+      "#f59e0b",
+      "#ef4444",
+      "#991b1b"
+    ]
+  }
+}

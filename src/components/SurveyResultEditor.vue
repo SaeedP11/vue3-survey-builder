@@ -17,6 +17,7 @@ import ResultActionsEditor from "./ResultActionsEditor.vue";
 import ResultImagesEditor from "./ResultImagesEditor.vue";
 import ResultLayoutEditor from "./ResultLayoutEditor.vue";
 import { resolveLayout } from "../utils/resultLayout.ts";
+import { resolveTierColors } from "../utils/statusTiers.ts";
 
 const props = defineModel<SurveyResultProps>("props", { required: true });
 // Shared with the preview, where a block can be clicked too
@@ -108,6 +109,39 @@ function addStatusLabel() {
 function removeStatusLabel(index: number) {
   ensureStatusLabels();
   statusLabels.value.splice(index, 1);
+  // The notes and colours follow their tiers
+  for (const key of ["tierNotes", "tierColors"] as const) {
+    const list = props.value[key];
+    if (Array.isArray(list) && index < list.length) list.splice(index, 1);
+  }
+}
+
+/** The colour shown for a tier: the template's, or the default; a colour input takes only #rrggbb. */
+function tierColor(index: number): string {
+  const color = resolveTierColors(props.value.tierColors, statusLabels.value.length)[index];
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : "#888888";
+}
+
+function setTierColor(index: number, color: string) {
+  const colors = Array.isArray(props.value.tierColors) ? [...props.value.tierColors] : [];
+  while (colors.length <= index) colors.push("");
+  colors[index] = color;
+  props.value.tierColors = colors;
+}
+
+function resetTierColors() {
+  props.value.tierColors = [];
+}
+
+function tierNote(index: number): string {
+  return props.value.tierNotes?.[index] ?? "";
+}
+
+function setTierNote(index: number, text: string) {
+  const notes = Array.isArray(props.value.tierNotes) ? [...props.value.tierNotes] : [];
+  while (notes.length <= index) notes.push("");
+  notes[index] = text;
+  props.value.tierNotes = notes;
 }
 
 function updateStatusLabel(index: number, raw: string) {
@@ -627,6 +661,13 @@ watch(selectedBlock, (id) => {
               class="flex-1"
               @input="updateStatusLabel(index, ($event.target as HTMLInputElement).value)"
             />
+            <input
+              :value="tierColor(index)"
+              type="color"
+              :aria-label="`${t('fields.tierColors.label')}: ${label || index + 1}`"
+              class="order-first h-9 w-9 shrink-0 cursor-pointer rounded-md border border-fb-border bg-fb-surface p-0.5"
+              @input="setTierColor(index, ($event.target as HTMLInputElement).value)"
+            />
             <button
               type="button"
               :disabled="statusLabels.length <= 1"
@@ -638,9 +679,42 @@ watch(selectedBlock, (id) => {
             </button>
           </li>
         </ol>
-        <button type="button" :class="addButtonClass" @click="addStatusLabel">
-          {{ t("addStatusLabel") }}
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" :class="addButtonClass" @click="addStatusLabel">
+            {{ t("addStatusLabel") }}
+          </button>
+          <button
+            v-if="props.tierColors?.length"
+            type="button"
+            :class="smallButtonClass"
+            @click="resetTierColors"
+          >
+            {{ t("fields.tierColors.reset") }}
+          </button>
+        </div>
+      </section>
+
+      <section
+        v-if="statusLabels.length"
+        class="space-y-3 border-t border-fb-border pt-5"
+        :aria-labelledby="`${uid}-tier-notes`"
+      >
+        <div class="space-y-1">
+          <h3 :id="`${uid}-tier-notes`" :class="headingClass">{{ t("fields.tierNotes.label") }}</h3>
+          <p :class="helpClass">{{ t("fields.tierNotes.help") }}</p>
+        </div>
+        <div v-for="(label, index) in statusLabels" :key="index" class="flex flex-col gap-1.5">
+          <label :for="`${uid}-tier-note-${index}`" :class="labelClass">{{ label || index + 1 }}</label>
+          <textarea
+            :id="`${uid}-tier-note-${index}`"
+            :value="tierNote(index)"
+            rows="2"
+            :placeholder="t('fields.tierNotes.placeholder')"
+            class="resize-y leading-relaxed"
+            :class="inputClass"
+            @input="setTierNote(index, ($event.target as HTMLTextAreaElement).value)"
+          />
+        </div>
       </section>
     </div>
 
