@@ -247,12 +247,16 @@ const templateValues = computed<Record<string, unknown> | undefined>(() => {
   const number = new Intl.NumberFormat(locale.value, {
     maximumFractionDigits: 2,
   });
-  return {
+  const values: Record<string, unknown> = {
     $score: number.format(score),
     $status: pickLabel(statusLabels.value, scoreTier.value ?? 0, ""),
     $min: number.format(props.min ?? 0),
     $max: number.format(props.max ?? 100),
   };
+  // The score variable's own name (`{$result_status}`) is the status label too
+  const alias = props.scoreVariable ? `$${props.scoreVariable}` : "";
+  if (alias && !(alias in values)) values[alias] = values.$status;
+  return values;
 });
 
 /** Each HTML block's markup, its template values filled and sanitized. */

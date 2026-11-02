@@ -101,7 +101,7 @@
     },
     "tierNotes": {
       "label": "Note per status",
-      "help": "Shown instead of the note text when the score falls in that status. Leave empty to use the note text. Any text can use the variables $score, $status, $min and $max, or the name of an answer, each in curly braces.",
+      "help": "Shown instead of the note text when the score falls in that status. Leave empty to use the note text. Any text can use the variables $score, $status, $min and $max, or the name of an answer, each in curly braces. The score variable's own name with a $ (for example $result_status) also shows the status label.",
       "placeholder": "Same as the note text"
     }
   },
@@ -225,13 +225,13 @@
       "unit": "Unit",
       "add": "Add a card",
       "remove": "Remove card",
-      "help": "A card's value is an answer's name, or $score, $status, $min or $max. A card whose answer is empty is left out."
+      "help": "A card's value is an answer's name, or $score, $status (or $ and the score variable's name), $min or $max. A card whose answer is empty is left out."
     },
     "html": {
       "label": "HTML",
       "help": "Write HTML with inline styles. Scripts, forms, buttons, frames and style tags are removed, and links must use http(s), mailto: or tel:.",
       "variables": "Insert a value",
-      "variablesHelp": "An answer's name in braces shows that answer; {'{'}$score{'}'} and {'{'}$status{'}'} show the score and its status label.",
+      "variablesHelp": "An answer's name in braces shows that answer; {'{'}$score{'}'} and {'{'}$status{'}'} show the score and its status label; {'{'}$<score variable>{'}'} shows the status label too.",
       "count": "{n} / {max} characters",
       "starterTitle": "What happens next",
       "starterText": "Write your message here."

@@ -115,6 +115,30 @@ describe("RenderResult", () => {
     const { wrapper } = render(undefined, {});
     expect(wrapper.find(".probe").exists()).toBe(false);
   });
+
+  test("passes the score variable's name on", () => {
+    expect(render({ score: "result_status" }, { result_status: 2 }).received()?.scoreVariable).toBe(
+      "result_status",
+    );
+    expect(render({ score: 3 }, {}).received()?.scoreVariable).toBeUndefined();
+  });
+
+  test("{$<score variable>} shows the status label, like {$status}", () => {
+    const { wrapper } = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: {
+          score: "result_status",
+          min: 0,
+          max: 2,
+          statusLabels: ["Low", "Mid", "High"],
+          description: "Level {$result_status} / {$status}",
+          noteText: "",
+        },
+        result: { result_status: 2 },
+      },
+    });
+    expect(wrapper.text()).toContain("Level High / High");
+  });
 });
 
 describe("SurveyResult", () => {

@@ -6,7 +6,7 @@ import { legacyActions } from "../utils/resultContent.ts";
 import { defaultLayout, resolveLayout } from "../utils/resultLayout.ts";
 
 type DefaultProps = Required<
-  Omit<SurveyResultProps, "primaryLabel" | "secondaryLabel" | "closeLabel">
+  Omit<SurveyResultProps, "scoreVariable" | "primaryLabel" | "secondaryLabel" | "closeLabel">
 >;
 
 /** The copy for `locale`'s language, English when there is none. */

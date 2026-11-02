@@ -83,6 +83,8 @@ const resolvedProps = computed<
       ? templateProps.tierNotes.map((note) => withAnswers(note) ?? "")
       : undefined,
     score: resolveNumber(templateProps.score),
+    scoreVariable:
+      typeof templateProps.score === "string" ? templateProps.score : undefined,
     // The editor stores each row's value as a variable name, like the score
     tableRows: templateProps.tableRows?.map((row) => ({
       ...row,

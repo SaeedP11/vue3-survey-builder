@@ -152,7 +152,7 @@ export interface ResultMetric {
   label: string;
   /**
    * What the card shows: an answer's or calculated value's name, or one of
-   * `$score`, `$status`, `$min`, `$max`.
+   * `$score`, `$status`, `$min`, `$max` (or `$` and the score variable's name, same as `$status`).
    */
   value: string;
   /** Shown after the value, e.g. `L` or `%`. */
@@ -182,6 +182,8 @@ export interface ResultBlock {
 
 export interface SurveyResultProps {
   score?: number | string;
+  /** The score variable's name; `{$name}` in a text shows the status label. Set by RenderResult. */
+  scoreVariable?: string;
   min?: number;
   max?: number;
   scoreDisplay?: ScoreDisplayVariant;
