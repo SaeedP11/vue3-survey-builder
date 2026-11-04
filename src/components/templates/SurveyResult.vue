@@ -42,6 +42,7 @@ import {
 } from "../../utils/resultContent.ts";
 import {
   blockShownFor,
+  blockStyleCss,
   dropBlock,
   htmlBlockName,
   moveBlock,
@@ -136,9 +137,37 @@ function onAction(action: ResultAction, event: MouseEvent) {
     emit("secondary");
 }
 
+const look = computed(() => props.appearance ?? {});
+const SHAPE_CLASS = {
+  rounded: "rounded-xl",
+  pill: "rounded-full",
+  square: "rounded-none",
+} as const;
+
+const cardStyle = computed(() => ({
+  maxWidth: look.value.maxWidth ? `${look.value.maxWidth}px` : undefined,
+  borderRadius:
+    look.value.radius !== undefined ? `${look.value.radius}px` : undefined,
+}));
+const chipStyle = computed(() => ({
+  background: look.value.chipBackground,
+  borderColor: look.value.chipBackground,
+  color: look.value.chipColor,
+}));
+const blocksStyle = computed(() => ({
+  gap: look.value.gap !== undefined ? `${look.value.gap}px` : undefined,
+}));
+const metricsStyle = computed(() =>
+  look.value.metricsMinWidth
+    ? {
+        gridTemplateColumns: `repeat(auto-fit, minmax(${look.value.metricsMinWidth}px, 1fr))`,
+      }
+    : undefined,
+);
+
 const buttonClass = (action: ResultAction) => {
   const base =
-    "flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-[15px] font-bold no-underline cursor-pointer font-fb transition-[filter,background-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sjs-primary-backcolor)]";
+    `flex min-h-12 items-center justify-center gap-2 ${SHAPE_CLASS[look.value.buttonShape ?? "rounded"]} px-4 py-3 text-center text-[15px] font-bold no-underline cursor-pointer font-fb transition-[filter,background-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sjs-primary-backcolor)]`;
   switch (action.variant ?? "primary") {
     case "secondary":
       return `${base} flex-[1_1_11rem] min-w-0 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] border-[1.5px] border-[var(--sjs-border-default)] hover:bg-[var(--sjs-general-backcolor-dim)]`;
@@ -443,7 +472,9 @@ const themeVars = computed<Record<string, string>>(() => {
           ? 'w-full max-w-2xl bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)] rounded-xl border border-[var(--sjs-border-light)] shadow-sm'
           : 'w-4/5 max-w-155 bg-[var(--sjs-general-backcolor)] text-[var(--sjs-general-forecolor)]',
       ]"
+      :style="cardStyle"
     >
+      <slot v-if="look.showHeader !== false" name="header" v-bind="{ brandName: ui.brandName, brandTagline: ui.brandTagline, categoryChip: ui.categoryChip, logoSrc }">
       <header
         class="flex items-center justify-between px-7.5 py-5 border-b border-[var(--sjs-border-light)]"
       >
@@ -473,22 +504,29 @@ const themeVars = computed<Record<string, string>>(() => {
         <div class="flex items-center gap-3">
           <span
             class="text-[11px] font-bold text-[var(--sjs-special-green)] bg-[var(--sjs-special-green-light)] border border-[var(--sjs-special-green-light)] px-3 py-1.5 rounded-full"
+            :style="chipStyle"
             >{{ ui.categoryChip }}</span
           >
         </div>
       </header>
+      </slot>
+
+      <slot name="before" />
 
       <div
-        class="flex flex-col gap-7"
+        class="flex flex-col"
         :class="[
+          look.gap === undefined ? 'gap-7' : '',
           first && !isBanner(first) ? 'pt-9.5' : '',
           !last || !isBanner(last) ? 'pb-8.5' : '',
         ]"
+        :style="blocksStyle"
       >
         <div
           v-for="({ block, index }, position) in rendered"
           :key="block.id"
           :class="isBanner(block) ? '' : 'px-9.5'"
+          :style="blockStyleCss(block.style)"
           :data-block="block.type"
         >
           <component
@@ -508,12 +546,21 @@ const themeVars = computed<Record<string, string>>(() => {
               class="flex flex-col items-center text-center gap-3.25"
             >
               <div
+                v-if="look.showHeroIcon !== false"
+                :style="
+                  look.heroIconColor
+                    ? {
+                        background: `color-mix(in srgb, ${look.heroIconColor} 15%, transparent)`,
+                        borderColor: 'transparent',
+                      }
+                    : undefined
+                "
                 class="w-15 h-15 rounded-full bg-(--sjs-special-green-light) border border-[var(--sjs-special-green-light)] flex items-center justify-center"
               >
                 <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M5 12.5l4 4L19 7"
-                    stroke="var(--sjs-special-green)"
+                    :stroke="look.heroIconColor ?? 'var(--sjs-special-green)'"
                     stroke-width="2.6"
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -564,6 +611,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                  :tier-colors="tierColors"
                 />
                 <TemperatureGauge
                   v-else-if="scoreDisplay === 'temperature'"
@@ -587,6 +635,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                  :tier-colors="tierColors"
                 />
                 <VerticalThermometer
                   v-else-if="scoreDisplay === 'thermometer'"
@@ -602,11 +651,13 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
+                  :tier-colors="tierColors"
                 />
                 <Table
                   v-else-if="scoreDisplay === 'table'"
                   :rows="resolvedTableRows"
                   :status-labels="statusLabels"
+                  :tier-colors="tierColors"
                 />
               </div>
             </template>
@@ -652,6 +703,7 @@ const themeVars = computed<Record<string, string>>(() => {
             <dl
               v-else-if="block.type === 'metrics'"
               class="m-0 grid grid-cols-[repeat(auto-fit,minmax(8.5rem,1fr))] gap-3"
+              :style="metricsStyle"
             >
               <div
                 v-for="metric in blockMetrics[block.id]"
@@ -767,6 +819,8 @@ const themeVars = computed<Record<string, string>>(() => {
           {{ rendered.length ? t("canvas.dropHere") : t("canvas.emptyLayout") }}
         </div>
       </div>
+
+      <slot name="after" />
     </div>
   </div>
 </template>

@@ -3,10 +3,10 @@ import SurveyResultEditor from "../components/SurveyResultEditor.vue";
 import SurveyResult from "../components/templates/SurveyResult.vue";
 import { surveyResult } from "../locales/index.ts";
 import { legacyActions } from "../utils/resultContent.ts";
-import { defaultLayout, resolveLayout } from "../utils/resultLayout.ts";
+import { defaultLayout, resolveAppearance, resolveLayout } from "../utils/resultLayout.ts";
 
 type DefaultProps = Required<
-  Omit<SurveyResultProps, "scoreVariable" | "primaryLabel" | "secondaryLabel" | "closeLabel">
+  Omit<SurveyResultProps, "scoreVariable" | "appearance" | "primaryLabel" | "secondaryLabel" | "closeLabel">
 >;
 
 /** The copy for `locale`'s language, English when there is none. */
@@ -82,6 +82,9 @@ export function editableProps(
     );
   }
   merged.layout = resolveLayout(stored?.layout);
+  const appearance = resolveAppearance(stored?.appearance);
+  if (appearance) merged.appearance = appearance;
+  else delete merged.appearance;
   return merged;
 }
 

@@ -80,13 +80,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { TableRow } from "../../types/index.ts";
-import { pickLabel } from "../../utils/statusTiers.ts";
+import { pickColor, pickLabel } from "../../utils/statusTiers.ts";
 import useLocalI18n from "../../composables/useLocalI18n.ts";
 import { surveyResult } from "../../locales/index.ts";
 
 const props = defineProps<{
   rows?: TableRow[];
   statusLabels?: string[];
+  /** One colour per status tier, from the template. */
+  tierColors?: string[];
 }>();
 
 const { t } = useLocalI18n(surveyResult);
@@ -151,6 +153,13 @@ const statusThemes: Record<string, StatusTheme> = {
   },
 };
 
+/** The theme for a status: the template's tier colour when set, else the default. */
+function themeFor(key: keyof typeof statusThemes, tier: number): StatusTheme {
+  if (!props.tierColors?.length) return statusThemes[key];
+  const fill = pickColor(props.tierColors, tier);
+  return { fill, fillSoft: `color-mix(in srgb, ${fill} 14%, white)` };
+}
+
 const processedData = computed(() => {
   return resolveRows.value.map((row, idx) => {
     const rawValue = row.value;
@@ -166,24 +175,24 @@ const processedData = computed(() => {
 
     const rangeSpan = max - min;
     let statusText = pickLabel(resolvedStatusLabels.value, 0, "—");
-    let theme = statusThemes.normal;
+    let theme = themeFor("normal", 0);
 
     if (hasValue) {
       if (numericValue > max) {
         if (rangeSpan > 0 && numericValue - max > rangeSpan * 0.3) {
           statusText = pickLabel(resolvedStatusLabels.value, 2, "—");
-          theme = statusThemes.critical;
+          theme = themeFor("critical", 2);
         } else {
           statusText = pickLabel(resolvedStatusLabels.value, 1, "—");
-          theme = statusThemes.warning;
+          theme = themeFor("warning", 1);
         }
       } else if (numericValue < min) {
         if (rangeSpan > 0 && min - numericValue > rangeSpan * 0.3) {
           statusText = pickLabel(resolvedStatusLabels.value, 2, "—");
-          theme = statusThemes.critical;
+          theme = themeFor("critical", 2);
         } else {
           statusText = pickLabel(resolvedStatusLabels.value, 1, "—");
-          theme = statusThemes.warning;
+          theme = themeFor("warning", 1);
         }
       }
     }

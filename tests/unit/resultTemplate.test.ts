@@ -495,3 +495,29 @@ describe("per-status copy and colours", () => {
     expect(styles.some((s) => /background-color:\s*(#222222|rgb\(34, 34, 34\))/.test(s))).toBe(true);
   });
 });
+
+describe("SurveyResult appearance and slots", () => {
+  test("hides the header and hero icon, shapes the card", () => {
+    const { wrapper } = mountWithCreator(SurveyResult, {
+      props: { ...getDefaultProps("en"), appearance: { showHeader: false, maxWidth: 400, radius: 8 } },
+    });
+    expect(wrapper.find("header").exists()).toBe(false);
+    expect(wrapper.html()).toContain("400px");
+  });
+
+  test("renders the header, before and after slots", () => {
+    const Host = defineComponent({
+      setup: () => () =>
+        h(SurveyResult, getDefaultProps("en"), {
+          header: (slot: { brandName: string }) => h("i", { "data-h": "" }, slot.brandName),
+          before: () => h("i", { "data-before": "" }),
+          after: () => h("i", { "data-after": "" }),
+        }),
+    });
+    const { wrapper } = mountWithCreator(Host);
+    expect(wrapper.find("[data-h]").text()).toBe(getDefaultProps("en").brandName);
+    expect(wrapper.find("header").exists()).toBe(false);
+    expect(wrapper.find("[data-before]").exists()).toBe(true);
+    expect(wrapper.find("[data-after]").exists()).toBe(true);
+  });
+});

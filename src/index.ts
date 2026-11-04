@@ -39,6 +39,8 @@ export type {
   ResultActionType,
   ResultActionVariant,
   ResultBlock,
+  ResultAppearance,
+  ResultBlockStyle,
   ResultBlockType,
   ResultImage,
   ResultImagePlacement,

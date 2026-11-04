@@ -4,12 +4,15 @@
  * since it comes from saved JSON or the AI.
  */
 import type {
+  ResultAppearance,
   ResultBlock,
+  ResultBlockStyle,
   ResultBlockType,
   ResultImagePlacement,
   ResultMetric,
 } from "../types/index.ts";
 import { newId } from "./resultContent.ts";
+import { safeColor } from "./statusTiers.ts";
 
 /** Blocks a layout may hold; beyond it, new blocks are refused. */
 export const MAX_BLOCKS = 24;
@@ -83,6 +86,80 @@ export function resolveMetrics(raw: unknown): ResultMetric[] {
   return out;
 }
 
+const ALIGNS: NonNullable<ResultBlockStyle["align"]>[] = ["start", "center", "end"];
+
+/** `n` as a whole number of px inside 0 to `max`, or undefined. */
+function px(n: unknown, max: number): number | undefined {
+  return typeof n === "number" && Number.isFinite(n)
+    ? Math.min(Math.max(Math.round(n), 0), max)
+    : undefined;
+}
+
+/** A stored block style read leniently: only valid fields stay; none left, no style. */
+export function resolveBlockStyle(raw: unknown): ResultBlockStyle | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const e = raw as Record<string, unknown>;
+  const style: ResultBlockStyle = {};
+  if (ALIGNS.includes(e.align as never)) style.align = e.align as ResultBlockStyle["align"];
+  const background = safeColor(e.background);
+  if (background) style.background = background;
+  const color = safeColor(e.color);
+  if (color) style.color = color;
+  const radius = px(e.radius, 48);
+  if (radius !== undefined) style.radius = radius;
+  const padding = px(e.padding, 64);
+  if (padding !== undefined) style.padding = padding;
+  const spaceBefore = px(e.spaceBefore, 96);
+  if (spaceBefore !== undefined) style.spaceBefore = spaceBefore;
+  return Object.keys(style).length ? style : undefined;
+}
+
+const BUTTON_SHAPES: NonNullable<ResultAppearance["buttonShape"]>[] = ["rounded", "pill", "square"];
+
+/** `n` rounded and clamped to `min`..`max`, or undefined when it is no number. */
+function between(n: unknown, min: number, max: number): number | undefined {
+  if (typeof n !== "number" || !Number.isFinite(n)) return undefined;
+  return Math.min(max, Math.max(min, Math.round(n)));
+}
+
+/** A stored appearance read leniently: only valid fields stay; none left, no appearance. */
+export function resolveAppearance(raw: unknown): ResultAppearance | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const e = raw as Record<string, unknown>;
+  const a: ResultAppearance = {};
+  const maxWidth = between(e.maxWidth, 320, 960);
+  if (maxWidth !== undefined) a.maxWidth = maxWidth;
+  const radius = px(e.radius, 48);
+  if (radius !== undefined) a.radius = radius;
+  const gap = px(e.gap, 64);
+  if (gap !== undefined) a.gap = gap;
+  if (e.showHeader === false) a.showHeader = false;
+  const chipBackground = safeColor(e.chipBackground);
+  if (chipBackground) a.chipBackground = chipBackground;
+  const chipColor = safeColor(e.chipColor);
+  if (chipColor) a.chipColor = chipColor;
+  if (e.showHeroIcon === false) a.showHeroIcon = false;
+  const heroIconColor = safeColor(e.heroIconColor);
+  if (heroIconColor) a.heroIconColor = heroIconColor;
+  const metricsMinWidth = between(e.metricsMinWidth, 96, 320);
+  if (metricsMinWidth !== undefined) a.metricsMinWidth = metricsMinWidth;
+  if (BUTTON_SHAPES.includes(e.buttonShape as never)) a.buttonShape = e.buttonShape as ResultAppearance["buttonShape"];
+  return Object.keys(a).length ? a : undefined;
+}
+
+/** The inline CSS of a block style. */
+export function blockStyleCss(style: ResultBlockStyle | undefined): Record<string, string> {
+  if (!style) return {};
+  const css: Record<string, string> = {};
+  if (style.background) css.backgroundColor = style.background;
+  if (style.color) css.color = style.color;
+  if (style.radius !== undefined) css.borderRadius = `${style.radius}px`;
+  if (style.padding !== undefined) css.padding = `${style.padding}px`;
+  if (style.spaceBefore !== undefined) css.marginTop = `${style.spaceBefore}px`;
+  if (style.align) css.textAlign = style.align === "center" ? "center" : style.align;
+  return css;
+}
+
 /**
  * The layout to show: `layout` cleaned up, or the standard order when there is
  * none. Unknown blocks go, a built-in block shows once, an images block needs
@@ -119,6 +196,8 @@ export function resolveLayout(layout: unknown): ResultBlock[] {
     if (type === "metrics") block.metrics = resolveMetrics(entry.metrics);
     if (entry.hidden === true) block.hidden = true;
     if (isTier(entry.tier)) block.tier = entry.tier;
+    const style = resolveBlockStyle(entry.style);
+    if (style) block.style = style;
     out.push(block);
   });
   return out;

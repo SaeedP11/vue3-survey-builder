@@ -86,6 +86,32 @@ describe.each(CHARTS)("%s", (_name, widget, scoreProp) => {
   });
 });
 
+describe.each(CHARTS)("%s tier colours", (_name, widget, scoreProp) => {
+  const COLORS = ["#111111", "#222222", "#333333", "#444444"];
+  const html = async (props: Record<string, unknown>) => {
+    const wrapper = mount(widget, {
+      props: { [scoreProp]: 95, min: 0, max: 100, statusLabels: LABELS, ...props },
+      global: { plugins: [createTestI18n("en")] },
+    });
+    await settle(wrapper);
+    return wrapper.html().toLowerCase();
+  };
+  const hex = (c: string) => c.slice(1);
+  const rgb = (c: string) =>
+    `rgb(${parseInt(c.slice(1, 3), 16)}, ${parseInt(c.slice(3, 5), 16)}, ${parseInt(c.slice(5), 16)})`;
+  const uses = (out: string, c: string) => out.includes(c) || out.includes(rgb(c));
+
+  test("paints with the given colours", async () => {
+    const out = await html({ tierColors: COLORS });
+    expect(COLORS.some((c) => uses(out, c))).toBe(true);
+  });
+
+  test("uses none of them without tierColors", async () => {
+    const out = await html({});
+    expect(COLORS.some((c) => uses(out, c) || out.includes(hex(c) + ";"))).toBe(false);
+  });
+});
+
 describe("Table", () => {
   function render(props: Record<string, unknown>, locale = "en") {
     return mount(Table, { props, global: { plugins: [createTestI18n(locale)] } });
@@ -125,6 +151,15 @@ describe("Table", () => {
 
   test("falls back to sample rows when it has none", () => {
     expect(render({ rows: [] }).findAll("tbody tr").length).toBeGreaterThan(0);
+  });
+
+  test("colours the status cells with tierColors", () => {
+    const rows = [{ metric: "m", value: 200, min: 0, max: 100 }];
+    const statusLabels = ["Normal", "Watch", "Alert"];
+    const plain = render({ rows, statusLabels }).html();
+    const custom = render({ rows, statusLabels, tierColors: ["#123456", "#234567", "#345678"] }).html();
+    expect(custom).not.toBe(plain);
+    expect(custom).toMatch(/#345678|rgb\(52, 86, 120\)/i);
   });
 
   test("translates its headers", () => {

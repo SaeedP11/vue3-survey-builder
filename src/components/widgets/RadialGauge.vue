@@ -18,8 +18,8 @@
       >
         <defs>
           <linearGradient id="gauge-gradient" x1="100%" y1="0%" x2="0%" y2="0%">
-            <stop offset="0%" stop-color="#0ea5e9" />
-            <stop offset="100%" stop-color="#f97316" />
+            <stop offset="0%" :stop-color="startColor" />
+            <stop offset="100%" :stop-color="endColor" />
           </linearGradient>
 
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -65,7 +65,7 @@
           <circle
             r="5"
             fill="#ffffff"
-            stroke="#0ea5e9"
+            :stroke="startColor"
             stroke-width="2"
             filter="url(#glow)"
           />
@@ -100,7 +100,9 @@
       }"
     >
       <span class="text-slate-600">{{ displayValue }} {{ unit }} / </span>
-      <span :class="statusColorClass">{{ statusText }}</span>
+      <span :class="statusColorClass"
+        :style="statusStyle"
+      >{{ statusText }}</span>
     </div>
   </div>
 </template>
@@ -116,6 +118,8 @@ const props = defineProps({
   title: { type: String, default: "HEART RATE (BPM)" },
   unit: { type: String, default: "BPM" },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
 });
 
 const isLoaded = ref(false);
@@ -160,8 +164,17 @@ const pointerAngle = computed(() => {
   return 90 - 180 * animatedProgress.value;
 });
 
+const custom = computed(() => props.tierColors?.length > 0);
+const startColor = computed(() => (custom.value ? props.tierColors[0] : "#0ea5e9"));
+const endColor = computed(() =>
+  custom.value ? props.tierColors[props.tierColors.length - 1] : "#f97316",
+);
+const statusStyle = computed(() =>
+  custom.value ? { color: pickColor(props.tierColors, tier.value) } : undefined,
+);
+
 const statusColorClass = computed(() =>
-  pickColor(["text-[#0ea5e9]", "text-[#f59e0b]", "text-[#ef4444]"], tier.value),
+  custom.value ? "" : pickColor(["text-[#0ea5e9]", "text-[#f59e0b]", "text-[#ef4444]"], tier.value),
 );
 
 const statusText = computed(() =>

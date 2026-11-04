@@ -158,6 +158,28 @@ describe("the block list", () => {
     expect(layout.value.find((b) => b.id === "note")).toEqual({ id: "note", type: "note" });
   });
 
+  test("styles a block, ignores an unsafe colour, and resets the look", async () => {
+    const { row, layout } = setup({ selected: "note" });
+    const style = () => layout.value.find((b) => b.id === "note")?.style;
+    const fields = () => row("note").find("[data-style]");
+
+    await fields().find("select").setValue("center");
+    expect(style()).toEqual({ align: "center" });
+
+    const [background] = fields().findAll('input[type="text"]');
+    await background.setValue("url(javascript:x)");
+    expect(style()).toEqual({ align: "center" });
+    await background.setValue("#112233");
+    expect(style()).toEqual({ align: "center", background: "#112233" });
+
+    const [radius] = fields().findAll('input[type="number"]');
+    await radius.setValue("99");
+    expect(style()?.radius).toBe(99);
+
+    await row("note").find("[data-style-reset]").trigger("click");
+    expect(layout.value.find((b) => b.id === "note")).toEqual({ id: "note", type: "note" });
+  });
+
   test("brings a block selected elsewhere into view", async () => {
     const { row, selected } = setup();
     const scroll = vi.fn();

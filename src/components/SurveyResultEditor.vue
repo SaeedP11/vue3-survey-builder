@@ -4,6 +4,7 @@ import { surveyResultEditor } from "../locales/index.ts";
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from "vue";
 import type {
   ResultAction,
+  ResultAppearance,
   ResultBlock,
   ResultBlockType,
   ResultImage,
@@ -15,6 +16,7 @@ import useLocalI18n from "../composables/useLocalI18n.ts";
 import ImageSourceField from "./ImageSourceField.vue";
 import ResultActionsEditor from "./ResultActionsEditor.vue";
 import ResultImagesEditor from "./ResultImagesEditor.vue";
+import ResultAppearanceEditor from "./ResultAppearanceEditor.vue";
 import ResultLayoutEditor from "./ResultLayoutEditor.vue";
 import { resolveLayout } from "../utils/resultLayout.ts";
 import { resolveTierColors } from "../utils/statusTiers.ts";
@@ -169,6 +171,14 @@ const actions = computed<ResultAction[]>({
   get: () => (Array.isArray(props.value.actions) ? props.value.actions : []),
   set: (next) => {
     props.value.actions = next;
+  },
+});
+
+const appearance = computed<ResultAppearance | undefined>({
+  get: () => props.value.appearance,
+  set: (next) => {
+    if (next) props.value.appearance = next;
+    else delete props.value.appearance;
   },
 });
 
@@ -386,6 +396,7 @@ watch(selectedBlock, (id) => {
         :edit-label="(block) => { const target = blockTab(block); return target && t(`tabs.${target}`); }"
         @edit="editBlock"
       />
+      <ResultAppearanceEditor v-model="appearance" class="mt-6 border-t border-fb-border pt-5" />
     </div>
 
     <!-- Content: the hero, the note and the brand -->

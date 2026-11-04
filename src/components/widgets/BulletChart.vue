@@ -24,7 +24,7 @@
           v-for="(b, i) in bands"
           :key="i"
           :class="b.color"
-          :style="{ flex: b.pct }"
+          :style="{ flex: b.pct, ...b.style }"
         ></div>
       </div>
 
@@ -66,6 +66,8 @@ const props = defineProps({
   unit: { type: String, default: "%" },
   title: { type: String, default: "Performance" },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
   duration: { type: Number, default: 1100 },
 });
 
@@ -79,7 +81,12 @@ const bands = computed(() => {
   return labels.map((label, i) => ({
     label,
     pct: 1,
-    color: pickColor(palette, i),
+    color: props.tierColors?.length ? "" : pickColor(palette, i),
+    style: props.tierColors?.length
+      ? {
+          backgroundColor: `color-mix(in srgb, ${pickColor(props.tierColors, i)} 28%, white)`,
+        }
+      : undefined,
   }));
 });
 

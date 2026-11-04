@@ -161,6 +161,46 @@ export interface ResultMetric {
   text?: string;
 }
 
+/** How one block of the result page looks; every field is optional and unset keeps the default. */
+export interface ResultBlockStyle {
+  /** Where the block's content sits across the page. */
+  align?: "start" | "center" | "end";
+  /** A colour: hex, rgb(a), hsl(a) or `var(--name)`. */
+  background?: string;
+  /** The text colour, in the same forms. */
+  color?: string;
+  /** Corner radius in px (0 to 48); shows with a background. */
+  radius?: number;
+  /** Space around the content inside the block, in px (0 to 64). */
+  padding?: number;
+  /** Extra space above the block, in px (0 to 96). */
+  spaceBefore?: number;
+}
+
+/** Page-wide look of the result template; every field is optional and unset keeps the default. */
+export interface ResultAppearance {
+  /** The card's maximum width in px (320 to 960). */
+  maxWidth?: number;
+  /** The card's corner radius in px (0 to 48). */
+  radius?: number;
+  /** Space between blocks in px (0 to 64). */
+  gap?: number;
+  /** `false` hides the brand header. */
+  showHeader?: boolean;
+  /** The category chip's background colour (hex, rgb(a), hsl(a) or `var(--name)`). */
+  chipBackground?: string;
+  /** The category chip's text colour, in the same forms. */
+  chipColor?: string;
+  /** `false` hides the hero's icon. */
+  showHeroIcon?: boolean;
+  /** The hero icon's colour, in the same forms as the chip's. */
+  heroIconColor?: string;
+  /** The least width of a metric card in px (96 to 320); wider means fewer columns. */
+  metricsMinWidth?: number;
+  /** Shape of the buttons. */
+  buttonShape?: "rounded" | "pill" | "square";
+}
+
 export interface ResultBlock {
   /** Stable id; the built-in blocks use their type (and placement) as id. */
   id: string;
@@ -178,6 +218,8 @@ export interface ResultBlock {
    * into `statusLabels`); unset shows it for every result.
    */
   tier?: number;
+  /** The block's own look: alignment, colours, radius and spacing. */
+  style?: ResultBlockStyle;
 }
 
 export interface SurveyResultProps {
@@ -227,6 +269,8 @@ export interface SurveyResultProps {
    * index of `statusLabels`. A tier without one gets a green-to-red default.
    */
   tierColors?: string[];
+  /** Page-wide look: card size, header, chip, hero icon, spacing, button shape. */
+  appearance?: ResultAppearance;
 }
 
 export interface RecurringSurveyData {

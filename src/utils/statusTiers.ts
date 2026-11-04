@@ -50,6 +50,11 @@ const DEFAULT_TIER_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444", "#b91c1
 const SAFE_COLOR =
   /^(#[0-9a-f]{3,8}|(rgb|hsl)a?\([\d\s.,%/-]+\)|var\(--[\w-]+\))$/i;
 
+/** `value` trimmed, when it is a colour that is safe to put in a style. */
+export function safeColor(value: unknown): string | undefined {
+  return typeof value === "string" && SAFE_COLOR.test(value.trim()) ? value.trim() : undefined;
+}
+
 /**
  * One colour per tier: the template's `tierColors` where it names a valid one,
  * the green-to-red default elsewhere.

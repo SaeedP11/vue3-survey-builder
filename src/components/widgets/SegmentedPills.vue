@@ -18,6 +18,7 @@
         class="flex-1 h-10 rounded-md border"
         :class="i <= activeSegments ? activeClass : inactiveClass"
         :style="{
+          ...(i <= activeSegments ? activeStyle : {}),
           transition: `background-color 0.4s ${(i - 1) * 50}ms ease-out, border-color 0.4s ${(i - 1) * 50}ms ease-out`,
         }"
       ></div>
@@ -34,6 +35,7 @@
       <span
         class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
         :class="badgeClass"
+        :style="badgeStyle"
         >{{ statusText }}</span
       >
     </div>
@@ -50,6 +52,8 @@ const props = defineProps({
   max: { type: Number, default: 10 },
   segments: { type: Number, default: 10 },
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
+  // One colour per tier, from the template; without it the widget's own
+  tierColors: { type: Array, default: null },
   duration: { type: Number, default: 900 },
 });
 
@@ -80,8 +84,25 @@ const statusText = computed(() =>
   pickLabel(props.statusLabels, tier.value, "—"),
 );
 
+const custom = computed(() => props.tierColors?.length > 0);
+const tierColor = computed(() => pickColor(props.tierColors, tier.value));
+const activeStyle = computed(() =>
+  custom.value
+    ? { backgroundColor: tierColor.value, borderColor: tierColor.value }
+    : {},
+);
+const badgeStyle = computed(() =>
+  custom.value
+    ? {
+        color: tierColor.value,
+        borderColor: tierColor.value,
+        backgroundColor: `color-mix(in srgb, ${tierColor.value} 12%, white)`,
+      }
+    : undefined,
+);
+
 const activeClass = computed(() =>
-  pickColor(
+  custom.value ? "" : pickColor(
     [
       "bg-emerald-500 border-emerald-600",
       "bg-amber-500 border-amber-600",
@@ -94,7 +115,7 @@ const activeClass = computed(() =>
 const inactiveClass = "bg-slate-100 border-slate-200";
 
 const badgeClass = computed(() =>
-  pickColor(
+  custom.value ? "border" : pickColor(
     [
       "text-emerald-700 bg-emerald-50 border border-emerald-200",
       "text-amber-700 bg-amber-50 border border-amber-200",

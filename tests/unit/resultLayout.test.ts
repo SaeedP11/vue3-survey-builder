@@ -13,6 +13,9 @@ import {
   isBuiltIn,
   missingBlocks,
   moveBlock,
+  resolveBlockStyle,
+  blockStyleCss,
+  resolveAppearance,
   resolveLayout,
 } from "../../src/utils/resultLayout.ts";
 
@@ -316,5 +319,77 @@ describe("metrics blocks", () => {
 
   test("createBlock makes an empty one", () => {
     expect(createBlock("metrics")).toMatchObject({ type: "metrics", metrics: [] });
+  });
+});
+
+describe("block style", () => {
+  test("resolveBlockStyle keeps valid fields and clamps sizes", () => {
+    expect(
+      resolveBlockStyle({
+        align: "center",
+        background: " #fff ",
+        color: "var(--x)",
+        radius: 99,
+        padding: -3,
+        spaceBefore: 10.4,
+      }),
+    ).toEqual({
+      align: "center",
+      background: "#fff",
+      color: "var(--x)",
+      radius: 48,
+      padding: 0,
+      spaceBefore: 10,
+    });
+  });
+
+  test("resolveBlockStyle drops invalid fields, and returns undefined when none is left", () => {
+    expect(resolveBlockStyle({ align: "left", background: "url(x)", radius: "4" })).toBeUndefined();
+    expect(resolveBlockStyle(null)).toBeUndefined();
+    expect(resolveBlockStyle({ background: "red;x", color: "#000" })).toEqual({ color: "#000" });
+  });
+
+  test("blockStyleCss maps the style to inline CSS", () => {
+    expect(blockStyleCss(undefined)).toEqual({});
+    expect(blockStyleCss({ align: "end", background: "#000", radius: 8, padding: 4, spaceBefore: 2 })).toEqual({
+      backgroundColor: "#000",
+      borderRadius: "8px",
+      padding: "4px",
+      marginTop: "2px",
+      textAlign: "end",
+    });
+  });
+
+  test("resolveLayout keeps a block's valid style only", () => {
+    const [a, b] = resolveLayout([
+      { id: "html-1", type: "html", style: { padding: 12, background: "nope" } },
+      { id: "divider-1", type: "divider", style: { background: "nope" } },
+    ]);
+    expect(a.style).toEqual({ padding: 12 });
+    expect(b.style).toBeUndefined();
+  });
+});
+
+describe("resolveAppearance", () => {
+  test("returns undefined for nothing valid", () => {
+    expect(resolveAppearance(undefined)).toBeUndefined();
+    expect(resolveAppearance({})).toBeUndefined();
+    expect(resolveAppearance({ maxWidth: "wide", chipColor: "javascript:x" })).toBeUndefined();
+    expect(resolveAppearance({ showHeader: true, showHeroIcon: true })).toBeUndefined();
+  });
+
+  test("clamps numbers and keeps safe colours", () => {
+    expect(
+      resolveAppearance({ maxWidth: 5000, radius: -4, gap: 12, metricsMinWidth: 10, chipColor: "#fff" }),
+    ).toEqual({ maxWidth: 960, radius: 0, gap: 12, metricsMinWidth: 96, chipColor: "#fff" });
+  });
+
+  test("keeps only false toggles and known shapes", () => {
+    expect(resolveAppearance({ showHeader: false, showHeroIcon: false, buttonShape: "pill" })).toEqual({
+      showHeader: false,
+      showHeroIcon: false,
+      buttonShape: "pill",
+    });
+    expect(resolveAppearance({ buttonShape: "blob" })).toBeUndefined();
   });
 });

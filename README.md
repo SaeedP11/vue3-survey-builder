@@ -572,7 +572,8 @@ in the survey JSON under `resultTemplate` (a hidden survey property):
 | Brand and copy | `logoSrc`, `brandName`, `brandTagline`, `categoryChip`, `title`, `subtitle`, `description`, `noteText` |
 | `images` | `{ id, src, alt?, caption?, placement?, fit?, tier? }[]`: see below |
 | `actions` | `{ id, label, type, variant?, icon?, url?, newTab? }[]`: the page's buttons, see below |
-| `layout` | `{ id, type, placement?, html?, hidden?, tier? }[]`: the page's blocks, top to bottom, see below |
+| `layout` | `{ id, type, placement?, html?, hidden?, tier?, style? }[]`: the page's blocks, top to bottom, see below |
+| `appearance` | `{ maxWidth?, radius?, gap?, showHeader?, chipBackground?, chipColor?, showHeroIcon?, heroIconColor?, metricsMinWidth?, buttonShape? }`: the page-wide look, see below |
 
 **Images.** `placement` is `banner` (full width under the header),
 `afterScore` (the default) or `beforeActions`; `fit` is `cover` (fill and
@@ -592,7 +593,20 @@ the images placed there show in it), `actions` (the buttons), and the
 author's own `html` and `divider` blocks. Without `layout` the page keeps
 its standard order (banner images, hero, score, images, note, images,
 buttons), so templates saved before it look as they did. Any block can be
-`hidden`, or limited to one status `tier` like an image.
+`hidden`, limited to one status `tier` like an image, or given its own
+`style` (`align`, `background`, `color`, `radius`, `padding`, `spaceBefore`;
+invalid values are ignored).
+
+**Appearance.** `appearance` styles the whole page: `maxWidth` (320–960 px) and
+`radius` (0–48) of the card, `gap` (0–64) between blocks, `showHeader: false` and
+`showHeroIcon: false` to hide the brand header or the hero check mark,
+`chipBackground` / `chipColor` for the category chip, `heroIconColor`,
+`metricsMinWidth` (96–320) for the metric cards, and `buttonShape`
+(`rounded`, `pill` or `square`). Numbers are clamped, colours must be hex,
+`rgb()`, `hsl()` or `var(--x)`, and anything else is ignored. The status-tier
+`tierColors` apply to every score widget. `SurveyResult` also has `header`
+(replaces the brand header; gets `brandName`, `brandTagline`, `categoryChip`,
+`logoSrc`), `before` and `after` slots around the blocks.
 
 In the editor, blocks are arranged by dragging them, on the preview or in the
 **Layout** panel. The panel also has move up/down buttons, and a focused

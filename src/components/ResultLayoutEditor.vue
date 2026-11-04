@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from "vue";
-import type { ResultBlock, ResultBlockType, ResultImagePlacement, ResultMetric } from "../types/index.ts";
+import type {
+  ResultBlock,
+  ResultBlockStyle,
+  ResultBlockType,
+  ResultImagePlacement,
+  ResultMetric,
+} from "../types/index.ts";
+import { safeColor } from "../utils/statusTiers.ts";
 import { surveyResultEditor } from "../locales/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import useBlockDrag, { dropSide } from "../composables/useBlockDrag.ts";
@@ -68,10 +75,48 @@ function update(id: string, patch: Partial<ResultBlock>) {
       // Unset, rather than stored as false or undefined
       if (!next.hidden) delete next.hidden;
       if (next.tier === undefined) delete next.tier;
+      if (!next.style || !Object.keys(next.style).length) delete next.style;
       return next;
     }),
   );
 }
+
+/** Sets one field of a block's style; `undefined` (or an empty value) unsets it, and the last one unsets the style. */
+function setStyle<K extends keyof ResultBlockStyle>(
+  block: ResultBlock,
+  key: K,
+  value: ResultBlockStyle[K] | undefined,
+) {
+  const style: ResultBlockStyle = { ...block.style };
+  if (value === undefined) delete style[key];
+  else style[key] = value;
+  update(block.id, { style });
+}
+
+/** A number input's value for the style: whole px, or unset when emptied. */
+function pxOf(event: Event): number | undefined {
+  const raw = (event.target as HTMLInputElement).value.trim();
+  const n = Number(raw);
+  return raw === "" || !Number.isFinite(n) ? undefined : n;
+}
+
+/** A colour text input's value: only a colour the page accepts is stored; empty unsets it. */
+function colorOf(event: Event, current: string | undefined): string | undefined {
+  const raw = (event.target as HTMLInputElement).value.trim();
+  if (raw === "") return undefined;
+  return safeColor(raw) ?? current;
+}
+
+const STYLE_COLORS = ["background", "color"] as const;
+const STYLE_SIZES = [
+  { key: "radius", max: 48 },
+  { key: "padding", max: 64 },
+  { key: "spaceBefore", max: 96 },
+] as const;
+const ALIGN_OPTIONS = ["start", "center", "end"] as const;
+
+/** A native colour picker needs #rrggbb; anything else shows black until picked. */
+const pickerValue = (c: string | undefined) => (c && /^#[0-9a-f]{6}$/i.test(c) ? c : "#000000");
 
 function move(index: number, by: -1 | 1) {
   setLayout(moveBlock(layout.value, index, by === -1 ? index - 1 : index + 2));
@@ -401,6 +446,102 @@ watch(selected, async (id) => {
                 </option>
               </select>
             </div>
+
+            <fieldset
+              v-if="block.type !== 'divider'"
+              class="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
+              data-style
+            >
+              <legend class="mb-1 p-0 text-[11.5px] font-semibold text-fb-fg-secondary">
+                {{ t("layout.style.label") }}
+              </legend>
+
+              <div class="flex flex-col gap-1">
+                <label
+                  :for="`${uid}-align-${index}`"
+                  class="text-[11.5px] text-fb-fg-muted"
+                  >{{ t("layout.style.align") }}</label
+                >
+                <select
+                  :id="`${uid}-align-${index}`"
+                  :value="block.style?.align ?? ''"
+                  :class="inputClass"
+                  @change="
+                    setStyle(
+                      block,
+                      'align',
+                      (($event.target as HTMLSelectElement).value || undefined) as ResultBlockStyle['align'],
+                    )
+                  "
+                >
+                  <option value="">{{ t("layout.style.default") }}</option>
+                  <option v-for="a in ALIGN_OPTIONS" :key="a" :value="a">
+                    {{ t(`layout.style.alignOptions.${a}`) }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div v-for="key in STYLE_COLORS" :key="key" class="flex min-w-0 flex-col gap-1">
+                  <label
+                    :for="`${uid}-${key}-${index}`"
+                    class="text-[11.5px] text-fb-fg-muted"
+                    >{{ t(`layout.style.${key}`) }}</label
+                  >
+                  <div class="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      :value="pickerValue(block.style?.[key])"
+                      :aria-label="t(`layout.style.${key}`)"
+                      class="h-9 w-9 shrink-0 cursor-pointer rounded-lg border border-fb-border bg-fb-surface p-0.5"
+                      @input="setStyle(block, key, ($event.target as HTMLInputElement).value)"
+                    />
+                    <input
+                      :id="`${uid}-${key}-${index}`"
+                      type="text"
+                      dir="ltr"
+                      spellcheck="false"
+                      :value="block.style?.[key] ?? ''"
+                      :placeholder="t('layout.style.colorPlaceholder')"
+                      class="min-w-0 flex-1"
+                      :class="inputClass"
+                      @change="setStyle(block, key, colorOf($event, block.style?.[key]))"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div v-for="size in STYLE_SIZES" :key="size.key" class="flex min-w-0 flex-col gap-1">
+                  <label
+                    :for="`${uid}-${size.key}-${index}`"
+                    class="text-[11.5px] text-fb-fg-muted"
+                    >{{ t(`layout.style.${size.key}`) }}</label
+                  >
+                  <input
+                    :id="`${uid}-${size.key}-${index}`"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    :max="size.max"
+                    :value="block.style?.[size.key] ?? ''"
+                    :placeholder="t('layout.style.auto')"
+                    :class="inputClass"
+                    @change="setStyle(block, size.key, pxOf($event))"
+                  />
+                </div>
+              </div>
+
+              <button
+                v-if="block.style"
+                type="button"
+                class="cursor-pointer self-start rounded-md border-0 bg-transparent px-1 py-0.5 text-[11.5px] font-semibold text-fb-accent hover:underline focus-visible:outline-2 focus-visible:outline-fb-accent"
+                data-style-reset
+                @click="update(block.id, { style: undefined })"
+              >
+                {{ t("layout.style.reset") }}
+              </button>
+            </fieldset>
 
             <div v-if="block.type === 'metrics'" class="flex flex-col gap-2" data-metrics>
               <span class="text-[11.5px] font-semibold text-fb-fg-secondary">{{

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   resolveTierColors,
+  safeColor,
   labelCount,
   pickColor,
   pickLabel,
@@ -96,5 +97,19 @@ describe("resolveTierColors", () => {
     expect(colors[1]).not.toBe("");
     expect(colors[2]).not.toContain("javascript");
     expect(colors[3]).toBe("var(--brand)");
+  });
+});
+
+describe("safeColor", () => {
+  test("keeps hex, rgb, hsl and var() colours, trimmed", () => {
+    for (const c of ["#abc", "#aabbcc", "rgb(1, 2, 3)", "rgba(1,2,3,.5)", "hsl(10 20% 30%)", "var(--sjs-primary)"]) {
+      expect(safeColor(` ${c} `)).toBe(c);
+    }
+  });
+
+  test("drops anything else", () => {
+    for (const c of ["url(javascript:x)", "red; background:url(x)", "expression(1)", "", "#12"]) {
+      expect(safeColor(c)).toBeUndefined();
+    }
   });
 });

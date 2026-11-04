@@ -483,3 +483,30 @@ describe("the metrics block", () => {
     expect(none.find("[data-block='metrics']").exists()).toBe(false);
   });
 });
+
+describe("a block's look", () => {
+  test("applies the block's style inline, and leaves other blocks alone", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      layout: [
+        { id: "hero", type: "hero", style: { align: "center", background: "#112233", radius: 20, padding: 12, spaceBefore: 8 } },
+        { id: "note", type: "note" },
+      ],
+    });
+    const styled = view.find("[data-block=hero]").element as HTMLElement;
+    expect(styled.style.backgroundColor).toBe("rgb(17, 34, 51)");
+    expect(styled.style.textAlign).toBe("center");
+    expect(styled.style.borderRadius).toBe("20px");
+    expect(styled.style.padding).toBe("12px");
+    expect(styled.style.marginTop).toBe("8px");
+    expect((view.find("[data-block=note]").element as HTMLElement).style.backgroundColor).toBe("");
+  });
+
+  test("ignores an unsafe colour", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      layout: [{ id: "note", type: "note", style: { background: "url(javascript:x)" } }],
+    });
+    expect((view.find("[data-block=note]").element as HTMLElement).style.background).toBe("");
+  });
+});

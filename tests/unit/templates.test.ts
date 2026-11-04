@@ -86,3 +86,12 @@ describe("layout", () => {
     expect(editableProps({ layout: [] }, "en").layout).toEqual([]);
   });
 });
+
+describe("editableProps appearance", () => {
+  test("cleans the stored appearance and drops it when empty", () => {
+    const kept = editableProps({ appearance: { radius: 999, gap: 8 } }, "en");
+    expect(kept.appearance).toEqual({ radius: 48, gap: 8 });
+    expect("appearance" in editableProps({ appearance: { radius: "x" } as never }, "en")).toBe(false);
+    expect("appearance" in editableProps(undefined, "en")).toBe(false);
+  });
+});
