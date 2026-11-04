@@ -55,17 +55,17 @@
       "label": "حداقل"
     },
     "logoSrc": {
-      "label": "لوگو",
+      "label": "لوگو (اختیاری)",
       "placeholder": "https://"
     },
     "brandName": {
-      "label": "نام برند"
+      "label": "نام برند (اختیاری)"
     },
     "brandTagline": {
-      "label": "شعار"
+      "label": "شعار (اختیاری)"
     },
     "categoryChip": {
-      "label": "برچسب دسته‌بندی"
+      "label": "برچسب دسته‌بندی (اختیاری)"
     },
     "title": {
       "label": "عنوان"

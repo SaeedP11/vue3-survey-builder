@@ -55,17 +55,17 @@
       "label": "Min"
     },
     "logoSrc": {
-      "label": "Logo",
+      "label": "Logo (optional)",
       "placeholder": "https://"
     },
     "brandName": {
-      "label": "Brand name"
+      "label": "Brand name (optional)"
     },
     "brandTagline": {
-      "label": "Tagline"
+      "label": "Tagline (optional)"
     },
     "categoryChip": {
-      "label": "Category chip"
+      "label": "Category chip (optional)"
     },
     "title": {
       "label": "Title"

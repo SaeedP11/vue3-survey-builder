@@ -154,7 +154,7 @@ describe("SurveyResult", () => {
 
   test("falls back to the locale's copy for empty fields", () => {
     for (const locale of ["en", "fa"] as const) {
-      const view = render({ title: "", brandName: "  ", primaryLabel: "" }, locale);
+      const view = render({ title: "", primaryLabel: "" }, locale);
       expect(view.text()).toContain(surveyResult[locale].title);
       expect(view.text()).toContain(surveyResult[locale].brandName);
       expect(view.text()).toContain(surveyResult[locale].primaryLabel);
@@ -519,5 +519,36 @@ describe("SurveyResult appearance and slots", () => {
     expect(wrapper.find("header").exists()).toBe(false);
     expect(wrapper.find("[data-before]").exists()).toBe(true);
     expect(wrapper.find("[data-after]").exists()).toBe(true);
+  });
+});
+
+describe("SurveyResult optional brand fields", () => {
+  const mount = (props: SurveyResultProps) =>
+    mountWithCreator(SurveyResult, { props }).wrapper;
+
+  test("hides the tagline and category chip when emptied", () => {
+    const wrapper = mount({ brandName: "Acme", brandTagline: "", categoryChip: "  " });
+    expect(wrapper.text()).toContain("Acme");
+    expect(wrapper.text()).not.toContain(surveyResult.en.brandTagline);
+    expect(wrapper.text()).not.toContain(surveyResult.en.categoryChip);
+  });
+
+  test("keeps them when set, and falls back to the default copy when unset", () => {
+    expect(mount({ brandTagline: "Hello", categoryChip: "Tag" }).text()).toContain("Hello");
+    expect(mount({}).text()).toContain(surveyResult.en.categoryChip);
+  });
+
+  test("hides the brand name and shows no placeholder without a logo", () => {
+    const wrapper = mount({ brandName: "", brandTagline: "Hello", categoryChip: "" });
+    expect(wrapper.text()).not.toContain(surveyResult.en.brandName);
+    expect(wrapper.text()).toContain("Hello");
+    expect(wrapper.find("header img").exists()).toBe(false);
+    expect(wrapper.find("header [aria-hidden=\"true\"]").exists()).toBe(false);
+  });
+
+  test("leaves out the whole header when logo, name, tagline and chip are all empty", () => {
+    const wrapper = mount({ logoSrc: "", brandName: "", brandTagline: "", categoryChip: "" });
+    expect(wrapper.find("header").exists()).toBe(false);
+    expect(mount({ logoSrc: "https://x.test/l.png", brandName: "", brandTagline: "", categoryChip: "" }).find("header img").exists()).toBe(true);
   });
 });

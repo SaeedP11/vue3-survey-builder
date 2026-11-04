@@ -224,20 +224,28 @@ const tierNote = computed(() => {
 const ui = computed(() => {
   const or = (v: string | undefined, fallback: string) =>
     v && v.trim().length > 0 ? v : fallback;
+  const optional = (v: string | undefined, fallback: string) =>
+    v === undefined ? fallback : v.trim();
   const values = templateValues.value;
   const fill = (text: string) =>
     values ? fillText(text, values, (name) => name.startsWith("$")) : text;
 
   return {
-    brandName: or(props.brandName, t("brandName")),
-    brandTagline: or(props.brandTagline, t("brandTagline")),
-    categoryChip: or(props.categoryChip, t("categoryChip")),
+    brandName: optional(props.brandName, t("brandName")),
+    // Optional: left unset they use the default copy, emptied they are hidden.
+    brandTagline: optional(props.brandTagline, t("brandTagline")),
+    categoryChip: optional(props.categoryChip, t("categoryChip")),
     title: fill(or(props.title, t("title"))),
     subtitle: fill(or(props.subtitle, t("subtitle"))),
     description: fill(or(props.description, t("description"))),
     noteText: fill(or(tierNote.value, t("noteText"))),
   };
 });
+
+// The brand header shows only what is filled in; with nothing it is left out.
+const hasHeader = computed(
+  () => !!(props.logoSrc || ui.value.brandName || ui.value.brandTagline || ui.value.categoryChip),
+);
 
 const tierColors = computed(() =>
   resolveTierColors(props.tierColors, statusLabels.value.length),
@@ -476,32 +484,30 @@ const themeVars = computed<Record<string, string>>(() => {
     >
       <slot v-if="look.showHeader !== false" name="header" v-bind="{ brandName: ui.brandName, brandTagline: ui.brandTagline, categoryChip: ui.categoryChip, logoSrc }">
       <header
+        v-if="hasHeader"
         class="flex items-center justify-between px-7.5 py-5 border-b border-[var(--sjs-border-light)]"
       >
-        <div class="flex items-center gap-3">
+        <div v-if="logoSrc || ui.brandName || ui.brandTagline" class="flex items-center gap-3">
           <img
             v-if="logoSrc"
             :src="logoSrc"
             :alt="ui.brandName"
             class="block w-10.5 h-10.5 rounded-[11px] object-cover"
           />
-          <div
-            v-else
-            class="block w-10.5 h-10.5 rounded-[11px] bg-[var(--sjs-primary-backcolor)]"
-            aria-hidden="true"
-          />
-          <div class="flex flex-col gap-px">
+          <div v-if="ui.brandName || ui.brandTagline" class="flex flex-col gap-px">
             <span
+              v-if="ui.brandName"
               class="text-base font-extrabold tracking-[0.01em] text-[var(--sjs-general-forecolor)]"
               >{{ ui.brandName }}</span
             >
             <span
+              v-if="ui.brandTagline"
               class="text-[11.5px] font-medium text-[var(--sjs-general-forecolor-light)]"
               >{{ ui.brandTagline }}</span
             >
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div v-if="ui.categoryChip" class="flex items-center gap-3 ms-auto">
           <span
             class="text-[11px] font-bold text-[var(--sjs-special-green)] bg-[var(--sjs-special-green-light)] border border-[var(--sjs-special-green-light)] px-3 py-1.5 rounded-full"
             :style="chipStyle"
