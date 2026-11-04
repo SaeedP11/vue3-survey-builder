@@ -24,6 +24,8 @@ export { SurveyComponent } from "survey-vue3-ui";
 export * from "./composables/useSurveyModel.ts";
 export * from "survey-core";
 
+export { provideIconPicker } from "./provider/iconPickerKey.ts";
+export type { IconPickerConfig } from "./provider/iconPickerKey.ts";
 export { provideSurveyResultTemplate } from "./provider/surveyResultTemplateKey.ts";
 
 export type {

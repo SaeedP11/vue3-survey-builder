@@ -203,6 +203,18 @@ describe("logo", () => {
     expect(model.logoSrc).toBe("https://cdn.test/up.png");
   });
 
+  test("previews the logo and reports one that does not load", async () => {
+    const { child, model } = setup();
+    expect(child.find("img[src=\"https://x.test/logo.png\"]").exists()).toBe(false);
+    model.logoSrc = "https://x.test/logo.png";
+    await nextTick();
+    const img = child.find("img[src=\"https://x.test/logo.png\"]");
+    expect(img.exists()).toBe(true);
+    await img.trigger("error");
+    expect(child.find("img[src=\"https://x.test/logo.png\"]").exists()).toBe(false);
+    expect(child.text()).toContain(T.imageField.loadFailed);
+  });
+
   test("refuses a file that is not an image", async () => {
     const { child, model } = setup();
     const input = child.find('input[type="file"]');

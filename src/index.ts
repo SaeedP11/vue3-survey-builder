@@ -21,6 +21,9 @@ export {
   useSurveyResultTemplate,
 } from "./provider/surveyResultTemplate.ts";
 
+export { provideIconPicker, useIconPicker } from "./provider/iconPickerKey.ts";
+export type { IconPickerConfig } from "./provider/iconPickerKey.ts";
+
 import "survey-core/survey-core.css";
 import "survey-creator-core/survey-creator-core.css";
 import "./styles/style.css";

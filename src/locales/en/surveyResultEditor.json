@@ -128,7 +128,8 @@
     "tooLarge": "This image is over {max}. Upload a smaller one or paste a link to it.",
     "notImage": "Pick an image file (PNG, JPG, WebP or GIF).",
     "failed": "The upload failed. Try again, or paste a link to the image.",
-    "badUrl": "Use an https:// address."
+    "badUrl": "Use an https:// address.",
+    "loadFailed": "This image could not be loaded. Check the link."
   },
   "images": {
     "help": "A banner, an illustration for each status tier, or a diagram. Images for a tier show only when the score lands in it.",
@@ -236,6 +237,7 @@
       },
       "chipBackground": "Chip background",
       "chipColor": "Chip text colour",
+      "heroIcon": "Hero icon",
       "heroIconColor": "Hero icon colour",
       "showHeader": "Show the brand header",
       "showHeroIcon": "Show the hero icon",

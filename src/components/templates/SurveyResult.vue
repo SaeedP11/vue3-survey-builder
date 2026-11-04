@@ -19,7 +19,8 @@ import type {
   TableRow,
 } from "../../types/index.ts";
 import DefaultScoreCard from "../widgets/DefaultScoreCard.vue";
-import ResultActionIcon from "./ResultActionIcon.vue";
+import ResultActionIcon from "./IconView.vue";
+import IconView from "./IconView.vue";
 import ResultCanvasBlock from "./ResultCanvasBlock.vue";
 import ResultHtmlBlock from "./ResultHtmlBlock.vue";
 import ResultImages from "./ResultImages.vue";
@@ -563,7 +564,12 @@ const themeVars = computed<Record<string, string>>(() => {
                 "
                 class="w-15 h-15 rounded-full bg-(--sjs-special-green-light) border border-[var(--sjs-special-green-light)] flex items-center justify-center"
               >
-                <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+                <IconView
+                  v-if="look.heroIcon"
+                  :name="look.heroIcon"
+                  :style="{ color: look.heroIconColor ?? 'var(--sjs-special-green)', width: '29px', height: '29px' }"
+                />
+                <svg v-else width="29" height="29" viewBox="0 0 24 24" fill="none">
                   <path
                     d="M5 12.5l4 4L19 7"
                     :stroke="look.heroIconColor ?? 'var(--sjs-special-green)'"

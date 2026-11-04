@@ -139,6 +139,7 @@ export function resolveAppearance(raw: unknown): ResultAppearance | undefined {
   const chipColor = safeColor(e.chipColor);
   if (chipColor) a.chipColor = chipColor;
   if (e.showHeroIcon === false) a.showHeroIcon = false;
+  if (typeof e.heroIcon === "string" && /^[\w:.-]{1,80}$/.test(e.heroIcon)) a.heroIcon = e.heroIcon;
   const heroIconColor = safeColor(e.heroIconColor);
   if (heroIconColor) a.heroIconColor = heroIconColor;
   const metricsMinWidth = between(e.metricsMinWidth, 96, 320);

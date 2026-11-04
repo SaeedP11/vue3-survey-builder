@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useId } from "vue";
+import { computed, ref, useId, watch } from "vue";
 import type { Question } from "survey-core";
 import { useSurveyCreator } from "../provider/surveyCreator";
 import { surveyResultEditor } from "../locales/index.ts";
@@ -20,6 +20,9 @@ const uploading = ref(false);
 const error = ref("");
 
 const preview = computed(() => safeImageSrc(model.value));
+// The address is well formed but the image does not load (wrong link, not an image)
+const loadFailed = ref(false);
+watch(preview, () => (loadFailed.value = false));
 const embedded = computed(() => model.value.startsWith("data:"));
 // A data URL is no use to read or edit; the field stays empty for a new address
 const urlText = computed(() => (embedded.value ? "" : model.value));
@@ -73,13 +76,14 @@ function onFile(event: Event) {
 <template>
   <div class="flex items-start gap-3">
     <div
-      class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-lg border border-fb-border bg-fb-surface-muted text-fb-fg-muted"
+      class="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-fb-border bg-fb-surface-muted text-fb-fg-muted"
     >
       <img
-        v-if="preview"
+        v-if="preview && !loadFailed"
         :src="preview"
         alt=""
-        class="h-full w-full object-cover"
+        class="h-full w-full object-contain"
+        @error="loadFailed = true"
       />
       <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
@@ -135,11 +139,11 @@ function onFile(event: Event) {
         {{ t("imageField.embedded") }}
       </p>
       <p
-        v-if="error || badUrl"
+        v-if="error || badUrl || loadFailed"
         role="alert"
         class="text-xs leading-snug text-[#d92d20]"
       >
-        {{ error || t("imageField.badUrl") }}
+        {{ error || (badUrl ? t("imageField.badUrl") : t("imageField.loadFailed")) }}
       </p>
       <input
         ref="fileInput"

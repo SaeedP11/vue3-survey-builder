@@ -74,6 +74,8 @@ export type ResultActionType =
 export type ResultActionVariant = "primary" | "secondary" | "text";
 
 export type ResultActionIcon =
+  /** Any other name belongs to the host's icon set (see `provideIconPicker`). */
+  | (string & {})
   | "none"
   | "arrow"
   | "external"
@@ -193,6 +195,8 @@ export interface ResultAppearance {
   chipColor?: string;
   /** `false` hides the hero's icon. */
   showHeroIcon?: boolean;
+  /** The hero icon's name in the host's icon set; empty keeps the check mark. */
+  heroIcon?: string;
   /** The hero icon's colour, in the same forms as the chip's. */
   heroIconColor?: string;
   /** The least width of a metric card in px (96 to 320); wider means fewer columns. */

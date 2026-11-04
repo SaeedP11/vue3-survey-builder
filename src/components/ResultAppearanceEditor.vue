@@ -5,11 +5,14 @@ import { safeColor } from "../utils/statusTiers.ts";
 import { resolveAppearance } from "../utils/resultLayout.ts";
 import { surveyResultEditor } from "../locales/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
+import { useIconPicker } from "../provider/iconPickerKey.ts";
+import IconPickerField from "./IconPickerField.vue";
 
 const appearance = defineModel<ResultAppearance | undefined>({ default: undefined });
 
 const { t } = useLocalI18n(surveyResultEditor);
 const uid = useId();
+const { picker } = useIconPicker();
 
 const inputClass =
   "rounded-lg border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg outline-none focus:border-fb-accent";
@@ -95,6 +98,20 @@ function colorOf(event: Event, current: string | undefined): string | undefined 
           {{ t(`layout.appearance.shapes.${shape}`) }}
         </option>
       </select>
+    </div>
+
+    <div v-if="picker" class="flex flex-col gap-1">
+      <label :for="`${uid}-heroIcon`" class="text-[11.5px] text-fb-fg-muted">{{
+        t("layout.appearance.heroIcon")
+      }}</label>
+      <IconPickerField
+        :id="`${uid}-heroIcon`"
+        :model-value="appearance?.heroIcon"
+        :label="t('layout.appearance.heroIcon')"
+        :input-class="inputClass"
+        data-appearance-field="heroIcon"
+        @update:model-value="set('heroIcon', $event && $event !== 'none' ? $event : undefined)"
+      />
     </div>
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">

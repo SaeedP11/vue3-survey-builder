@@ -10,7 +10,7 @@ import { surveyResultEditor } from "../locales/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import { newId, safeLinkUrl } from "../utils/resultContent.ts";
 import ListItemControls from "./ListItemControls.vue";
-import ResultActionIconView from "./templates/ResultActionIcon.vue";
+import IconPickerField from "./IconPickerField.vue";
 
 const MAX_ACTIONS = 6;
 
@@ -27,18 +27,6 @@ const uid = useId();
 
 const types: ResultActionType[] = ["link", "restart", "close", "print", "custom"];
 const variants: ResultActionVariant[] = ["primary", "secondary", "text"];
-const icons: ResultActionIcon[] = [
-  "none",
-  "arrow",
-  "external",
-  "download",
-  "print",
-  "calendar",
-  "phone",
-  "message",
-  "share",
-  "restart",
-];
 // A new type's natural icon, while the button still has none or the old type's
 const TYPE_ICON: Record<ResultActionType, ResultActionIcon> = {
   link: "external",
@@ -236,28 +224,13 @@ const idDuplicate = (action: ResultAction) =>
             class="text-[11.5px] font-semibold text-fb-fg-secondary"
             >{{ t("actions.icon") }}</label
           >
-          <div class="relative">
-            <select
-              :id="`${uid}-icon-${index}`"
-              :value="action.icon ?? 'none'"
-              :class="[inputClass, 'w-full ps-9']"
-              @change="
-                update(index, {
-                  icon: ($event.target as HTMLSelectElement)
-                    .value as ResultActionIcon,
-                })
-              "
-            >
-              <option v-for="icon in icons" :key="icon" :value="icon">
-                {{ t(`actions.icons.${icon}`) }}
-              </option>
-            </select>
-            <span
-              class="pointer-events-none absolute inset-y-0 start-3 flex items-center text-fb-fg-secondary"
-            >
-              <ResultActionIconView :name="action.icon" />
-            </span>
-          </div>
+          <IconPickerField
+            :id="`${uid}-icon-${index}`"
+            :model-value="action.icon"
+            :label="t('actions.icon')"
+            :input-class="inputClass"
+            @update:model-value="update(index, { icon: $event })"
+          />
         </div>
       </div>
 
