@@ -5,6 +5,7 @@
  */
 import DOMPurify, { type Config } from "dompurify";
 import { safeImageSrc, safeLinkUrl } from "./resultContent.ts";
+import { migrateResultHtmlTheme } from "./resultHtmlTheme.ts";
 
 /** `{name}` and `{ name }`, as in link addresses. */
 const PLACEHOLDER = /\{\s*([^{}\s]+)\s*\}/g;
@@ -112,9 +113,9 @@ function getPurifier(): Purifier | undefined {
   return purifier;
 }
 
-/** `html` with only safe markup left; empty where there is no DOM to sanitize with. */
+/** `html` with only safe markup left, its fixed font and neutral colours moved to the host theme; empty where there is no DOM to sanitize with. */
 export function sanitizeResultHtml(html: string | undefined): string {
   if (!html || !html.trim()) return "";
   const p = getPurifier();
-  return p ? (p.sanitize(html, CONFIG) as string) : "";
+  return p ? (p.sanitize(migrateResultHtmlTheme(html), CONFIG) as string) : "";
 }

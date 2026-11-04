@@ -5,6 +5,7 @@ import {
   isTemplateVariable,
   sanitizeResultHtml,
 } from "../../src/utils/resultHtml.ts";
+import { migrateResultHtmlTheme } from "../../src/utils/resultHtmlTheme.ts";
 
 /** The sanitized markup, parsed back for inspection. */
 function parse(html: string) {
@@ -149,5 +150,54 @@ describe("fillHtmlPlaceholders", () => {
   test("tells the template's own variables apart", () => {
     expect(isTemplateVariable("$score")).toBe(true);
     expect(isTemplateVariable("score")).toBe(false);
+  });
+});
+
+describe("migrateResultHtmlTheme", () => {
+  test("drops a fixed font so the text inherits the host's", () => {
+    expect(migrateResultHtmlTheme("<div style='font-family:Tahoma,Arial,sans-serif;max-width:760px'>x</div>")).toBe(
+      "<div style='max-width:760px'>x</div>",
+    );
+    expect(migrateResultHtmlTheme('<p style="color:red; font-family: Vazir">x</p>')).toBe('<p style="color:red;">x</p>');
+  });
+
+  test("keeps a monospace font", () => {
+    const html = '<code style="font-family:ui-monospace,monospace">x</code>';
+    expect(migrateResultHtmlTheme(html)).toBe(html);
+  });
+
+  test("turns neutral colours into theme variables", () => {
+    expect(migrateResultHtmlTheme("<div style='background:#FFFFFF;border:1px solid #e2e8f0;color:#0f172a'>x</div>")).toBe(
+      "<div style='background:var(--sjs-general-backcolor);border:1px solid var(--sjs-border-inside);color:var(--sjs-general-forecolor)'>x</div>",
+    );
+  });
+
+  test("leaves status colours, placeholders and text alone", () => {
+    const html = "<div style='color:#15803d;border:1px solid {cat_result_border}'>#ffffff #0f172a</div>";
+    expect(migrateResultHtmlTheme(html)).toBe(html);
+  });
+
+  test("moves SVG fill and stroke to style, where var() works", () => {
+    expect(migrateResultHtmlTheme("<text fill='#475569' font-size='13'>x</text>")).toBe(
+      "<text font-size='13' style=\"fill:var(--sjs-general-forecolor-light)\">x</text>",
+    );
+    expect(migrateResultHtmlTheme("<path fill='#22c55e' stroke='#e2e8f0'/>")).toBe(
+      "<path fill='#22c55e' style=\"stroke:var(--sjs-border-inside)\"/>",
+    );
+    expect(migrateResultHtmlTheme("<text fill='#334155' style='opacity:.5'>x</text>")).toBe(
+      "<text style='opacity:.5;fill:var(--sjs-general-forecolor)'>x</text>",
+    );
+  });
+
+  test("is idempotent", () => {
+    const once = migrateResultHtmlTheme("<div style='font-family:Tahoma;color:#334155'><text fill='#64748b'/></div>");
+    expect(migrateResultHtmlTheme(once)).toBe(once);
+  });
+
+  test("reaches the sanitized output, with the variables kept", () => {
+    const host = parse("<div style='font-family:Tahoma;color:#334155'>x</div>");
+    const style = host.querySelector("div")?.getAttribute("style") ?? "";
+    expect(style).not.toContain("font-family");
+    expect(style).toContain("var(--sjs-general-forecolor)");
   });
 });
