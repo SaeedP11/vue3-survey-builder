@@ -231,6 +231,22 @@ describe("SurveyResultEditorModal", () => {
     expect(child.find('[data-testid="unsaved"]').exists()).toBe(false);
   });
 
+  test("revert restores stored props and clears unsaved changes", async () => {
+    const { child, open } = setup();
+    await open();
+    child.findComponent(SurveyResultEditor).props("props").title = "Edited";
+    await nextTick();
+    expect(child.find('[data-testid="unsaved"]').exists()).toBe(true);
+
+    const revertBtn = child.findAll("button").find((b) => b.text() === T.revert);
+    expect(revertBtn?.exists()).toBe(true);
+    await revertBtn!.trigger("click");
+    await nextTick();
+
+    expect(child.find('[data-testid="unsaved"]').exists()).toBe(false);
+    expect(child.findComponent(SurveyResultEditor).props("props").title).toBe(getDefaultProps("en").title);
+  });
+
   test("uses a provided template component and editor", async () => {
     const Preview = defineComponent({ props: ["title"], render: () => h("div", { class: "custom-preview" }) });
     const Editor = defineComponent({ props: ["props"], render: () => h("div", { class: "custom-editor" }) });

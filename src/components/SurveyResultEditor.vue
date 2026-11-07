@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSurveyCreator } from "../provider/surveyCreator";
 import { surveyResultEditor } from "../locales/index.ts";
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from "vue";
+import { computed, h, nextTick, onBeforeUnmount, ref, useId, watch } from "vue";
 import type {
   ResultAction,
   ResultAppearance,
@@ -82,6 +82,75 @@ const scoreDisplayOptions: { value: ScoreDisplayVariant }[] = [
   { value: "pills" },
   { value: "table" },
 ];
+
+const icon = (renderFn: () => ReturnType<typeof h>) => ({ render: renderFn });
+
+const scoreDisplayIcons: Record<ScoreDisplayVariant, { render: () => ReturnType<typeof h> }> = {
+  default: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "currentColor" }, [
+      h("rect", { x: 2, y: 6, width: 9, height: 8, rx: 2, "fill-opacity": "0.35" }),
+      h("rect", { x: 13.5, y: 6, width: 9, height: 8, rx: 2, "fill-opacity": "0.65" }),
+      h("rect", { x: 25, y: 6, width: 9, height: 8, rx: 2 }),
+    ]),
+  ),
+  linear: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor" }, [
+      h("rect", { x: 2, y: 7, width: 32, height: 6, rx: 3, "stroke-width": 1.5, opacity: 0.3 }),
+      h("rect", { x: 2, y: 7, width: 20, height: 6, rx: 3, fill: "currentColor" }),
+      h("circle", { cx: 22, cy: 10, r: 2.5, fill: "currentColor" }),
+    ]),
+  ),
+  radial: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor", "stroke-width": 2 }, [
+      h("path", { d: "M 8 18 A 11 11 0 1 1 28 18", "stroke-linecap": "round", opacity: 0.3 }),
+      h("path", { d: "M 8 18 A 11 11 0 0 1 18 7", "stroke-linecap": "round" }),
+      h("circle", { cx: 18, cy: 16, r: 2, fill: "currentColor" }),
+      h("line", { x1: 18, y1: 16, x2: 24, y2: 10, "stroke-linecap": "round" }),
+    ]),
+  ),
+  temperature: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor", "stroke-width": 2 }, [
+      h("path", { d: "M 5 17 A 13 13 0 0 1 31 17", "stroke-linecap": "round", opacity: 0.3 }),
+      h("path", { d: "M 5 17 A 13 13 0 0 1 22 5.5", "stroke-linecap": "round" }),
+      h("line", { x1: 18, y1: 17, x2: 20, y2: 8, "stroke-linecap": "round" }),
+    ]),
+  ),
+  donut: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor", "stroke-width": 3 }, [
+      h("circle", { cx: 18, cy: 10, r: 7, opacity: 0.25 }),
+      h("circle", { cx: 18, cy: 10, r: 7, "stroke-dasharray": "30 14", "stroke-linecap": "round" }),
+    ]),
+  ),
+  bullet: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor" }, [
+      h("rect", { x: 2, y: 5, width: 32, height: 10, rx: 2, fill: "currentColor", "fill-opacity": 0.2, stroke: "none" }),
+      h("rect", { x: 2, y: 8, width: 22, height: 4, rx: 1, fill: "currentColor", stroke: "none" }),
+      h("line", { x1: 26, y1: 4, x2: 26, y2: 16, "stroke-width": 2, stroke: "currentColor" }),
+    ]),
+  ),
+  thermometer: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor", "stroke-width": 1.5 }, [
+      h("rect", { x: 16.5, y: 2, width: 3, height: 10, rx: 1.5 }),
+      h("circle", { cx: 18, cy: 15, r: 3.5, fill: "currentColor" }),
+      h("line", { x1: 18, y1: 6, x2: 18, y2: 15, "stroke-width": 2, "stroke-linecap": "round" }),
+    ]),
+  ),
+  pills: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "currentColor" }, [
+      h("rect", { x: 2, y: 8, width: 6.5, height: 4, rx: 2 }),
+      h("rect", { x: 10.5, y: 8, width: 6.5, height: 4, rx: 2 }),
+      h("rect", { x: 19, y: 8, width: 6.5, height: 4, rx: 2, "fill-opacity": 0.3 }),
+      h("rect", { x: 27.5, y: 8, width: 6.5, height: 4, rx: 2, "fill-opacity": 0.3 }),
+    ]),
+  ),
+  table: icon(() =>
+    h("svg", { viewBox: "0 0 36 20", class: "h-5 w-9", fill: "none", stroke: "currentColor", "stroke-width": 1.5 }, [
+      h("rect", { x: 3, y: 3, width: 30, height: 14, rx: 2 }),
+      h("line", { x1: 3, y1: 8, x2: 33, y2: 8 }),
+      h("line", { x1: 15, y1: 3, x2: 15, y2: 17 }),
+    ]),
+  ),
+};
 
 const showScoreChartFields = computed(
   () => props.value.scoreDisplay !== "table",
@@ -479,15 +548,59 @@ watch(selectedBlock, (id) => {
     >
       <section class="space-y-3.5" :aria-labelledby="`${uid}-display`">
         <h3 :id="`${uid}-display`" :class="headingClass">{{ t("groups.display") }}</h3>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-2">
           <label :for="`${uid}-score-display`" :class="labelClass">{{
             t("fields.scoreDisplay.label")
           }}</label>
-          <select :id="`${uid}-score-display`" v-model="props.scoreDisplay" :class="inputClass">
+          <select
+            :id="`${uid}-score-display`"
+            v-model="props.scoreDisplay"
+            :class="inputClass"
+            class="sr-only"
+            tabindex="-1"
+            aria-hidden="true"
+          >
             <option v-for="o in scoreDisplayOptions" :key="o.value" :value="o.value">
               {{ t(`options.scoreDisplay.${o.value}`) }}
             </option>
           </select>
+
+          <!-- Visual Score Display Selector Cards -->
+          <div
+            role="radiogroup"
+            :aria-label="t('fields.scoreDisplay.label')"
+            class="grid grid-cols-3 gap-2"
+          >
+            <button
+              v-for="o in scoreDisplayOptions"
+              :key="o.value"
+              type="button"
+              role="radio"
+              :aria-checked="props.scoreDisplay === o.value"
+              class="group flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2 text-center transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fb-accent"
+              :class="
+                props.scoreDisplay === o.value
+                  ? 'border-fb-accent bg-fb-accent-soft/30 text-fb-fg ring-2 ring-fb-accent font-semibold shadow-xs'
+                  : 'border-fb-border bg-fb-surface text-fb-fg-secondary hover:border-fb-border-strong hover:bg-fb-surface-muted hover:text-fb-fg'
+              "
+              :title="t(`options.scoreDisplay.${o.value}`)"
+              @click="props.scoreDisplay = o.value"
+            >
+              <span
+                class="grid h-7 w-11 place-items-center rounded-md transition-colors"
+                :class="
+                  props.scoreDisplay === o.value
+                    ? 'text-fb-accent'
+                    : 'text-fb-fg-muted group-hover:text-fb-fg'
+                "
+              >
+                <component :is="scoreDisplayIcons[o.value]" />
+              </span>
+              <span class="line-clamp-2 text-[11px] leading-tight">
+                {{ t(`options.scoreDisplay.${o.value}`) }}
+              </span>
+            </button>
+          </div>
         </div>
 
         <div v-if="showScoreChartFields" class="flex flex-col gap-1.5">
@@ -715,7 +828,19 @@ watch(selectedBlock, (id) => {
           <p :class="helpClass">{{ t("fields.tierNotes.help") }}</p>
         </div>
         <div v-for="(label, index) in statusLabels" :key="index" class="flex flex-col gap-1.5">
-          <label :for="`${uid}-tier-note-${index}`" :class="labelClass">{{ label || index + 1 }}</label>
+          <label
+            :for="`${uid}-tier-note-${index}`"
+            :class="labelClass"
+            class="inline-flex items-center gap-1.5"
+          >
+            <span
+              class="h-2.5 w-2.5 shrink-0 rounded-full border border-black/10 shadow-xs"
+              :style="{ backgroundColor: tierColor(index) }"
+              aria-hidden="true"
+            />
+            <span class="font-mono text-[10.5px] text-fb-fg-muted">#{{ index + 1 }}</span>
+            <span>{{ label || (t("fields.statusLabels.label") + " " + (index + 1)) }}</span>
+          </label>
           <textarea
             :id="`${uid}-tier-note-${index}`"
             :value="tierNote(index)"

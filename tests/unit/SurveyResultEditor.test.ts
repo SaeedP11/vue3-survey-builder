@@ -50,6 +50,16 @@ describe("score", () => {
     );
   });
 
+  test("clicking a visual score card updates the score display", async () => {
+    const { child, model } = setup();
+    const radialCard = child
+      .findAll('button[role="radio"]')
+      .find((b) => b.text().includes(T.options.scoreDisplay.radial));
+    expect(radialCard?.exists()).toBe(true);
+    await radialCard!.trigger("click");
+    expect(model.scoreDisplay).toBe("radial");
+  });
+
   test("offers the survey's questions and calculated values as the score", async () => {
     const { control, optionValues, model } = setup();
     const select = control(T.fields.score.label);

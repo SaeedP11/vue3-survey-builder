@@ -54,4 +54,17 @@ describe("ResultAppearanceEditor", () => {
     expect(value.value).toBeUndefined();
     expect(wrapper.find("[data-appearance-reset]").exists()).toBe(false);
   });
+
+  test("clicking a preset applies its theme values", async () => {
+    const { wrapper, value } = setup();
+    const oceanBtn = wrapper.findAll("button").find((b) => b.text().includes("Ocean Breeze"));
+    expect(oceanBtn?.exists()).toBe(true);
+    await oceanBtn!.trigger("click");
+    expect(value.value).toMatchObject({
+      chipBackground: "#e0f2fe",
+      chipColor: "#0284c7",
+      buttonShape: "pill",
+      cardShadow: "md",
+    });
+  });
 });

@@ -50,6 +50,7 @@ const editedProps = ref<SurveyResultProps>(getDefaultProps(locale.value));
 const selectedBlock = ref<string | null>(null);
 // The template as it was loaded, to tell whether there is anything to lose
 const loaded = ref("");
+const mobileView = ref<"split" | "preview" | "editor">("split");
 const dirty = computed(
   () => isOpen.value && JSON.stringify(editedProps.value) !== loaded.value,
 );
@@ -242,6 +243,15 @@ useCreatorToolbarAction(
                 />
                 {{ t("unsaved") }}
               </span>
+              <button
+                v-if="dirty"
+                type="button"
+                class="cursor-pointer border-0 bg-transparent p-0 text-[11px] font-normal text-fb-fg-muted underline hover:text-fb-fg"
+                :title="t('revert')"
+                @click="loadStored"
+              >
+                {{ t("revert") }}
+              </button>
             </div>
             <p
               :id="descriptionId"
@@ -249,6 +259,26 @@ useCreatorToolbarAction(
             >
               {{ t("description") }}
             </p>
+          </div>
+          <div
+            class="flex items-center rounded-lg border border-fb-border bg-fb-surface-muted p-0.5 lg:hidden"
+            role="group"
+            :aria-label="t('views.split')"
+          >
+            <button
+              v-for="mode in (['split', 'preview', 'editor'] as const)"
+              :key="mode"
+              type="button"
+              class="cursor-pointer rounded-md border-0 px-2 py-1 text-[11px] font-semibold transition-colors"
+              :class="
+                mobileView === mode
+                  ? 'bg-fb-surface text-fb-fg shadow-xs'
+                  : 'bg-transparent text-fb-fg-muted hover:text-fb-fg'
+              "
+              @click="mobileView = mode"
+            >
+              {{ t(`views.${mode}`) }}
+            </button>
           </div>
           <button
             type="button"
@@ -272,10 +302,16 @@ useCreatorToolbarAction(
         </header>
 
         <div
-          class="grid min-h-0 flex-1 grid-rows-[minmax(0,2fr)_minmax(0,3fr)] lg:grid-cols-[minmax(0,1fr)_420px] lg:grid-rows-1"
+          class="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_420px] lg:grid-rows-1"
+          :class="
+            mobileView === 'split'
+              ? 'grid-rows-[minmax(0,2fr)_minmax(0,3fr)]'
+              : 'grid-rows-1'
+          "
         >
           <div
             class="min-h-0 overflow-auto overscroll-contain border-b border-fb-border bg-fb-surface-muted lg:border-b-0 lg:border-e"
+            :class="{ 'hidden lg:block': mobileView === 'editor' }"
           >
             <component
               :is="activeTemplate.component"
@@ -286,7 +322,10 @@ useCreatorToolbarAction(
             />
           </div>
 
-          <div class="flex min-h-0 flex-col bg-fb-surface">
+          <div
+            class="flex min-h-0 flex-col bg-fb-surface"
+            :class="{ 'hidden lg:flex': mobileView === 'preview' }"
+          >
             <!-- The built-in editor pads its own tabs, so their bar sticks to the top -->
             <div class="min-h-0 flex-1 overflow-auto overscroll-contain">
               <div v-if="activeTemplate.editor" class="px-4 py-5 sm:px-6">

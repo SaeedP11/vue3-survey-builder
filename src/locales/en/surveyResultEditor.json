@@ -2,8 +2,14 @@
   "title": "Edit result template",
   "description": "The page respondents see after they finish the survey.",
   "unsaved": "Unsaved changes",
+  "revert": "Discard changes",
   "save": "Save",
   "cancel": "Cancel",
+  "views": {
+    "split": "Split",
+    "preview": "Preview",
+    "editor": "Editor"
+  },
   "resultTemplateRequired": {
     "title": "Result template is required",
     "message": "Before you can save the survey, you need to configure the result template that will be shown to respondents after they complete it.",
@@ -235,6 +241,14 @@
     "appearance": {
       "label": "Page look",
       "help": "Applies to the whole result page. Empty fields keep the default.",
+      "presets": {
+        "label": "Color presets",
+        "clean": "Clean Slate",
+        "ocean": "Ocean Breeze",
+        "emerald": "Emerald Mint",
+        "sunset": "Sunset Warmth",
+        "slate": "Dark Modern"
+      },
       "maxWidth": "Card max width (px)",
       "radius": "Card radius (px)",
       "gap": "Space between blocks (px)",

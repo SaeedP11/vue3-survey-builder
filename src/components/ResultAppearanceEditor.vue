@@ -30,6 +30,77 @@ const SHAPES = ["rounded", "pill", "square"] as const;
 const SHADOW_OPTIONS = ["none", "sm", "md", "lg"] as const;
 const HERO_ALIGNS = ["start", "center", "end"] as const;
 
+interface AppearancePreset {
+  id: "clean" | "ocean" | "emerald" | "sunset" | "slate";
+  appearance: Partial<ResultAppearance>;
+}
+
+const PRESETS: AppearancePreset[] = [
+  {
+    id: "clean",
+    appearance: {
+      chipBackground: "#f1f5f9",
+      chipColor: "#334155",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#e2e8f0",
+      buttonShape: "rounded",
+      cardShadow: "sm",
+    },
+  },
+  {
+    id: "ocean",
+    appearance: {
+      chipBackground: "#e0f2fe",
+      chipColor: "#0284c7",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#bae6fd",
+      buttonShape: "pill",
+      cardShadow: "md",
+    },
+  },
+  {
+    id: "emerald",
+    appearance: {
+      chipBackground: "#d1fae5",
+      chipColor: "#059669",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#a7f3d0",
+      buttonShape: "rounded",
+      cardShadow: "sm",
+    },
+  },
+  {
+    id: "sunset",
+    appearance: {
+      chipBackground: "#fef3c7",
+      chipColor: "#d97706",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#fde68a",
+      buttonShape: "pill",
+      cardShadow: "md",
+    },
+  },
+  {
+    id: "slate",
+    appearance: {
+      chipBackground: "#334155",
+      chipColor: "#f8fafc",
+      cardBackground: "#0f172a",
+      cardBorderColor: "#1e293b",
+      buttonShape: "rounded",
+      cardShadow: "lg",
+    },
+  },
+];
+
+function applyPreset(preset: AppearancePreset) {
+  const next: Record<string, unknown> = {
+    ...appearance.value,
+    ...preset.appearance,
+  };
+  appearance.value = resolveAppearance(next);
+}
+
 const pickerValue = (c: string | undefined) => (c && /^#[0-9a-f]{6}$/i.test(c) ? c : "#000000");
 
 /** Stores `patch` over the current look; an unset field or an empty look leaves nothing stored. */
@@ -59,6 +130,32 @@ function colorOf(event: Event, current: string | undefined): string | undefined 
       {{ t("layout.appearance.label") }}
     </legend>
     <p class="m-0 text-xs text-fb-fg-muted">{{ t("layout.appearance.help") }}</p>
+
+    <div class="flex flex-col gap-1.5 pt-1">
+      <span class="text-[11.5px] font-semibold text-fb-fg-muted">
+        {{ t("layout.appearance.presets.label") }}
+      </span>
+      <div
+        class="flex flex-wrap items-center gap-1.5"
+        role="group"
+        :aria-label="t('layout.appearance.presets.label')"
+      >
+        <button
+          v-for="p in PRESETS"
+          :key="p.id"
+          type="button"
+          class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-fb-border bg-fb-surface px-2.5 py-1 text-xs text-fb-fg transition-all hover:border-fb-border-strong hover:bg-fb-surface-muted focus-visible:outline-2 focus-visible:outline-fb-accent"
+          @click="applyPreset(p)"
+        >
+          <span
+            class="h-3 w-3 shrink-0 rounded-full border border-black/10"
+            :style="{ backgroundColor: p.appearance.chipColor }"
+            aria-hidden="true"
+          />
+          <span>{{ t(`layout.appearance.presets.${p.id}`) }}</span>
+        </button>
+      </div>
+    </div>
 
     <div class="grid grid-cols-2 gap-2">
       <div v-for="size in SIZES" :key="size.key" class="flex min-w-0 flex-col gap-1">
