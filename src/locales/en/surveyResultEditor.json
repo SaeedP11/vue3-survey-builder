@@ -27,6 +27,7 @@
     "score": "Score",
     "images": "Images",
     "actions": "Buttons",
+    "appearance": "Theme & look",
     "needsAttention": "needs attention"
   },
   "groups": {
@@ -219,6 +220,15 @@
       "radius": "Radius (px)",
       "padding": "Padding (px)",
       "spaceBefore": "Space above (px)",
+      "borderWidth": "Border width (px)",
+      "borderColor": "Border colour",
+      "shadow": "Shadow",
+      "shadowOptions": {
+        "none": "None",
+        "sm": "Small",
+        "md": "Medium",
+        "lg": "Large"
+      },
       "auto": "Auto",
       "reset": "Reset look"
     },
@@ -239,6 +249,11 @@
       "chipColor": "Chip text colour",
       "heroIcon": "Hero icon",
       "heroIconColor": "Hero icon colour",
+      "heroAlign": "Hero alignment",
+      "cardShadow": "Card shadow",
+      "cardBackground": "Card background",
+      "cardBorderColor": "Card border colour",
+      "cardBorderWidth": "Card border width (px)",
       "showHeader": "Show the brand header",
       "showHeroIcon": "Show the hero icon",
       "reset": "Reset page look"
@@ -275,6 +290,29 @@
       "count": "{n} / {max} characters",
       "starterTitle": "What happens next",
       "starterText": "Write your message here."
+    },
+    "callout": {
+      "label": "Notice box",
+      "type": "Type",
+      "types": {
+        "info": "Info",
+        "success": "Success",
+        "warning": "Warning",
+        "danger": "Alert / Danger"
+      },
+      "title": "Title",
+      "titlePlaceholder": "e.g. Important notice",
+      "message": "Message",
+      "messagePlaceholder": "Write your notice or advice here..."
+    },
+    "checklist": {
+      "label": "Checklist",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Recommended next steps",
+      "add": "Add item",
+      "itemPlaceholder": "Checklist item text",
+      "empty": "No items yet.",
+      "checked": "Completed"
     }
   },
   "moveUp": "Move up",

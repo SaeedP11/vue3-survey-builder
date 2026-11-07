@@ -146,7 +146,32 @@ export type ResultBlockType =
   /** A horizontal rule. */
   | "divider"
   /** The `metrics` as value cards: chosen answers or score values. */
-  | "metrics";
+  | "metrics"
+  /** Callout box: notice, recommendation, warning or alert. */
+  | "callout"
+  /** Action checklist or recommendation items. */
+  | "checklist";
+
+export type ResultCalloutType = "info" | "success" | "warning" | "danger";
+
+export interface ResultCallout {
+  type?: ResultCalloutType;
+  title?: string;
+  message?: string;
+}
+
+export interface ResultChecklistItem {
+  id: string;
+  text: string;
+  checked?: boolean;
+}
+
+export interface ResultChecklist {
+  title?: string;
+  items: ResultChecklistItem[];
+}
+
+export type ResultShadow = "none" | "sm" | "md" | "lg";
 
 /** One card of a `metrics` block. */
 export interface ResultMetric {
@@ -177,6 +202,12 @@ export interface ResultBlockStyle {
   padding?: number;
   /** Extra space above the block, in px (0 to 96). */
   spaceBefore?: number;
+  /** Border width in px (0 to 8). */
+  borderWidth?: number;
+  /** Border colour (hex, rgb(a), hsl(a) or `var(--name)`). */
+  borderColor?: string;
+  /** Box shadow elevation. */
+  shadow?: ResultShadow;
 }
 
 /** Page-wide look of the result template; every field is optional and unset keeps the default. */
@@ -199,10 +230,20 @@ export interface ResultAppearance {
   heroIcon?: string;
   /** The hero icon's colour, in the same forms as the chip's. */
   heroIconColor?: string;
+  /** Alignment of the hero title, subtitle and description. */
+  heroAlign?: "start" | "center" | "end";
   /** The least width of a metric card in px (96 to 320); wider means fewer columns. */
   metricsMinWidth?: number;
   /** Shape of the buttons. */
   buttonShape?: "rounded" | "pill" | "square";
+  /** Elevation shadow of the result card. */
+  cardShadow?: ResultShadow;
+  /** Custom background colour of the result card. */
+  cardBackground?: string;
+  /** Custom border colour of the result card. */
+  cardBorderColor?: string;
+  /** Custom border width of the result card in px (0 to 8). */
+  cardBorderWidth?: number;
 }
 
 export interface ResultBlock {
@@ -215,6 +256,10 @@ export interface ResultBlock {
   html?: string;
   /** A `metrics` block's cards. */
   metrics?: ResultMetric[];
+  /** A `callout` block's configuration. */
+  callout?: ResultCallout;
+  /** A `checklist` block's configuration. */
+  checklist?: ResultChecklist;
   /** Kept in the layout but not shown. */
   hidden?: boolean;
   /**

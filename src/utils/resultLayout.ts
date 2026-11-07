@@ -8,8 +8,13 @@ import type {
   ResultBlock,
   ResultBlockStyle,
   ResultBlockType,
+  ResultCallout,
+  ResultCalloutType,
+  ResultChecklist,
+  ResultChecklistItem,
   ResultImagePlacement,
   ResultMetric,
+  ResultShadow,
 } from "../types/index.ts";
 import { newId } from "./resultContent.ts";
 import { safeColor } from "./statusTiers.ts";
@@ -20,6 +25,8 @@ export const MAX_BLOCKS = 24;
 export const MAX_HTML_LENGTH = 20_000;
 /** Cards a metrics block holds; beyond it, new cards are refused. */
 export const MAX_METRICS = 12;
+/** Items a checklist block holds; beyond it, new items are refused. */
+export const MAX_CHECKLIST_ITEMS = 20;
 
 const PLACEMENTS: ResultImagePlacement[] = ["banner", "afterScore", "beforeActions"];
 const TYPES: ResultBlockType[] = [
@@ -31,6 +38,8 @@ const TYPES: ResultBlockType[] = [
   "html",
   "divider",
   "metrics",
+  "callout",
+  "checklist",
 ];
 /** The blocks a layout holds once at most; the author's own blocks repeat. */
 const SINGLE: ResultBlockType[] = ["hero", "score", "note", "images", "actions"];
@@ -86,7 +95,44 @@ export function resolveMetrics(raw: unknown): ResultMetric[] {
   return out;
 }
 
+export const CALLOUT_TYPES: ResultCalloutType[] = ["info", "success", "warning", "danger"];
+
+/** A callout block's contents, read leniently. */
+export function resolveCallout(raw: unknown): ResultCallout | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const e = raw as Partial<ResultCallout>;
+  const type = CALLOUT_TYPES.includes(e.type as never) ? e.type : "info";
+  const title = typeof e.title === "string" ? e.title.slice(0, 200) : "";
+  const message = typeof e.message === "string" ? e.message.slice(0, 2000) : "";
+  return { type, title, message };
+}
+
+/** A checklist block's items, read leniently. */
+export function resolveChecklist(raw: unknown): ResultChecklist | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const e = raw as Partial<ResultChecklist>;
+  const title = typeof e.title === "string" ? e.title.slice(0, 200) : "";
+  const items: ResultChecklistItem[] = [];
+  if (Array.isArray(e.items)) {
+    const seen = new Set<string>();
+    e.items.forEach((item, index) => {
+      if (items.length >= MAX_CHECKLIST_ITEMS || !item || typeof item !== "object") return;
+      const it = item as Partial<ResultChecklistItem>;
+      let id = typeof it.id === "string" && it.id ? it.id : `item-${index}`;
+      while (seen.has(id)) id += "_";
+      seen.add(id);
+      items.push({
+        id,
+        text: typeof it.text === "string" ? it.text.slice(0, 500) : "",
+        checked: it.checked === true,
+      });
+    });
+  }
+  return { title, items };
+}
+
 const ALIGNS: NonNullable<ResultBlockStyle["align"]>[] = ["start", "center", "end"];
+const SHADOW_OPTIONS: ResultShadow[] = ["none", "sm", "md", "lg"];
 
 /** `n` as a whole number of px inside 0 to `max`, or undefined. */
 function px(n: unknown, max: number): number | undefined {
@@ -111,6 +157,11 @@ export function resolveBlockStyle(raw: unknown): ResultBlockStyle | undefined {
   if (padding !== undefined) style.padding = padding;
   const spaceBefore = px(e.spaceBefore, 96);
   if (spaceBefore !== undefined) style.spaceBefore = spaceBefore;
+  const borderWidth = px(e.borderWidth, 8);
+  if (borderWidth !== undefined) style.borderWidth = borderWidth;
+  const borderColor = safeColor(e.borderColor);
+  if (borderColor) style.borderColor = borderColor;
+  if (SHADOW_OPTIONS.includes(e.shadow as never)) style.shadow = e.shadow as ResultShadow;
   return Object.keys(style).length ? style : undefined;
 }
 
@@ -142,11 +193,26 @@ export function resolveAppearance(raw: unknown): ResultAppearance | undefined {
   if (typeof e.heroIcon === "string" && /^[\w:.-]{1,80}$/.test(e.heroIcon)) a.heroIcon = e.heroIcon;
   const heroIconColor = safeColor(e.heroIconColor);
   if (heroIconColor) a.heroIconColor = heroIconColor;
+  if (ALIGNS.includes(e.heroAlign as never)) a.heroAlign = e.heroAlign as NonNullable<ResultAppearance["heroAlign"]>;
   const metricsMinWidth = between(e.metricsMinWidth, 96, 320);
   if (metricsMinWidth !== undefined) a.metricsMinWidth = metricsMinWidth;
   if (BUTTON_SHAPES.includes(e.buttonShape as never)) a.buttonShape = e.buttonShape as ResultAppearance["buttonShape"];
+  if (SHADOW_OPTIONS.includes(e.cardShadow as never)) a.cardShadow = e.cardShadow as ResultShadow;
+  const cardBackground = safeColor(e.cardBackground);
+  if (cardBackground) a.cardBackground = cardBackground;
+  const cardBorderColor = safeColor(e.cardBorderColor);
+  if (cardBorderColor) a.cardBorderColor = cardBorderColor;
+  const cardBorderWidth = px(e.cardBorderWidth, 8);
+  if (cardBorderWidth !== undefined) a.cardBorderWidth = cardBorderWidth;
   return Object.keys(a).length ? a : undefined;
 }
+
+export const SHADOW_CSS: Record<ResultShadow, string> = {
+  none: "none",
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+  md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+  lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+};
 
 /** The inline CSS of a block style. */
 export function blockStyleCss(style: ResultBlockStyle | undefined): Record<string, string> {
@@ -158,6 +224,12 @@ export function blockStyleCss(style: ResultBlockStyle | undefined): Record<strin
   if (style.padding !== undefined) css.padding = `${style.padding}px`;
   if (style.spaceBefore !== undefined) css.marginTop = `${style.spaceBefore}px`;
   if (style.align) css.textAlign = style.align === "center" ? "center" : style.align;
+  if (style.borderWidth !== undefined || style.borderColor) {
+    css.border = `${style.borderWidth ?? 1}px solid ${style.borderColor ?? "var(--sjs-border-light)"}`;
+  }
+  if (style.shadow && style.shadow !== "none") {
+    css.boxShadow = SHADOW_CSS[style.shadow];
+  }
   return css;
 }
 
@@ -195,6 +267,8 @@ export function resolveLayout(layout: unknown): ResultBlock[] {
       block.html = typeof entry.html === "string" ? entry.html.slice(0, MAX_HTML_LENGTH) : "";
     }
     if (type === "metrics") block.metrics = resolveMetrics(entry.metrics);
+    if (type === "callout") block.callout = resolveCallout(entry.callout);
+    if (type === "checklist") block.checklist = resolveChecklist(entry.checklist);
     if (entry.hidden === true) block.hidden = true;
     if (isTier(entry.tier)) block.tier = entry.tier;
     const style = resolveBlockStyle(entry.style);
@@ -210,10 +284,15 @@ export function missingBlocks(layout: ResultBlock[]): ResultBlock[] {
   return defaultLayout().filter((b) => !ids.has(b.id));
 }
 
-/** A new block of `type`: a built-in one by its id, or a fresh html or divider block. */
+/** A new block of `type`: a built-in one by its id, or a fresh custom block. */
 export function createBlock(
   type: ResultBlockType,
-  options: { placement?: ResultImagePlacement; html?: string } = {},
+  options: {
+    placement?: ResultImagePlacement;
+    html?: string;
+    callout?: ResultCallout;
+    checklist?: ResultChecklist;
+  } = {},
 ): ResultBlock {
   if (SINGLE.includes(type)) {
     const block: ResultBlock = { id: builtInId(type, options.placement), type };
@@ -223,6 +302,19 @@ export function createBlock(
   const block: ResultBlock = { id: newId(type), type };
   if (type === "html") block.html = options.html ?? "";
   if (type === "metrics") block.metrics = [];
+  if (type === "callout") {
+    block.callout = options.callout ?? {
+      type: "info",
+      title: "",
+      message: "",
+    };
+  }
+  if (type === "checklist") {
+    block.checklist = options.checklist ?? {
+      title: "",
+      items: [],
+    };
+  }
   return block;
 }
 

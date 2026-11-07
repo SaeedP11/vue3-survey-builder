@@ -2,19 +2,14 @@
 import { computed, nextTick, ref, useId, watch } from "vue";
 import type {
   ResultBlock,
-  ResultBlockStyle,
   ResultBlockType,
   ResultImagePlacement,
-  ResultMetric,
 } from "../types/index.ts";
-import { safeColor } from "../utils/statusTiers.ts";
 import { surveyResultEditor } from "../locales/index.ts";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import useBlockDrag, { dropSide } from "../composables/useBlockDrag.ts";
 import {
   MAX_BLOCKS,
-  MAX_HTML_LENGTH,
-  MAX_METRICS,
   createBlock,
   dropBlock,
   htmlBlockName,
@@ -23,7 +18,12 @@ import {
   moveBlock,
   type BlockDrag,
 } from "../utils/resultLayout.ts";
-import { newId } from "../utils/resultContent.ts";
+import ResultBlockPalette, { type PaletteItem } from "./ResultBlockPalette.vue";
+import ResultBlockStyleEditor from "./ResultBlockStyleEditor.vue";
+import ResultBlockHtmlEditor from "./ResultBlockHtmlEditor.vue";
+import ResultBlockMetricsEditor from "./ResultBlockMetricsEditor.vue";
+import ResultBlockCalloutEditor from "./ResultBlockCalloutEditor.vue";
+import ResultBlockChecklistEditor from "./ResultBlockChecklistEditor.vue";
 
 const layout = defineModel<ResultBlock[]>({ required: true });
 const selected = defineModel<string | null>("selected", { default: null });
@@ -47,11 +47,17 @@ const inputClass =
 const iconButton =
   "grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-fb-fg-muted hover:bg-fb-border hover:text-fb-fg disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-fb-accent";
 
-function labelOf(block: Pick<ResultBlock, "type" | "placement" | "html">) {
+function labelOf(block: Pick<ResultBlock, "type" | "placement" | "html" | "callout" | "checklist">) {
   if (block.type === "images") return t(`blocks.images.${block.placement}`);
   if (block.type === "html") {
     const name = htmlBlockName(block.html);
     if (name) return name;
+  }
+  if (block.type === "callout" && block.callout?.title) {
+    return block.callout.title;
+  }
+  if (block.type === "checklist" && block.checklist?.title) {
+    return block.checklist.title;
   }
   return t(`blocks.${block.type}`);
 }
@@ -80,43 +86,6 @@ function update(id: string, patch: Partial<ResultBlock>) {
     }),
   );
 }
-
-/** Sets one field of a block's style; `undefined` (or an empty value) unsets it, and the last one unsets the style. */
-function setStyle<K extends keyof ResultBlockStyle>(
-  block: ResultBlock,
-  key: K,
-  value: ResultBlockStyle[K] | undefined,
-) {
-  const style: ResultBlockStyle = { ...block.style };
-  if (value === undefined) delete style[key];
-  else style[key] = value;
-  update(block.id, { style });
-}
-
-/** A number input's value for the style: whole px, or unset when emptied. */
-function pxOf(event: Event): number | undefined {
-  const raw = (event.target as HTMLInputElement).value.trim();
-  const n = Number(raw);
-  return raw === "" || !Number.isFinite(n) ? undefined : n;
-}
-
-/** A colour text input's value: only a colour the page accepts is stored; empty unsets it. */
-function colorOf(event: Event, current: string | undefined): string | undefined {
-  const raw = (event.target as HTMLInputElement).value.trim();
-  if (raw === "") return undefined;
-  return safeColor(raw) ?? current;
-}
-
-const STYLE_COLORS = ["background", "color"] as const;
-const STYLE_SIZES = [
-  { key: "radius", max: 48 },
-  { key: "padding", max: 64 },
-  { key: "spaceBefore", max: 96 },
-] as const;
-const ALIGN_OPTIONS = ["start", "center", "end"] as const;
-
-/** A native colour picker needs #rrggbb; anything else shows black until picked. */
-const pickerValue = (c: string | undefined) => (c && /^#[0-9a-f]{6}$/i.test(c) ? c : "#000000");
 
 function move(index: number, by: -1 | 1) {
   setLayout(moveBlock(layout.value, index, by === -1 ? index - 1 : index + 2));
@@ -152,16 +121,11 @@ function add(type: ResultBlockType, placement?: ResultImagePlacement) {
 
 // ---- palette ----
 
-interface PaletteItem {
-  key: string;
-  type: ResultBlockType;
-  placement?: ResultImagePlacement;
-  label: string;
-}
-
 const palette = computed<PaletteItem[]>(() => [
   { key: "html", type: "html", label: t("blocks.html") },
   { key: "metrics", type: "metrics", label: t("blocks.metrics") },
+  { key: "callout", type: "callout", label: t("blocks.callout") },
+  { key: "checklist", type: "checklist", label: t("blocks.checklist") },
   { key: "divider", type: "divider", label: t("blocks.divider") },
   ...missingBlocks(layout.value).map((b) => ({
     key: b.id,
@@ -212,59 +176,6 @@ function onDragEnd() {
 const showIndicator = (index: number, side: "before" | "after") =>
   dropTarget.value?.index === index && dropTarget.value.side === side;
 
-// ---- metrics editing ----
-
-function updateMetric(block: ResultBlock, id: string, patch: Partial<ResultMetric>) {
-  update(block.id, {
-    metrics: (block.metrics ?? []).map((m) => {
-      if (m.id !== id) return m;
-      const next = { ...m, ...patch };
-      if (!next.unit) delete next.unit;
-      return next;
-    }),
-  });
-}
-
-function addMetric(block: ResultBlock) {
-  const metrics = block.metrics ?? [];
-  if (metrics.length >= MAX_METRICS) return;
-  update(block.id, {
-    metrics: [...metrics, { id: newId("metric"), label: "", value: "" }],
-  });
-}
-
-function removeMetric(block: ResultBlock, id: string) {
-  update(block.id, { metrics: (block.metrics ?? []).filter((m) => m.id !== id) });
-}
-
-// ---- HTML editing ----
-
-const htmlInput = ref<HTMLTextAreaElement>();
-
-const htmlVariables = computed(() => [
-  "$score",
-  "$status",
-  ...props.variables.filter((name) => !name.startsWith("$")),
-]);
-
-/** `name` as a placeholder: `{name}`. */
-const tokenOf = (name: string) => `{${name}}`;
-
-async function insertVariable(block: ResultBlock, name: string) {
-  const input = htmlInput.value;
-  const html = block.html ?? "";
-  const token = tokenOf(name);
-  const start = input?.selectionStart ?? html.length;
-  const end = input?.selectionEnd ?? html.length;
-  const next = (html.slice(0, start) + token + html.slice(end)).slice(0, MAX_HTML_LENGTH);
-  update(block.id, { html: next });
-  await nextTick();
-  if (input) {
-    input.focus();
-    input.setSelectionRange(start + token.length, start + token.length);
-  }
-}
-
 // A block selected on the preview comes into view in the list
 const rows = ref<Record<string, HTMLElement>>({});
 watch(selected, async (id) => {
@@ -277,6 +188,14 @@ watch(selected, async (id) => {
 <template>
   <div class="space-y-4">
     <p class="text-xs leading-snug text-fb-fg-muted">{{ t("layout.help") }}</p>
+
+    <ResultBlockPalette
+      :palette="palette"
+      :full="full"
+      @add="add"
+      @dragstart="(event, item) => drag.start(event, { kind: 'add', block: newBlock(item.type, item.placement) })"
+      @dragend="onDragEnd"
+    />
 
     <p
       v-if="layout.length === 0"
@@ -447,241 +366,49 @@ watch(selected, async (id) => {
               </select>
             </div>
 
-            <fieldset
+            <ResultBlockStyleEditor
               v-if="block.type !== 'divider'"
-              class="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
-              data-style
-            >
-              <legend class="mb-1 p-0 text-[11.5px] font-semibold text-fb-fg-secondary">
-                {{ t("layout.style.label") }}
-              </legend>
+              :model-value="block.style"
+              :uid="uid"
+              :index="index"
+              @update:model-value="update(block.id, { style: $event })"
+            />
 
-              <div class="flex flex-col gap-1">
-                <label
-                  :for="`${uid}-align-${index}`"
-                  class="text-[11.5px] text-fb-fg-muted"
-                  >{{ t("layout.style.align") }}</label
-                >
-                <select
-                  :id="`${uid}-align-${index}`"
-                  :value="block.style?.align ?? ''"
-                  :class="inputClass"
-                  @change="
-                    setStyle(
-                      block,
-                      'align',
-                      (($event.target as HTMLSelectElement).value || undefined) as ResultBlockStyle['align'],
-                    )
-                  "
-                >
-                  <option value="">{{ t("layout.style.default") }}</option>
-                  <option v-for="a in ALIGN_OPTIONS" :key="a" :value="a">
-                    {{ t(`layout.style.alignOptions.${a}`) }}
-                  </option>
-                </select>
-              </div>
+            <ResultBlockMetricsEditor
+              v-if="block.type === 'metrics'"
+              :model-value="block.metrics"
+              :variables="variables"
+              :uid="uid"
+              :index="index"
+              @update:model-value="update(block.id, { metrics: $event })"
+            />
 
-              <div class="grid grid-cols-2 gap-2">
-                <div v-for="key in STYLE_COLORS" :key="key" class="flex min-w-0 flex-col gap-1">
-                  <label
-                    :for="`${uid}-${key}-${index}`"
-                    class="text-[11.5px] text-fb-fg-muted"
-                    >{{ t(`layout.style.${key}`) }}</label
-                  >
-                  <div class="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      :value="pickerValue(block.style?.[key])"
-                      :aria-label="t(`layout.style.${key}`)"
-                      class="h-9 w-9 shrink-0 cursor-pointer rounded-lg border border-fb-border bg-fb-surface p-0.5"
-                      @input="setStyle(block, key, ($event.target as HTMLInputElement).value)"
-                    />
-                    <input
-                      :id="`${uid}-${key}-${index}`"
-                      type="text"
-                      dir="ltr"
-                      spellcheck="false"
-                      :value="block.style?.[key] ?? ''"
-                      :placeholder="t('layout.style.colorPlaceholder')"
-                      class="min-w-0 flex-1"
-                      :class="inputClass"
-                      @change="setStyle(block, key, colorOf($event, block.style?.[key]))"
-                    />
-                  </div>
-                </div>
-              </div>
+            <ResultBlockHtmlEditor
+              v-if="block.type === 'html'"
+              :model-value="block.html"
+              :variables="variables"
+              :uid="uid"
+              :index="index"
+              @update:model-value="update(block.id, { html: $event })"
+            />
 
-              <div class="grid grid-cols-3 gap-2">
-                <div v-for="size in STYLE_SIZES" :key="size.key" class="flex min-w-0 flex-col gap-1">
-                  <label
-                    :for="`${uid}-${size.key}-${index}`"
-                    class="text-[11.5px] text-fb-fg-muted"
-                    >{{ t(`layout.style.${size.key}`) }}</label
-                  >
-                  <input
-                    :id="`${uid}-${size.key}-${index}`"
-                    type="number"
-                    inputmode="numeric"
-                    min="0"
-                    :max="size.max"
-                    :value="block.style?.[size.key] ?? ''"
-                    :placeholder="t('layout.style.auto')"
-                    :class="inputClass"
-                    @change="setStyle(block, size.key, pxOf($event))"
-                  />
-                </div>
-              </div>
+            <ResultBlockCalloutEditor
+              v-if="block.type === 'callout'"
+              :model-value="block.callout"
+              :variables="variables"
+              :uid="uid"
+              :index="index"
+              @update:model-value="update(block.id, { callout: $event })"
+            />
 
-              <button
-                v-if="block.style"
-                type="button"
-                class="cursor-pointer self-start rounded-md border-0 bg-transparent px-1 py-0.5 text-[11.5px] font-semibold text-fb-accent hover:underline focus-visible:outline-2 focus-visible:outline-fb-accent"
-                data-style-reset
-                @click="update(block.id, { style: undefined })"
-              >
-                {{ t("layout.style.reset") }}
-              </button>
-            </fieldset>
-
-            <div v-if="block.type === 'metrics'" class="flex flex-col gap-2" data-metrics>
-              <span class="text-[11.5px] font-semibold text-fb-fg-secondary">{{
-                t("layout.metrics.label")
-              }}</span>
-              <p v-if="!block.metrics?.length" class="m-0 text-[11.5px] text-fb-fg-muted">
-                {{ t("layout.metrics.empty") }}
-              </p>
-              <div
-                v-for="(metric, m) in block.metrics"
-                :key="metric.id"
-                class="grid grid-cols-[1fr_1fr_5rem_auto] items-end gap-2 max-sm:grid-cols-2"
-                data-metric
-              >
-                <div class="flex min-w-0 flex-col gap-1">
-                  <label
-                    :for="`${uid}-m-label-${index}-${m}`"
-                    class="text-[11px] text-fb-fg-muted"
-                    >{{ t("layout.metrics.name") }}</label
-                  >
-                  <input
-                    :id="`${uid}-m-label-${index}-${m}`"
-                    :value="metric.label"
-                    type="text"
-                    :class="inputClass"
-                    @input="updateMetric(block, metric.id, { label: ($event.target as HTMLInputElement).value })"
-                  />
-                </div>
-                <div class="flex min-w-0 flex-col gap-1">
-                  <label
-                    :for="`${uid}-m-value-${index}-${m}`"
-                    class="text-[11px] text-fb-fg-muted"
-                    >{{ t("layout.metrics.value") }}</label
-                  >
-                  <input
-                    :id="`${uid}-m-value-${index}-${m}`"
-                    :value="metric.value"
-                    :list="`${uid}-m-vars`"
-                    type="text"
-                    dir="ltr"
-                    spellcheck="false"
-                    :class="inputClass"
-                    @input="updateMetric(block, metric.id, { value: ($event.target as HTMLInputElement).value })"
-                  />
-                </div>
-                <div class="flex min-w-0 flex-col gap-1">
-                  <label
-                    :for="`${uid}-m-unit-${index}-${m}`"
-                    class="text-[11px] text-fb-fg-muted"
-                    >{{ t("layout.metrics.unit") }}</label
-                  >
-                  <input
-                    :id="`${uid}-m-unit-${index}-${m}`"
-                    :value="metric.unit ?? ''"
-                    type="text"
-                    :class="inputClass"
-                    @input="updateMetric(block, metric.id, { unit: ($event.target as HTMLInputElement).value })"
-                  />
-                </div>
-                <button
-                  type="button"
-                  :class="iconButton"
-                  :aria-label="t('layout.metrics.remove')"
-                  :title="t('layout.metrics.remove')"
-                  data-remove-metric
-                  @click="removeMetric(block, metric.id)"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  </svg>
-                </button>
-              </div>
-              <datalist :id="`${uid}-m-vars`">
-                <option v-for="name in htmlVariables" :key="name" :value="name" />
-              </datalist>
-              <button
-                type="button"
-                class="w-fit cursor-pointer rounded-lg border border-fb-border bg-fb-surface px-3 py-1.5 text-[12.5px] font-semibold text-fb-fg hover:border-fb-accent hover:bg-fb-accent-soft disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-fb-accent"
-                :disabled="(block.metrics?.length ?? 0) >= MAX_METRICS"
-                data-add-metric
-                @click="addMetric(block)"
-              >
-                {{ t("layout.metrics.add") }}
-              </button>
-              <p class="m-0 text-[11px] leading-snug text-fb-fg-muted">
-                {{ t("layout.metrics.help") }}
-              </p>
-            </div>
-
-            <div v-if="block.type === 'html'" class="flex flex-col gap-1.5">
-              <label
-                :for="`${uid}-html-${index}`"
-                class="text-[11.5px] font-semibold text-fb-fg-secondary"
-                >{{ t("layout.html.label") }}</label
-              >
-              <textarea
-                :id="`${uid}-html-${index}`"
-                :ref="(el) => (htmlInput = (el as HTMLTextAreaElement) ?? undefined)"
-                :value="block.html ?? ''"
-                rows="9"
-                dir="ltr"
-                spellcheck="false"
-                :maxlength="MAX_HTML_LENGTH"
-                :aria-describedby="`${uid}-html-help-${index}`"
-                class="resize-y font-['JetBrains_Mono',ui-monospace,monospace] text-[12px] leading-relaxed"
-                :class="inputClass"
-                @input="update(block.id, { html: ($event.target as HTMLTextAreaElement).value })"
-              />
-              <div class="flex items-start justify-between gap-3">
-                <p
-                  :id="`${uid}-html-help-${index}`"
-                  class="m-0 text-[11px] leading-snug text-fb-fg-muted"
-                >
-                  {{ t("layout.html.help") }}
-                </p>
-                <span class="shrink-0 text-[11px] tabular-nums text-fb-fg-muted">{{
-                  t("layout.html.count", { n: (block.html ?? "").length, max: MAX_HTML_LENGTH })
-                }}</span>
-              </div>
-
-              <div class="mt-1 flex flex-col gap-1.5">
-                <span class="text-[11.5px] font-semibold text-fb-fg-secondary">{{
-                  t("layout.html.variables")
-                }}</span>
-                <div class="flex flex-wrap gap-1.5" dir="ltr">
-                  <button
-                    v-for="name in htmlVariables"
-                    :key="name"
-                    type="button"
-                    class="cursor-pointer rounded-md border border-fb-border bg-fb-surface-muted px-2 py-1 font-['JetBrains_Mono',ui-monospace,monospace] text-[11px] text-fb-fg hover:border-fb-accent hover:bg-fb-accent-soft focus-visible:outline-2 focus-visible:outline-fb-accent"
-                    @click="insertVariable(block, name)"
-                  >
-                    {{ tokenOf(name) }}
-                  </button>
-                </div>
-                <p class="m-0 text-[11px] leading-snug text-fb-fg-muted">
-                  {{ t("layout.html.variablesHelp") }}
-                </p>
-              </div>
-            </div>
+            <ResultBlockChecklistEditor
+              v-if="block.type === 'checklist'"
+              :model-value="block.checklist"
+              :variables="variables"
+              :uid="uid"
+              :index="index"
+              @update:model-value="update(block.id, { checklist: $event })"
+            />
           </div>
         </div>
 
@@ -702,39 +429,6 @@ watch(selected, async (id) => {
       @drop="onDropEnd"
     >
       {{ t("layout.dropHere") }}
-    </div>
-
-    <div class="space-y-2 rounded-lg bg-fb-surface-muted/50 p-3">
-      <span class="block text-[12px] font-semibold text-fb-fg-secondary">{{ t("layout.add") }}</span>
-      <p class="m-0 text-[11px] leading-snug text-fb-fg-muted">
-        {{ full ? t("layout.full", { max: MAX_BLOCKS }) : t("layout.addHelp") }}
-      </p>
-      <div class="flex flex-wrap gap-1.5">
-        <!-- Not a <button>: browsers do not drag those (Firefox never does) -->
-        <div
-          v-for="item in palette"
-          :key="item.key"
-          role="button"
-          :tabindex="full ? -1 : 0"
-          :draggable="full ? 'false' : 'true'"
-          :aria-disabled="full ? 'true' : undefined"
-          class="flex select-none items-center gap-1.5 rounded-lg border border-fb-border bg-fb-surface px-2.5 py-1.5 text-xs font-semibold text-fb-fg focus-visible:outline-2 focus-visible:outline-fb-accent"
-          :class="
-            full
-              ? 'cursor-not-allowed opacity-50'
-              : 'cursor-grab hover:border-fb-accent active:cursor-grabbing'
-          "
-          :data-palette="item.key"
-          @click="!full && add(item.type, item.placement)"
-          @keydown.enter.prevent="!full && add(item.type, item.placement)"
-          @keydown.space.prevent="!full && add(item.type, item.placement)"
-          @dragstart="drag.start($event, { kind: 'add', block: newBlock(item.type, item.placement) })"
-          @dragend="onDragEnd"
-        >
-          <span aria-hidden="true" class="text-fb-fg-muted">+</span>
-          {{ item.label }}
-        </div>
-      </div>
     </div>
   </div>
 </template>

@@ -38,7 +38,9 @@
     "actions": "Buttons",
     "html": "HTML",
     "divider": "Divider",
-    "metrics": "Values"
+    "metrics": "Values",
+    "callout": "Notice box",
+    "checklist": "Recommendations checklist"
   },
   "canvas": {
     "drag": "Drag to move",
@@ -48,6 +50,8 @@
     "show": "Show on the result page",
     "hidden": "Hidden",
     "emptyHtml": "Empty HTML block: write its HTML in the Layout panel.",
+    "emptyCallout": "Empty notice box: configure it in the Layout panel.",
+    "emptyChecklist": "Empty checklist: add items in the Layout panel.",
     "dropHere": "Drop here to put the block last",
     "emptyLayout": "This page has no blocks yet. Drag one here from the Layout panel."
   }

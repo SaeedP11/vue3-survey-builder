@@ -410,6 +410,7 @@ describe("tabs", () => {
       T.tabs.score,
       T.tabs.images,
       T.tabs.actions,
+      T.tabs.appearance,
     ]);
     expect(shown(child, "layout")).toBe(true);
     expect(shown(child, "content")).toBe(false);
@@ -419,7 +420,7 @@ describe("tabs", () => {
     expect(shown(child, "content")).toBe(true);
     expect(shown(child, "layout")).toBe(false);
     // Only the selected tab is in the Tab order
-    expect(tabs(child).map((t) => t.attributes("tabindex"))).toEqual(["-1", "0", "-1", "-1", "-1"]);
+    expect(tabs(child).map((t) => t.attributes("tabindex"))).toEqual(["-1", "0", "-1", "-1", "-1", "-1"]);
   });
 
   test("the tab strip hides its scrollbars against a host's forced ones", () => {
@@ -437,11 +438,20 @@ describe("tabs", () => {
     expect(selected(child)).toBe("content");
     await tab(child, "content").trigger("keydown", { key: "ArrowLeft" });
     await tab(child, "layout").trigger("keydown", { key: "ArrowLeft" });
-    expect(selected(child)).toBe("actions");
-    await tab(child, "actions").trigger("keydown", { key: "Home" });
+    expect(selected(child)).toBe("appearance");
+    await tab(child, "appearance").trigger("keydown", { key: "Home" });
     expect(selected(child)).toBe("layout");
     await tab(child, "layout").trigger("keydown", { key: "End" });
-    expect(selected(child)).toBe("actions");
+    expect(selected(child)).toBe("appearance");
+  });
+
+  test("shows ResultAppearanceEditor when appearance tab is clicked", async () => {
+    const { child } = setup();
+    expect(shown(child, "appearance")).toBe(false);
+    await tab(child, "appearance").trigger("click");
+    expect(selected(child)).toBe("appearance");
+    expect(shown(child, "appearance")).toBe(true);
+    expect(child.find("[data-appearance]").exists()).toBe(true);
   });
 
   test("count the images and buttons", () => {

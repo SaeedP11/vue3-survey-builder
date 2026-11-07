@@ -263,12 +263,55 @@ describe("metrics editing", () => {
   });
 });
 
+describe("callout and checklist editing", () => {
+  test("adds and edits a callout block", async () => {
+    const { paletteItem, wrapper, layout } = setup({ selected: "hero" });
+    await paletteItem("callout").trigger("click");
+    const block = () => layout.value.find((b) => b.type === "callout")!;
+    expect(block()).toBeDefined();
+
+    const titleInput = wrapper.get("[data-callout-title]");
+    await titleInput.setValue("Notice title");
+    expect(block().callout?.title).toBe("Notice title");
+
+    const messageInput = wrapper.get("[data-callout-message]");
+    await messageInput.setValue("Detailed advice here");
+    expect(block().callout?.message).toBe("Detailed advice here");
+
+    const select = wrapper.get("[data-callout-type]");
+    await select.setValue("warning");
+    expect(block().callout?.type).toBe("warning");
+  });
+
+  test("adds and edits a checklist block", async () => {
+    const { paletteItem, wrapper, layout } = setup({ selected: "hero" });
+    await paletteItem("checklist").trigger("click");
+    const block = () => layout.value.find((b) => b.type === "checklist")!;
+    expect(block().checklist?.items).toEqual([]);
+
+    await wrapper.get("[data-checklist-title]").setValue("Action Plan");
+    expect(block().checklist?.title).toBe("Action Plan");
+
+    await wrapper.get("[data-add-item]").trigger("click");
+    expect(block().checklist?.items).toHaveLength(1);
+
+    const textInput = wrapper.get("[data-checklist-item] input[type=text]");
+    await textInput.setValue("First task");
+    expect(block().checklist?.items[0].text).toBe("First task");
+
+    await wrapper.get("[data-remove-item]").trigger("click");
+    expect(block().checklist?.items).toEqual([]);
+  });
+});
+
 describe("the palette", () => {
   test("offers HTML, a divider and the built-in blocks left out", () => {
     const { wrapper } = setup({ layout: [{ id: "score", type: "score" }] });
     expect(wrapper.findAll("[data-palette]").map((b) => b.attributes("data-palette"))).toEqual([
       "html",
       "metrics",
+      "callout",
+      "checklist",
       "divider",
       "images-banner",
       "hero",

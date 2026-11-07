@@ -509,4 +509,93 @@ describe("a block's look", () => {
     });
     expect((view.find("[data-block=note]").element as HTMLElement).style.background).toBe("");
   });
+
+  test("applies border and shadow to a block", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      layout: [
+        {
+          id: "callout-1",
+          type: "callout",
+          callout: { title: "Title", message: "Msg" },
+          style: { borderWidth: 2, borderColor: "#ff0000", shadow: "md" },
+        },
+      ],
+    });
+    const el = view.find("[data-block=callout]").element as HTMLElement;
+    expect(el.style.border).toBe("2px solid rgb(255, 0, 0)");
+    expect(el.style.boxShadow).toContain("rgba(0, 0, 0, 0.1)");
+  });
+});
+
+describe("callout and checklist blocks", () => {
+  test("renders a callout block with variant and variables", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      score: 85,
+      layout: [
+        {
+          id: "c1",
+          type: "callout",
+          callout: {
+            type: "warning",
+            title: "Score notice",
+            message: "Your score {$score} needs review.",
+          },
+        },
+      ],
+    });
+    const callout = view.find("[data-block='callout']");
+    expect(callout.exists()).toBe(true);
+    expect(callout.text()).toContain("Score notice");
+    expect(callout.text()).toContain("Your score 85 needs review.");
+  });
+
+  test("renders a checklist block with items and completed styles", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      layout: [
+        {
+          id: "chk1",
+          type: "checklist",
+          checklist: {
+            title: "Next Steps",
+            items: [
+              { id: "1", text: "Task A", checked: true },
+              { id: "2", text: "Task B", checked: false },
+            ],
+          },
+        },
+      ],
+    });
+    const chk = view.find("[data-block='checklist']");
+    expect(chk.exists()).toBe(true);
+    expect(chk.text()).toContain("Next Steps");
+    expect(chk.text()).toContain("Task A");
+    expect(chk.text()).toContain("Task B");
+  });
+});
+
+describe("page-wide card appearance", () => {
+  test("applies cardBackground, cardBorder, cardShadow, and heroAlign", () => {
+    const view = render({
+      ...getDefaultProps("en"),
+      appearance: {
+        cardBackground: "#fafafa",
+        cardBorderColor: "#333333",
+        cardBorderWidth: 2,
+        cardShadow: "lg",
+        heroAlign: "start",
+      },
+      layout: [{ id: "hero", type: "hero" }],
+    });
+    const card = view.element.firstElementChild as HTMLElement;
+    expect(card.style.backgroundColor).toBe("rgb(250, 250, 250)");
+    expect(card.style.border).toBe("2px solid rgb(51, 51, 51)");
+    expect(card.style.boxShadow).toContain("rgba(0, 0, 0, 0.1)");
+
+    const hero = view.find("[data-block=hero] .gap-3\\.25");
+    expect(hero.classes()).toContain("items-start");
+    expect(hero.classes()).toContain("text-start");
+  });
 });

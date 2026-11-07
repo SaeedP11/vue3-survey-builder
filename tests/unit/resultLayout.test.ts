@@ -17,6 +17,8 @@ import {
   blockStyleCss,
   resolveAppearance,
   resolveLayout,
+  resolveCallout,
+  resolveChecklist,
 } from "../../src/utils/resultLayout.ts";
 
 const ids = (layout: ResultBlock[]) => layout.map((b) => b.id);
@@ -319,6 +321,36 @@ describe("metrics blocks", () => {
 
   test("createBlock makes an empty one", () => {
     expect(createBlock("metrics")).toMatchObject({ type: "metrics", metrics: [] });
+    expect(createBlock("callout")).toMatchObject({
+      type: "callout",
+      callout: { type: "info", title: "", message: "" },
+    });
+    expect(createBlock("checklist")).toMatchObject({
+      type: "checklist",
+      checklist: { title: "", items: [] },
+    });
+  });
+
+  test("resolveCallout sanitizes callout blocks", () => {
+    expect(resolveCallout(undefined)).toBeUndefined();
+    expect(resolveCallout({ type: "invalid", title: "Test", message: "Msg" })).toEqual({
+      type: "info",
+      title: "Test",
+      message: "Msg",
+    });
+    expect(resolveCallout({ type: "warning", title: "Notice", message: "Be careful" })).toEqual({
+      type: "warning",
+      title: "Notice",
+      message: "Be careful",
+    });
+  });
+
+  test("resolveChecklist sanitizes checklist blocks", () => {
+    expect(resolveChecklist(undefined)).toBeUndefined();
+    expect(resolveChecklist({ title: "Tasks", items: [{ id: "1", text: "Walk", checked: true }, null] })).toEqual({
+      title: "Tasks",
+      items: [{ id: "1", text: "Walk", checked: true }],
+    });
   });
 });
 
@@ -351,12 +383,23 @@ describe("block style", () => {
 
   test("blockStyleCss maps the style to inline CSS", () => {
     expect(blockStyleCss(undefined)).toEqual({});
-    expect(blockStyleCss({ align: "end", background: "#000", radius: 8, padding: 4, spaceBefore: 2 })).toEqual({
+    expect(blockStyleCss({
+      align: "end",
+      background: "#000",
+      radius: 8,
+      padding: 4,
+      spaceBefore: 2,
+      borderWidth: 2,
+      borderColor: "#eee",
+      shadow: "sm",
+    })).toEqual({
       backgroundColor: "#000",
       borderRadius: "8px",
       padding: "4px",
       marginTop: "2px",
       textAlign: "end",
+      border: "2px solid #eee",
+      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
     });
   });
 
@@ -385,10 +428,24 @@ describe("resolveAppearance", () => {
   });
 
   test("keeps only false toggles and known shapes", () => {
-    expect(resolveAppearance({ showHeader: false, showHeroIcon: false, buttonShape: "pill" })).toEqual({
+    expect(resolveAppearance({
       showHeader: false,
       showHeroIcon: false,
       buttonShape: "pill",
+      heroAlign: "center",
+      cardShadow: "md",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#cccccc",
+      cardBorderWidth: 2,
+    })).toEqual({
+      showHeader: false,
+      showHeroIcon: false,
+      buttonShape: "pill",
+      heroAlign: "center",
+      cardShadow: "md",
+      cardBackground: "#ffffff",
+      cardBorderColor: "#cccccc",
+      cardBorderWidth: 2,
     });
     expect(resolveAppearance({ buttonShape: "blob" })).toBeUndefined();
   });

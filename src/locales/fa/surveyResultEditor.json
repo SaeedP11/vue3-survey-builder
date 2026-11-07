@@ -27,6 +27,7 @@
     "score": "امتیاز",
     "images": "تصاویر",
     "actions": "دکمه‌ها",
+    "appearance": "ظاهر و پوسته",
     "needsAttention": "نیاز به بررسی"
   },
   "groups": {
@@ -219,6 +220,15 @@
       "radius": "گردی گوشه (px)",
       "padding": "فاصله داخلی (px)",
       "spaceBefore": "فاصله بالا (px)",
+      "borderWidth": "ضخامت حاشیه (px)",
+      "borderColor": "رنگ حاشیه",
+      "shadow": "سایه",
+      "shadowOptions": {
+        "none": "بدون سایه",
+        "sm": "کوچک",
+        "md": "متوسط",
+        "lg": "بزرگ"
+      },
       "auto": "خودکار",
       "reset": "بازنشانی ظاهر"
     },
@@ -239,6 +249,11 @@
       "chipColor": "رنگ متن برچسب",
       "heroIcon": "آیکون اصلی",
       "heroIconColor": "رنگ آیکون اصلی",
+      "heroAlign": "تراز عنوان اصلی",
+      "cardShadow": "سایه کارت",
+      "cardBackground": "پس‌زمینه کارت",
+      "cardBorderColor": "رنگ حاشیه کارت",
+      "cardBorderWidth": "ضخامت حاشیه کارت (px)",
       "showHeader": "نمایش سربرگ برند",
       "showHeroIcon": "نمایش آیکون اصلی",
       "reset": "بازنشانی ظاهر صفحه"
@@ -275,6 +290,29 @@
       "count": "{n} / {max} نویسه",
       "starterTitle": "قدم بعدی",
       "starterText": "پیام خود را اینجا بنویسید."
+    },
+    "callout": {
+      "label": "کادر پیام",
+      "type": "نوع کادر",
+      "types": {
+        "info": "اطلاعات",
+        "success": "موفقیت",
+        "warning": "هشدار",
+        "danger": "مهم / خطر"
+      },
+      "title": "عنوان",
+      "titlePlaceholder": "مثلاً توصیه مهم",
+      "message": "متن پیام",
+      "messagePlaceholder": "پیام یا توصیه خود را اینجا بنویسید..."
+    },
+    "checklist": {
+      "label": "چک‌لیست توصیه‌ها",
+      "title": "عنوان",
+      "titlePlaceholder": "مثلاً اقدامات پیشنهادی بعدی",
+      "add": "افزودن مورد",
+      "itemPlaceholder": "متن مورد چک‌لیست",
+      "empty": "هنوز موردی اضافه نشده است.",
+      "checked": "تکمیل شده"
     }
   },
   "moveUp": "انتقال به بالا",

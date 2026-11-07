@@ -48,6 +48,7 @@ import {
   htmlBlockName,
   moveBlock,
   resolveLayout,
+  SHADOW_CSS,
   type BlockDrag,
 } from "../../utils/resultLayout.ts";
 import {
@@ -145,11 +146,21 @@ const SHAPE_CLASS = {
   square: "rounded-none",
 } as const;
 
-const cardStyle = computed(() => ({
-  maxWidth: look.value.maxWidth ? `${look.value.maxWidth}px` : undefined,
-  borderRadius:
-    look.value.radius !== undefined ? `${look.value.radius}px` : undefined,
-}));
+const cardStyle = computed(() => {
+  const css: Record<string, string | undefined> = {
+    maxWidth: look.value.maxWidth ? `${look.value.maxWidth}px` : undefined,
+    borderRadius:
+      look.value.radius !== undefined ? `${look.value.radius}px` : undefined,
+  };
+  if (look.value.cardBackground) css.backgroundColor = look.value.cardBackground;
+  if (look.value.cardBorderColor || look.value.cardBorderWidth !== undefined) {
+    css.border = `${look.value.cardBorderWidth ?? 1}px solid ${look.value.cardBorderColor ?? "var(--sjs-border-light)"}`;
+  }
+  if (look.value.cardShadow && look.value.cardShadow !== "none") {
+    css.boxShadow = SHADOW_CSS[look.value.cardShadow];
+  }
+  return css;
+});
 const chipStyle = computed(() => ({
   background: look.value.chipBackground,
   borderColor: look.value.chipBackground,
@@ -329,6 +340,55 @@ const blockMetrics = computed(() => {
   return out;
 });
 
+/** Each callout block's rendered title and message. */
+const blockCallouts = computed(() => {
+  const values = templateValues.value;
+  const out: Record<string, { type: string; title: string; message: string }> = {};
+  for (const block of layout.value) {
+    if (block.type !== "callout") continue;
+    const c = block.callout;
+    const title = c?.title ? (values ? fillText(c.title, values, (name) => name.startsWith("$")) : c.title) : "";
+    const message = c?.message ? (values ? fillText(c.message, values, (name) => name.startsWith("$")) : c.message) : "";
+    out[block.id] = {
+      type: c?.type ?? "info",
+      title,
+      message,
+    };
+  }
+  return out;
+});
+
+/** Each checklist block's rendered items. */
+const blockChecklists = computed(() => {
+  const values = templateValues.value;
+  const out: Record<string, { title: string; items: { id: string; text: string; checked: boolean }[] }> = {};
+  for (const block of layout.value) {
+    if (block.type !== "checklist") continue;
+    const c = block.checklist;
+    const title = c?.title ? (values ? fillText(c.title, values, (name) => name.startsWith("$")) : c.title) : "";
+    const items = (c?.items ?? []).map((it) => ({
+      id: it.id,
+      text: it.text ? (values ? fillText(it.text, values, (name) => name.startsWith("$")) : it.text) : "",
+      checked: !!it.checked,
+    }));
+    out[block.id] = { title, items };
+  }
+  return out;
+});
+
+function calloutClasses(type: string | undefined) {
+  switch (type) {
+    case "success":
+      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-950 dark:text-emerald-200";
+    case "warning":
+      return "border-amber-500/30 bg-amber-500/10 text-amber-950 dark:text-amber-200";
+    case "danger":
+      return "border-rose-500/30 bg-rose-500/10 text-rose-950 dark:text-rose-200";
+    default:
+      return "border-sky-500/30 bg-sky-500/10 text-sky-950 dark:text-sky-200";
+  }
+}
+
 function hasContent(block: ResultBlock): boolean {
   switch (block.type) {
     case "note":
@@ -339,6 +399,10 @@ function hasContent(block: ResultBlock): boolean {
       return actions.value.length > 0;
     case "metrics":
       return props.preview || (blockMetrics.value[block.id]?.length ?? 0) > 0;
+    case "callout":
+      return props.preview || !!(block.callout?.title?.trim() || block.callout?.message?.trim());
+    case "checklist":
+      return props.preview || (block.checklist?.items?.length ?? 0) > 0 || !!block.checklist?.title?.trim();
     case "html":
       // The editor shows an empty block, with a hint, so it can be found
       return props.preview || !!blockHtml.value[block.id];
@@ -359,7 +423,10 @@ const isBanner = (block: ResultBlock) =>
 
 const blockLabel = (block: ResultBlock) => {
   if (block.type === "images") return t(`blocks.images.${block.placement}`);
-  return (block.type === "html" && htmlBlockName(block.html)) || t(`blocks.${block.type}`);
+  if (block.type === "html") return htmlBlockName(block.html) || t("blocks.html");
+  if (block.type === "callout") return block.callout?.title || t("blocks.callout");
+  if (block.type === "checklist") return block.checklist?.title || t("blocks.checklist");
+  return t(`blocks.${block.type}`);
 };
 
 /** In the preview: the scores a button shows for, as its tier's label or a range. */
@@ -550,7 +617,12 @@ const themeVars = computed<Record<string, string>>(() => {
 
             <div
               v-else-if="block.type === 'hero'"
-              class="flex flex-col items-center text-center gap-3.25"
+              class="flex flex-col gap-3.25"
+              :class="[
+                look.heroAlign === 'start' ? 'items-start text-start' :
+                look.heroAlign === 'end' ? 'items-end text-end' :
+                'items-center text-center'
+              ]"
             >
               <div
                 v-if="look.showHeroIcon !== false"
@@ -735,6 +807,153 @@ const themeVars = computed<Record<string, string>>(() => {
                 </dd>
               </div>
             </dl>
+
+            <div
+              v-else-if="block.type === 'callout'"
+              class="flex items-start gap-3 rounded-xl border p-4 text-start font-fb"
+              :class="calloutClasses(blockCallouts[block.id]?.type)"
+              data-block="callout"
+            >
+              <div class="mt-0.5 shrink-0">
+                <!-- Success icon -->
+                <svg
+                  v-if="blockCallouts[block.id]?.type === 'success'"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <!-- Warning icon -->
+                <svg
+                  v-else-if="blockCallouts[block.id]?.type === 'warning'"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <!-- Danger icon -->
+                <svg
+                  v-else-if="blockCallouts[block.id]?.type === 'danger'"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <!-- Info icon (default) -->
+                <svg
+                  v-else
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+              </div>
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <h4
+                  v-if="blockCallouts[block.id]?.title"
+                  class="m-0 text-sm font-bold leading-snug"
+                >
+                  {{ blockCallouts[block.id]?.title }}
+                </h4>
+                <p
+                  v-if="blockCallouts[block.id]?.message"
+                  class="m-0 whitespace-pre-line text-xs leading-relaxed opacity-90 sm:text-[13px]"
+                >
+                  {{ blockCallouts[block.id]?.message }}
+                </p>
+                <p
+                  v-else-if="preview && !blockCallouts[block.id]?.title"
+                  class="m-0 text-xs italic opacity-60"
+                >
+                  {{ t("canvas.emptyCallout") }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-else-if="block.type === 'checklist'"
+              class="flex flex-col gap-2.5 rounded-xl border border-[var(--sjs-border-light)] bg-[var(--sjs-general-backcolor-dim)]/50 p-4 text-start font-fb"
+              data-block="checklist"
+            >
+              <h4
+                v-if="blockChecklists[block.id]?.title"
+                class="m-0 text-[14px] font-bold text-[var(--sjs-general-forecolor)]"
+              >
+                {{ blockChecklists[block.id]?.title }}
+              </h4>
+              <ul
+                v-if="blockChecklists[block.id]?.items?.length"
+                class="m-0 flex list-none flex-col gap-2 p-0"
+              >
+                <li
+                  v-for="item in blockChecklists[block.id]?.items"
+                  :key="item.id"
+                  class="flex items-start gap-2.5 text-xs leading-relaxed text-[var(--sjs-general-forecolor)] sm:text-[13px]"
+                >
+                  <span
+                    class="mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md border text-[11px]"
+                    :class="
+                      item.checked
+                        ? 'border-emerald-500 bg-emerald-500/15 text-emerald-600'
+                        : 'border-[var(--sjs-border-default)] bg-[var(--sjs-general-backcolor)] text-transparent'
+                    "
+                  >
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span :class="item.checked ? 'line-through opacity-75' : ''">
+                    {{ item.text }}
+                  </span>
+                </li>
+              </ul>
+              <p
+                v-else-if="preview"
+                class="m-0 text-xs italic opacity-60"
+              >
+                {{ t("canvas.emptyChecklist") }}
+              </p>
+            </div>
 
             <hr
               v-else-if="block.type === 'divider'"

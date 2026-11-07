@@ -22,10 +22,13 @@ const SIZES = [
   { key: "radius", min: 0, max: 48 },
   { key: "gap", min: 0, max: 64 },
   { key: "metricsMinWidth", min: 96, max: 320 },
+  { key: "cardBorderWidth", min: 0, max: 8 },
 ] as const;
-const COLORS = ["chipBackground", "chipColor", "heroIconColor"] as const;
+const COLORS = ["chipBackground", "chipColor", "heroIconColor", "cardBackground", "cardBorderColor"] as const;
 const TOGGLES = ["showHeader", "showHeroIcon"] as const;
 const SHAPES = ["rounded", "pill", "square"] as const;
+const SHADOW_OPTIONS = ["none", "sm", "md", "lg"] as const;
+const HERO_ALIGNS = ["start", "center", "end"] as const;
 
 const pickerValue = (c: string | undefined) => (c && /^#[0-9a-f]{6}$/i.test(c) ? c : "#000000");
 
@@ -77,27 +80,75 @@ function colorOf(event: Event, current: string | undefined): string | undefined 
       </div>
     </div>
 
-    <div class="flex flex-col gap-1">
-      <label :for="`${uid}-buttonShape`" class="text-[11.5px] text-fb-fg-muted">{{
-        t("layout.appearance.buttonShape")
-      }}</label>
-      <select
-        :id="`${uid}-buttonShape`"
-        :value="appearance?.buttonShape ?? ''"
-        :class="inputClass"
-        data-appearance-field="buttonShape"
-        @change="
-          set(
-            'buttonShape',
-            (($event.target as HTMLSelectElement).value || undefined) as ResultAppearance['buttonShape'],
-          )
-        "
-      >
-        <option value="">{{ t("layout.style.default") }}</option>
-        <option v-for="shape in SHAPES" :key="shape" :value="shape">
-          {{ t(`layout.appearance.shapes.${shape}`) }}
-        </option>
-      </select>
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div class="flex flex-col gap-1">
+        <label :for="`${uid}-buttonShape`" class="text-[11.5px] text-fb-fg-muted">{{
+          t("layout.appearance.buttonShape")
+        }}</label>
+        <select
+          :id="`${uid}-buttonShape`"
+          :value="appearance?.buttonShape ?? ''"
+          :class="inputClass"
+          data-appearance-field="buttonShape"
+          @change="
+            set(
+              'buttonShape',
+              (($event.target as HTMLSelectElement).value || undefined) as ResultAppearance['buttonShape'],
+            )
+          "
+        >
+          <option value="">{{ t("layout.style.default") }}</option>
+          <option v-for="shape in SHAPES" :key="shape" :value="shape">
+            {{ t(`layout.appearance.shapes.${shape}`) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label :for="`${uid}-cardShadow`" class="text-[11.5px] text-fb-fg-muted">{{
+          t("layout.appearance.cardShadow")
+        }}</label>
+        <select
+          :id="`${uid}-cardShadow`"
+          :value="appearance?.cardShadow ?? ''"
+          :class="inputClass"
+          data-appearance-field="cardShadow"
+          @change="
+            set(
+              'cardShadow',
+              (($event.target as HTMLSelectElement).value || undefined) as ResultAppearance['cardShadow'],
+            )
+          "
+        >
+          <option value="">{{ t("layout.style.default") }}</option>
+          <option v-for="sh in SHADOW_OPTIONS" :key="sh" :value="sh">
+            {{ t(`layout.style.shadowOptions.${sh}`) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label :for="`${uid}-heroAlign`" class="text-[11.5px] text-fb-fg-muted">{{
+          t("layout.appearance.heroAlign")
+        }}</label>
+        <select
+          :id="`${uid}-heroAlign`"
+          :value="appearance?.heroAlign ?? ''"
+          :class="inputClass"
+          data-appearance-field="heroAlign"
+          @change="
+            set(
+              'heroAlign',
+              (($event.target as HTMLSelectElement).value || undefined) as ResultAppearance['heroAlign'],
+            )
+          "
+        >
+          <option value="">{{ t("layout.style.default") }}</option>
+          <option v-for="align in HERO_ALIGNS" :key="align" :value="align">
+            {{ t(`layout.style.alignOptions.${align}`) }}
+          </option>
+        </select>
+      </div>
     </div>
 
     <div v-if="picker" class="flex flex-col gap-1">

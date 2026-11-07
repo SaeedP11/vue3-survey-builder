@@ -266,8 +266,8 @@ function updateTableRow(
 
 // ---- tabs ----
 
-type Tab = "layout" | "content" | "score" | "images" | "actions";
-const TABS: Tab[] = ["layout", "content", "score", "images", "actions"];
+type Tab = "layout" | "content" | "score" | "images" | "actions" | "appearance";
+const TABS: Tab[] = ["layout", "content", "score", "images", "actions", "appearance"];
 
 const tab = ref<Tab>("layout");
 const root = ref<HTMLElement>();
@@ -396,7 +396,6 @@ watch(selectedBlock, (id) => {
         :edit-label="(block) => { const target = blockTab(block); return target && t(`tabs.${target}`); }"
         @edit="editBlock"
       />
-      <ResultAppearanceEditor v-model="appearance" class="mt-6 border-t border-fb-border pt-5" />
     </div>
 
     <!-- Content: the hero, the note and the brand -->
@@ -755,6 +754,17 @@ watch(selectedBlock, (id) => {
         :min="props.min"
         :max="props.max"
       />
+    </div>
+
+    <!-- Appearance / Theme -->
+    <div
+      v-show="tab === 'appearance'"
+      :id="`${uid}-panel-appearance`"
+      role="tabpanel"
+      :aria-labelledby="`${uid}-tab-appearance`"
+      class="px-4 py-5 sm:px-6"
+    >
+      <ResultAppearanceEditor v-model="appearance" />
     </div>
   </div>
 </template>
