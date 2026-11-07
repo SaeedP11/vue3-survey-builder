@@ -41,7 +41,8 @@ describe("IconPicker", () => {
   test("filters icons by name, showing at most 80", async () => {
     const { creator, search, icons } = setup();
     renderHeader(creator.survey).click();
-    await nextTick();
+    await flush();
+    await flush();
     expect(icons().length).toBe(80);
 
     await search().setValue("heartpulse");
@@ -53,7 +54,7 @@ describe("IconPicker", () => {
     const { creator, search, icons, child } = setup();
     const logo = renderHeader(creator.survey);
     logo.click();
-    await nextTick();
+    await flush();
     await search().setValue("heartpulse");
     const name = icons()[0].attributes("title")!;
     await icons()[0].trigger("click");
@@ -64,9 +65,10 @@ describe("IconPicker", () => {
     expect(child.find("input.search-input").exists()).toBe(false);
   });
 
-  test("draws the icon saved in the JSON when the header renders", () => {
+  test("draws the icon saved in the JSON when the header renders", async () => {
     const { creator } = setup({ icon: "HeartPulse" });
     const logo = renderHeader(creator.survey);
+    await flush();
     expect(logo.querySelector(".placeholder svg")).not.toBeNull();
   });
 
@@ -81,9 +83,10 @@ describe("IconPicker", () => {
     await flush();
 
     const logo = renderHeader(creator.survey);
+    await flush();
     expect(logo.querySelector(".placeholder svg")).not.toBeNull();
     logo.click();
-    await nextTick();
+    await flush();
     expect(search().exists()).toBe(true);
   });
 

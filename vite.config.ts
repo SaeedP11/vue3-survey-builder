@@ -20,6 +20,7 @@ const globals: Record<string, string> = {
   "vue-i18n": "VueI18n",
   "survey-core": "Survey",
   "survey-core/themes": "SurveyTheme",
+  "survey-core/i18n/persian": "Survey",
   "survey-creator-core": "SurveyCreatorCore",
   "survey-creator-core/themes": "SurveyCreatorTheme",
   "survey-creator-core/i18n/persian": "SurveyCreatorCore",

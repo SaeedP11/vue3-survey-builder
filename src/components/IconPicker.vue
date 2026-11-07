@@ -11,7 +11,6 @@ import {
   type App,
   type Component,
 } from "vue";
-import * as LucideIcons from "lucide-vue-next";
 import type { SurveyModel } from "survey-core";
 import useLocalI18n from "../composables/useLocalI18n.ts";
 import { general } from "../locales/index.ts";
@@ -21,13 +20,37 @@ const { t } = useLocalI18n(general);
 
 const search = ref("");
 const isOpen = ref(false);
+const isLoading = ref(false);
 
 const creator = useSurveyCreator();
 const logoPickerContainer: Ref<HTMLElement | undefined> = ref();
 
+const ALL_ICONS: Ref<Record<string, Component> | null> = shallowRef(null);
+let lucidePromise: Promise<Record<string, Component>> | null = null;
+
+function loadLucide(): Promise<Record<string, Component>> {
+  if (!lucidePromise) {
+    isLoading.value = true;
+    lucidePromise = import("lucide-vue-next")
+      .then((mod) => {
+        ALL_ICONS.value = mod as unknown as Record<string, Component>;
+        isLoading.value = false;
+        return ALL_ICONS.value;
+      })
+      .catch((err) => {
+        isLoading.value = false;
+        throw err;
+      });
+  }
+  return lucidePromise;
+}
+
 const onLogoPickerClick = (e: Event) => {
   e.preventDefault();
   isOpen.value = !isOpen.value;
+  if (isOpen.value && !ALL_ICONS.value) {
+    loadLucide();
+  }
 };
 
 const onAfterRenderHeader = (survey: SurveyModel, options: any) => {
@@ -41,9 +64,16 @@ const onAfterRenderHeader = (survey: SurveyModel, options: any) => {
     logoPicker.addEventListener("click", onLogoPickerClick);
 
     // Draw the icon saved in the survey JSON, e.g. after a reload.
-    const saved =
-      survey.icon && LucideIcons[survey.icon as keyof typeof LucideIcons];
-    if (saved) mountIcon(saved as Component);
+    if (survey.icon) {
+      if (ALL_ICONS.value && ALL_ICONS.value[survey.icon]) {
+        mountIcon(ALL_ICONS.value[survey.icon]);
+      } else {
+        loadLucide().then((icons) => {
+          const saved = survey.icon && icons[survey.icon];
+          if (saved) mountIcon(saved);
+        });
+      }
+    }
   }
 };
 
@@ -61,8 +91,8 @@ onScopeDispose(() => {
   logoPickerContainer.value?.removeEventListener("click", onLogoPickerClick);
 });
 
-const ALL_ICONS = shallowRef(LucideIcons);
 const filteredIcons: Ref<[string, object][]> = computed(() => {
+  if (!ALL_ICONS.value) return [];
   const query = search.value.toLowerCase();
   return Object.entries(ALL_ICONS.value)
     .filter(
@@ -104,6 +134,9 @@ onScopeDispose(() => {
         :placeholder="t('iconSearchPlaceholder')"
         autofocus
       />
+      <div v-if="isLoading" class="loading-container">
+        <div class="progress-line"></div>
+      </div>
       <div class="icon-grid">
         <button
           type="button"
