@@ -1,5 +1,20 @@
 import { ComponentFactory } from "survey-vue3-ui";
 
+function patchComponent(comp: any): void {
+  if (!comp || typeof comp !== "object") return;
+  const target = comp.__vccOpts || comp;
+  target.inheritAttrs = false;
+  comp.inheritAttrs = false;
+  const props = target.props || comp.props;
+  if (props && typeof props === "object") {
+    Object.assign(props, {
+      itemData: {},
+      survey: {},
+      page: {},
+    });
+  }
+}
+
 /**
  * Patches SurveyJS Vue 3 components to prevent Vue extraneous non-props warnings.
  *
@@ -14,17 +29,22 @@ import { ComponentFactory } from "survey-vue3-ui";
 export function patchSurveyComponents(): void {
   const componentNames = ["sv-list-item-content", "sv-list-item-group"];
   for (const name of componentNames) {
-    const comp = ComponentFactory.Instance.getComponent(name);
-    if (comp && typeof comp === "object") {
-      (comp as Record<string, unknown>).inheritAttrs = false;
-      const props = (comp as { props?: Record<string, unknown> }).props;
-      if (props && typeof props === "object") {
-        Object.assign(props, {
-          itemData: {},
-          survey: {},
-          page: {},
-        });
+    patchComponent(ComponentFactory.Instance.getComponent(name));
+  }
+
+  const factory = ComponentFactory.Instance as any;
+  if (
+    factory &&
+    !factory.__patchSurveyComponentsHooked &&
+    typeof factory.registerComponent === "function"
+  ) {
+    factory.__patchSurveyComponentsHooked = true;
+    const origRegister = factory.registerComponent.bind(factory);
+    factory.registerComponent = (name: string, comp: any) => {
+      if (componentNames.includes(name)) {
+        patchComponent(comp);
       }
-    }
+      return origRegister(name, comp);
+    };
   }
 }
