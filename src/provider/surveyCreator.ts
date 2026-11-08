@@ -14,10 +14,12 @@ import useColorMode from "../composables/useColorMode";
 import immediateWatch from "../utils/immediateWatch";
 import { useI18n } from "vue-i18n";
 import { SURVEY_CREATOR_KEY } from "./surveyCreatorKey";
+import { patchSurveyComponents } from "../utils/patchSurveyComponents";
 
 export function initSurveyCreator(
   model?: SurveyCreatorModelType,
 ): SurveyCreatorModelType {
+  patchSurveyComponents();
   if (model) {
     provide(SURVEY_CREATOR_KEY, model);
     return model;
