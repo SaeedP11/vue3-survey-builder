@@ -11,6 +11,10 @@ const props = defineProps<{
   result: Record<string, unknown>;
   survey?: any;
   embedded?: boolean;
+  /** External variables (e.g. `{ role: 'doctor' }`) to evaluate conditions and expressions against. */
+  variables?: Record<string, unknown>;
+  /** External props / context to evaluate conditions and expressions against. */
+  externalProps?: Record<string, unknown>;
 }>();
 
 const emit = defineEmits<{
@@ -34,7 +38,19 @@ const mergedAnswers = computed<Record<string, unknown>>(() => {
       }
     }
   }
-  return { ...calculated, ...props.result };
+  const surveyVars: Record<string, unknown> = {};
+  if (typeof props.survey?.getVariableNames === "function") {
+    for (const name of props.survey.getVariableNames()) {
+      surveyVars[name] = props.survey.getVariable(name);
+    }
+  }
+  return {
+    ...calculated,
+    ...surveyVars,
+    ...props.externalProps,
+    ...props.variables,
+    ...props.result,
+  };
 });
 
 /** A variable name read from the answers/calculated values, or a literal number; else undefined. */
@@ -75,6 +91,11 @@ const resolvedProps = computed<
   return {
     ...templateProps,
     embedded: props.embedded,
+    survey: props.survey,
+    variables: {
+      ...templateProps.variables,
+      ...mergedAnswers.value,
+    },
     title: withAnswers(templateProps.title),
     subtitle: withAnswers(templateProps.subtitle),
     description: withAnswers(templateProps.description),

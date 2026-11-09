@@ -107,6 +107,13 @@ export interface ResultAction {
   scoreMin?: number;
   /** Shows the button only for a score of at most this. */
   scoreMax?: number;
+  /**
+   * Condition expression (e.g. `{role} = 'doctor'`) evaluated against survey answers,
+   * calculated values, and external variables/props. Shows the button only when true.
+   */
+  visibleIf?: string;
+  /** Alias for `visibleIf`. */
+  condition?: string;
 }
 
 /** Where an image sits on the result page. */
@@ -127,6 +134,13 @@ export interface ResultImage {
    * into `statusLabels`); unset shows it for every result.
    */
   tier?: number;
+  /**
+   * Condition expression evaluated against survey answers, calculated values,
+   * and external variables/props. Shows the image only when true.
+   */
+  visibleIf?: string;
+  /** Alias for `visibleIf`. */
+  condition?: string;
 }
 
 /** A part of the result page the layout places. */
@@ -269,6 +283,13 @@ export interface ResultBlock {
   tier?: number;
   /** The block's own look: alignment, colours, radius and spacing. */
   style?: ResultBlockStyle;
+  /**
+   * Condition expression evaluated against survey answers, calculated values,
+   * and external variables/props. Shows the block only when true.
+   */
+  visibleIf?: string;
+  /** Alias for `visibleIf`. */
+  condition?: string;
 }
 
 export interface SurveyResultProps {
@@ -320,6 +341,13 @@ export interface SurveyResultProps {
   tierColors?: string[];
   /** Page-wide look: card size, header, chip, hero icon, spacing, button shape. */
   appearance?: ResultAppearance;
+  /**
+   * External variables and properties (e.g. `{ role: 'doctor' }`) to resolve expressions
+   * and conditions against.
+   */
+  variables?: Record<string, unknown>;
+  /** External survey instance (SurveyModel) to evaluate conditions and read variables from. */
+  survey?: any;
 }
 
 export interface RecurringSurveyData {

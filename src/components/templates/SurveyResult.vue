@@ -103,7 +103,13 @@ const actions = computed(() =>
     (a) =>
       a.label &&
       a.label.trim().length > 0 &&
-      (props.preview || actionShownFor(a, numericScore.value, scoreTier.value)),
+      (props.preview ||
+        actionShownFor(a, numericScore.value, scoreTier.value, {
+          values: props.variables,
+          variables: props.variables,
+          survey: props.survey,
+          score: numericScore.value,
+        })),
   ),
 );
 // Filled buttons share a row; text buttons sit under it, as the close button did
@@ -273,6 +279,12 @@ const visibleImages = computed<ResultImage[]>(() => {
     props.min ?? 0,
     props.max ?? 100,
     statusLabels.value.length,
+    {
+      values: props.variables,
+      variables: props.variables,
+      survey: props.survey,
+      score: numericScore.value,
+    },
   );
 });
 const imagesAt = (placement: ResultImagePlacement | undefined) =>
@@ -413,7 +425,16 @@ function hasContent(block: ResultBlock): boolean {
 
 const rendered = computed(() =>
   layout.value.flatMap((block, index) => {
-    if (!props.preview && !blockShownFor(block, scoreTier.value)) return [];
+    if (
+      !props.preview &&
+      !blockShownFor(block, scoreTier.value, {
+        values: props.variables,
+        variables: props.variables,
+        survey: props.survey,
+        score: numericScore.value,
+      })
+    )
+      return [];
     return hasContent(block) ? [{ block, index }] : [];
   }),
 );
@@ -444,6 +465,10 @@ function conditionLabel(action: ResultAction): string {
     parts.push(`≥ ${number.format(min)}`);
   } else if (typeof max === "number") {
     parts.push(`≤ ${number.format(max)}`);
+  }
+  const expr = (action.visibleIf ?? action.condition)?.trim();
+  if (expr) {
+    parts.push(expr);
   }
   return t("images.onlyFor", { tier: parts.join(", ") });
 }

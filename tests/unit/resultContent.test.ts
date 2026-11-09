@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
   fillText,
+  actionHasCondition,
   actionShownFor,
+  evaluateCondition,
   fillPlaceholders,
   imagesForScore,
   legacyActions,
@@ -165,6 +167,74 @@ describe("actionShownFor", () => {
   test("a button limited to some scores stays hidden without a score", () => {
     expect(actionShownFor(action({ tier: 0 }), undefined, undefined)).toBe(false);
     expect(actionShownFor(action({ scoreMin: 0 }), undefined, undefined)).toBe(false);
+  });
+
+  test("a button with a condition on external variable shows only when condition is met", () => {
+    const doctorAction = action({ visibleIf: "{role} = 'doctor'" });
+    expect(actionHasCondition(doctorAction)).toBe(true);
+
+    // Visible when role is doctor
+    expect(
+      actionShownFor(doctorAction, undefined, undefined, {
+        variables: { role: "doctor" },
+      }),
+    ).toBe(true);
+
+    // Hidden when role is nurse
+    expect(
+      actionShownFor(doctorAction, undefined, undefined, {
+        variables: { role: "nurse" },
+      }),
+    ).toBe(false);
+
+    // Hidden when variable is missing
+    expect(actionShownFor(doctorAction, undefined, undefined, {})).toBe(false);
+
+    // Also supports array contains
+    const staffAction = action({ visibleIf: "{roles} contains 'doctor'" });
+    expect(
+      actionShownFor(staffAction, undefined, undefined, {
+        variables: { roles: ["doctor", "specialist"] },
+      }),
+    ).toBe(true);
+    expect(
+      actionShownFor(staffAction, undefined, undefined, {
+        variables: { roles: ["nurse"] },
+      }),
+    ).toBe(false);
+  });
+
+  test("combines score condition and external variable condition", () => {
+    const combo = action({
+      scoreMin: 50,
+      visibleIf: "{role} = 'doctor'",
+    });
+    // Doctor with high score shows
+    expect(
+      actionShownFor(combo, 80, 0, { variables: { role: "doctor" } }),
+    ).toBe(true);
+    // Doctor with low score stays hidden
+    expect(
+      actionShownFor(combo, 30, 0, { variables: { role: "doctor" } }),
+    ).toBe(false);
+    // Nurse with high score stays hidden
+    expect(
+      actionShownFor(combo, 80, 0, { variables: { role: "nurse" } }),
+    ).toBe(false);
+  });
+});
+
+describe("evaluateCondition", () => {
+  test("evaluates expressions against external variables and answers", () => {
+    expect(evaluateCondition("{role} = 'doctor'", { variables: { role: "doctor" } })).toBe(true);
+    expect(evaluateCondition("{role} = 'doctor'", { variables: { role: "nurse" } })).toBe(false);
+    expect(evaluateCondition("{user.role} = 'doctor'", { variables: { user: { role: "doctor" } } })).toBe(true);
+    expect(evaluateCondition("", { variables: { role: "doctor" } })).toBe(true);
+    expect(evaluateCondition(undefined)).toBe(true);
+  });
+
+  test("returns false on malformed expressions without crashing", () => {
+    expect(evaluateCondition("{{{ malformed", { variables: { role: "doctor" } })).toBe(false);
   });
 });
 

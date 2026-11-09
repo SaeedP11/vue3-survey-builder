@@ -6,7 +6,16 @@ import { legacyActions } from "../utils/resultContent.ts";
 import { defaultLayout, resolveAppearance, resolveLayout } from "../utils/resultLayout.ts";
 
 type DefaultProps = Required<
-  Omit<SurveyResultProps, "scoreVariable" | "appearance" | "primaryLabel" | "secondaryLabel" | "closeLabel">
+  Omit<
+    SurveyResultProps,
+    | "scoreVariable"
+    | "appearance"
+    | "primaryLabel"
+    | "secondaryLabel"
+    | "closeLabel"
+    | "variables"
+    | "survey"
+  >
 >;
 
 /** The copy for `locale`'s language, English when there is none. */

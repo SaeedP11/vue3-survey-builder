@@ -16,7 +16,7 @@ import type {
   ResultMetric,
   ResultShadow,
 } from "../types/index.ts";
-import { newId } from "./resultContent.ts";
+import { evaluateCondition, newId, type ConditionContext } from "./resultContent.ts";
 import { safeColor } from "./statusTiers.ts";
 
 /** Blocks a layout may hold; beyond it, new blocks are refused. */
@@ -344,9 +344,16 @@ export function insertBlock(layout: ResultBlock[], block: ResultBlock, at = layo
 }
 
 /** Whether a respondent whose score is in `tier` sees the block (`undefined`: no score). */
-export function blockShownFor(block: ResultBlock, tier: number | undefined) {
+export function blockShownFor(
+  block: ResultBlock,
+  tier: number | undefined,
+  context?: ConditionContext,
+) {
   if (block.hidden) return false;
-  return block.tier === undefined || block.tier === tier;
+  if (block.tier !== undefined && block.tier !== tier) return false;
+  const expr = (block.visibleIf ?? block.condition)?.trim();
+  if (expr && !evaluateCondition(expr, context)) return false;
+  return true;
 }
 
 /** What is being dragged: a block of the layout, or a new one from the palette. */

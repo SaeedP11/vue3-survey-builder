@@ -63,6 +63,10 @@ const questionNames = computed<string[]>(() => {
     .filter((n): n is string => !!n);
 });
 
+const knownVariables = computed<string[]>(() => [
+  ...new Set([...questionNames.value, ...calculatedVariableNames.value]),
+]);
+
 const hasScoreSources = computed(
   () => questionNames.value.length + calculatedVariableNames.value.length > 0,
 );
@@ -878,6 +882,7 @@ watch(selectedBlock, (id) => {
         :status-labels="statusLabels"
         :min="props.min"
         :max="props.max"
+        :known-variables="knownVariables"
       />
     </div>
 

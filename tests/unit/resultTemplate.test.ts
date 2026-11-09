@@ -56,6 +56,38 @@ describe("RenderResult", () => {
     expect(child.emitted("close")).toHaveLength(1);
   });
 
+  test("RenderResult passes external variables and evaluates role conditions", () => {
+    const { wrapper: doctorWrapper } = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: {
+          actions: [
+            { id: "patient", label: "Patient Action", type: "custom" },
+            { id: "doc", label: "Doctor Action", type: "custom", visibleIf: "{role} = 'doctor'" },
+          ],
+        },
+        result: {},
+        variables: { role: "doctor" },
+      },
+    });
+    const doctorButtons = doctorWrapper.findAll("button").map((b) => b.text());
+    expect(doctorButtons).toContain("Doctor Action");
+
+    const { wrapper: otherWrapper } = mountWithCreator(RenderResult, {
+      props: {
+        templateProps: {
+          actions: [
+            { id: "patient", label: "Patient Action", type: "custom" },
+            { id: "doc", label: "Doctor Action", type: "custom", visibleIf: "{role} = 'doctor'" },
+          ],
+        },
+        result: {},
+        variables: { role: "patient" },
+      },
+    });
+    const otherButtons = otherWrapper.findAll("button").map((b) => b.text());
+    expect(otherButtons).not.toContain("Doctor Action");
+  });
+
   /** Renders with a stand-in template that records the props it gets. */
   function render(templateProps: SurveyResultProps | undefined, result: Record<string, unknown>) {
     let received: Record<string, unknown> | undefined;
@@ -321,6 +353,23 @@ describe("SurveyResult buttons", () => {
     expect(labels("riskScore")).toEqual(["Always"]);
   });
 
+  test("shows an action button when condition on external variable (role = doctor) is met", () => {
+    const template = {
+      actions: [
+        { id: "all", label: "Always", type: "close" as const, variant: "text" as const },
+        { id: "doc", label: "Doctor Note", type: "custom" as const, visibleIf: "{role} = 'doctor'" },
+      ],
+    };
+
+    // When role is doctor
+    const docView = render({ ...template, variables: { role: "doctor" } });
+    expect(actionEls(docView).map((b) => b.text())).toEqual(["Doctor Note", "Always"]);
+
+    // When role is patient
+    const patientView = render({ ...template, variables: { role: "patient" } });
+    expect(actionEls(patientView).map((b) => b.text())).toEqual(["Always"]);
+  });
+
   test("hides the buttons block when the score allows none of its buttons", () => {
     const view = render({
       score: 10,
@@ -339,11 +388,13 @@ describe("SurveyResult buttons", () => {
         { id: "a", label: "Book", type: "custom", tier: 1 },
         { id: "b", label: "Call", type: "custom", scoreMin: 40, scoreMax: 60 },
         { id: "c", label: "Later", type: "close", variant: "text", scoreMin: 70 },
+        { id: "d", label: "Doctor", type: "custom", visibleIf: "{role} = 'doctor'" },
       ],
     });
     expect(view.findAll("[data-action-condition]").map((c) => c.text())).toEqual([
       "Only for: High",
       "Only for: 40–60",
+      "Only for: {role} = 'doctor'",
       "Only for: ≥ 70",
     ]);
   });

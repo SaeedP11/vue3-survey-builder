@@ -320,6 +320,7 @@ describe("buttons", () => {
       "Low",
       "High",
       T.actions.scoreRange,
+      T.actions.condition,
     ]);
 
     await show().setValue("tier-1");
@@ -343,6 +344,57 @@ describe("buttons", () => {
     await show().setValue("always");
     const { tier, scoreMin, scoreMax } = model.actions![0];
     expect([tier, scoreMin, scoreMax]).toEqual([undefined, undefined, undefined]);
+  });
+
+  test("sets condition on external variable (role = doctor) and toggles expression mode", async () => {
+    const { child, model } = setup(WITH_SOURCES, {
+      actions: [{ id: "doc", label: "Doctor Note", type: "custom" }],
+    });
+    const show = () => field(child, "show")!;
+    expect(show().findAll("option").map((o) => o.text())).toContain(
+      T.actions.condition,
+    );
+
+    await show().setValue("condition");
+    // Prepopulates doctor role scenario
+    expect(model.actions![0].visibleIf).toBe("{role} = 'doctor'");
+
+    // Update simple condition fields
+    const condVar = field(child, "cond-var")!;
+    const condOp = field(child, "cond-op")!;
+    const condVal = field(child, "cond-val")!;
+
+    expect((condVar.element as HTMLInputElement).value).toBe("role");
+    expect((condOp.element as HTMLSelectElement).value).toBe("=");
+    expect((condVal.element as HTMLInputElement).value).toBe("doctor");
+
+    await condVal.setValue("admin");
+    expect(model.actions![0].visibleIf).toBe("{role} = 'admin'");
+
+    await condOp.setValue("contains");
+    expect(model.actions![0].visibleIf).toBe("{role} contains 'admin'");
+
+    // Preset button click
+    const docPreset = child
+      .findAll("button")
+      .find((b) => b.text().includes(T.actions.conditionPresets.doctor));
+    expect(docPreset).toBeDefined();
+    await docPreset!.trigger("click");
+    expect(model.actions![0].visibleIf).toBe("{role} = 'doctor'");
+
+    // Toggle advanced expression
+    const modeBtn = child
+      .findAll("button")
+      .find((b) => b.text() === T.actions.conditionModeAdvanced);
+    expect(modeBtn).toBeDefined();
+    await modeBtn!.trigger("click");
+
+    const exprInput = field(child, "cond-expr")!;
+    expect(exprInput).toBeDefined();
+    await exprInput.setValue("{role} = 'doctor' or {isDoctor} = true");
+    expect(model.actions![0].visibleIf).toBe(
+      "{role} = 'doctor' or {isDoctor} = true",
+    );
   });
 
   test("sets the style", async () => {

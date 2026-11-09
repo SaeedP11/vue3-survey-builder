@@ -3,6 +3,7 @@
  * the addresses a page may use, answers put into link addresses, and the
  * images and buttons a score shows.
  */
+import { Model } from "survey-core";
 import type {
   ResultAction,
   ResultImage,
@@ -71,25 +72,107 @@ export function resolveActions(
 const isNumber = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
 
-/** Whether the button shows only for some scores: a tier or a score range. */
+export interface ConditionContext {
+  values?: Record<string, unknown>;
+  variables?: Record<string, unknown>;
+  survey?: any;
+  score?: number;
+}
+
+/**
+ * Evaluates a condition expression (e.g. `{role} = 'doctor'`) using SurveyJS expression syntax
+ * against survey answers, calculated values, and external variables/props.
+ */
+export function evaluateCondition(
+  expression: string | undefined,
+  context?: ConditionContext,
+): boolean {
+  const expr = expression?.trim();
+  if (!expr) return true;
+  try {
+    const survey =
+      context?.survey && typeof context.survey.runCondition === "function"
+        ? context.survey
+        : new Model();
+
+    if (survey !== context?.survey) {
+      if (context?.values || context?.score !== undefined) {
+        survey.data = {
+          ...context?.values,
+          ...(context?.score !== undefined ? { score: context.score } : {}),
+        };
+      }
+      if (context?.variables) {
+        for (const [k, v] of Object.entries(context.variables)) {
+          survey.setVariable(k, v);
+        }
+      }
+    } else {
+      if (context?.variables) {
+        for (const [k, v] of Object.entries(context.variables)) {
+          if (survey.getVariable(k) === undefined) {
+            survey.setVariable(k, v);
+          }
+        }
+      }
+      if (
+        context?.score !== undefined &&
+        survey.getVariable?.("score") === undefined &&
+        survey.getValue?.("score") === undefined
+      ) {
+        survey.setVariable("score", context.score);
+      }
+    }
+
+    return Boolean(survey.runCondition(expr));
+  } catch {
+    return false;
+  }
+}
+
+/** Whether the button shows only for some scores or a custom condition expression. */
 export function actionHasCondition(action: ResultAction): boolean {
-  return isNumber(action.tier) || isNumber(action.scoreMin) || isNumber(action.scoreMax);
+  const expr = (action.visibleIf ?? action.condition)?.trim();
+  return (
+    isNumber(action.tier) ||
+    isNumber(action.scoreMin) ||
+    isNumber(action.scoreMax) ||
+    Boolean(expr)
+  );
 }
 
 /**
  * Whether a respondent with `score` (in `tier`) sees the button. A button
- * limited to some scores stays hidden without a score.
+ * limited to some scores stays hidden without a score. When a condition expression
+ * (e.g. `{role} = 'doctor'`) is defined, it is evaluated against the provided context.
  */
 export function actionShownFor(
   action: ResultAction,
   score: number | undefined,
   tier: number | undefined,
+  context?: ConditionContext,
 ): boolean {
   if (!actionHasCondition(action)) return true;
-  if (score === undefined) return false;
-  if (isNumber(action.tier) && action.tier !== tier) return false;
-  if (isNumber(action.scoreMin) && score < action.scoreMin) return false;
-  if (isNumber(action.scoreMax) && score > action.scoreMax) return false;
+
+  const hasScoreCondition =
+    isNumber(action.tier) || isNumber(action.scoreMin) || isNumber(action.scoreMax);
+
+  if (hasScoreCondition) {
+    if (score === undefined) return false;
+    if (isNumber(action.tier) && action.tier !== tier) return false;
+    if (isNumber(action.scoreMin) && score < action.scoreMin) return false;
+    if (isNumber(action.scoreMax) && score > action.scoreMax) return false;
+  }
+
+  const expr = (action.visibleIf ?? action.condition)?.trim();
+  if (expr) {
+    const evalCtx: ConditionContext = {
+      ...context,
+      score: context?.score ?? score,
+    };
+    if (!evaluateCondition(expr, evalCtx)) return false;
+  }
+
   return true;
 }
 
@@ -144,12 +227,20 @@ export function imagesForScore(
   min: number,
   max: number,
   tierCount: number,
+  context?: ConditionContext,
 ): ResultImage[] {
   const tier =
     score === undefined ? undefined : tierIndex(score, min, max, tierCount);
-  return images.filter(
-    (image) => image.tier === undefined || image.tier === null || image.tier === tier,
-  );
+  return images.filter((image) => {
+    if (image.tier !== undefined && image.tier !== null && image.tier !== tier) {
+      return false;
+    }
+    const expr = (image.visibleIf ?? image.condition)?.trim();
+    if (expr && !evaluateCondition(expr, { ...context, score })) {
+      return false;
+    }
+    return true;
+  });
 }
 
 /**
