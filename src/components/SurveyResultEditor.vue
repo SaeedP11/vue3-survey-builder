@@ -63,8 +63,14 @@ const questionNames = computed<string[]>(() => {
     .filter((n): n is string => !!n);
 });
 
+const COMMON_EXTERNAL_VARIABLES = ["role", "roles", "user.role", "isDoctor"];
+
 const knownVariables = computed<string[]>(() => [
-  ...new Set([...questionNames.value, ...calculatedVariableNames.value]),
+  ...new Set([
+    ...COMMON_EXTERNAL_VARIABLES,
+    ...questionNames.value,
+    ...calculatedVariableNames.value,
+  ]),
 ]);
 
 const hasScoreSources = computed(

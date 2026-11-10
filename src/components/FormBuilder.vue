@@ -24,6 +24,8 @@ import "../utils/serilizers";
 const props = defineProps<{
   /** The designer's text direction; by default the direction of vue-i18n's locale. */
   dir?: TextDirection;
+  /** External variables (e.g. `{ role: 'doctor' }`) to evaluate conditions against in preview. */
+  variables?: Record<string, unknown>;
 }>();
 const json = defineModel<object>("json");
 registerJsonEditor();
@@ -76,9 +78,14 @@ watch(
 let completedSurvey: SurveyModel | undefined;
 // Each edit rebuilds the Preview tab's survey and its DOM: a result page left open
 // would teleport into the old, removed container and the new test would not render.
-creator.onSurveyInstanceCreated.add(() => {
+creator.onSurveyInstanceCreated.add((_sender, options) => {
   showResult.value = false;
   completedSurvey = undefined;
+  if (props.variables && options?.survey) {
+    for (const [k, v] of Object.entries(props.variables)) {
+      options.survey.setVariable(k, v);
+    }
+  }
 });
 handleComplete(creator, (sender) => {
   sender.showCompletedPage = false;
@@ -115,6 +122,8 @@ function restartPreview() {
       <RenderResult
         :templateProps="creator.JSON?.resultTemplate"
         :result
+        :survey="completedSurvey"
+        :variables="props.variables"
         @restart="restartPreview"
         @close="showResult = false"
       />
