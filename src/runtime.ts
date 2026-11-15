@@ -10,13 +10,16 @@
  */
 import registerChartQuestion from "./utils/registerChartQuestion";
 import { patchSurveyComponents } from "./utils/patchSurveyComponents";
+import registerPersianDatePicker from "./utils/registerPersianDatePicker";
 import useScrollToError from "./composables/useScrollToError";
 import "./utils/surveyProperties";
 import RenderResult from "./components/RenderResult.vue";
 import SurveyResult from "./components/templates/SurveyResult.vue";
+import PersianDateTimePicker from "./components/PersianDateTimePicker.vue";
 
 registerChartQuestion();
 patchSurveyComponents();
+registerPersianDatePicker();
 
 import "survey-core/survey-core.css";
 // The host's --color-formbilder-* variables, mapped onto SurveyJS's.
@@ -56,4 +59,10 @@ export {
   type ChartType,
 } from "./utils/registerChartQuestion";
 
-export { RenderResult, SurveyResult, useScrollToError };
+export {
+  PersianDateTimePicker,
+  RenderResult,
+  SurveyResult,
+  registerPersianDatePicker,
+  useScrollToError,
+};

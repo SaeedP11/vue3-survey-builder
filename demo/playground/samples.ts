@@ -260,4 +260,48 @@ export const SAMPLES: Sample[] = [
     name: "Spirometry (fa, status gauge)",
     json: spirometry,
   },
+  {
+    id: "persian-datetime-sample",
+    name: "Persian Date & Time (fa)",
+    json: {
+      title: "نوبت‌دهی و ثبت اطلاعات (تاریخ و زمان شمسی)",
+      description: "نمونه سوالات تاریخ، زمان و تاریخ‌وزمان شمسی با پشتیبانی از ذخیره‌سازی شمسی و میلادی",
+      pages: [
+        {
+          name: "page1",
+          elements: [
+            {
+              type: "text",
+              name: "birthDate",
+              title: "تاریخ تولد (شمسی)",
+              inputType: "date",
+              dateFormat: "jalali",
+              isRequired: true,
+            },
+            {
+              type: "text",
+              name: "appointmentTime",
+              title: "زمان مراجعه",
+              inputType: "time",
+              isRequired: true,
+            },
+            {
+              type: "text",
+              name: "appointmentDateTime",
+              title: "تاریخ و ساعت نوبت (شمسی)",
+              inputType: "datetime-local",
+              dateFormat: "jalali",
+            },
+            {
+              type: "text",
+              name: "registrationDateIso",
+              title: "تاریخ ثبت سیستم (نمایش شمسی، ذخیره در خروجی به صورت میلادی ISO)",
+              inputType: "date",
+              dateFormat: "gregorian",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
