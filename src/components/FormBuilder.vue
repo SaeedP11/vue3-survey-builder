@@ -10,6 +10,7 @@ import useJsonFormatAction from "../composables/useJsonFormatAction.ts";
 import RenderResult from "./RenderResult.vue";
 import AiAssistant from "./AiAssistant.vue";
 import IconPicker from "./IconPicker.vue";
+import ChatPreviewModal from "./ChatPreviewModal.vue";
 import "survey-creator-core/i18n/persian";
 // The designer's strings above; these are the Preview tab survey's own
 import "survey-core/i18n/persian";
@@ -109,6 +110,7 @@ function restartPreview() {
     <IconPicker />
     <AiAssistant />
     <SurveyResultEditorModal />
+    <ChatPreviewModal />
     <SurveyResultRequiredToast
       :open="showRequiredToast"
       @close="showRequiredToast = false"

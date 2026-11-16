@@ -3,6 +3,8 @@ import type { Question } from "survey-core";
 import type { Component } from "vue";
 import type { Ref } from "vue";
 
+export type { ChatSurveyProps } from "../components/ChatSurvey.vue";
+
 export type SurveyAiAssitantConfig = {
   onSubmit: (
     prompt: string,

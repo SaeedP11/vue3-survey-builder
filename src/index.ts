@@ -14,6 +14,7 @@ import { patchSurveyComponents } from "./utils/patchSurveyComponents";
 import registerPersianDatePicker from "./utils/registerPersianDatePicker";
 import registerPersianDatePickerDesigner from "./utils/registerPersianDatePickerDesigner";
 import PersianDateTimePicker from "./components/PersianDateTimePicker.vue";
+import ChatSurvey from "./components/ChatSurvey.vue";
 
 // Built in: the chart question needs nothing from the host, so the designer
 // and every survey rendered with this library know it from import
@@ -43,6 +44,7 @@ export * from "survey-core";
 
 export type {
   AsyncDropdownHandlers,
+  ChatSurveyProps,
   ItemType,
   ResultAction,
   ResultActionIcon,
@@ -75,6 +77,7 @@ export type {
 } from "./utils/registerCustomLogic";
 
 export {
+  ChatSurvey,
   FormBuilder,
   PersianDateTimePicker,
   RenderResult,

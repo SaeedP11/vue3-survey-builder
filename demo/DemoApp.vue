@@ -7,6 +7,7 @@ import { aiMockConfig, aiShouldFail } from "./playground/aiMock.ts";
 import { events, logEvent } from "./playground/eventLog.ts";
 import { SAMPLES } from "./playground/samples.ts";
 import FillPanel from "./playground/FillPanel.vue";
+import ChatPanel from "./playground/ChatPanel.vue";
 import JsonPanel from "./playground/JsonPanel.vue";
 import EventLog from "./playground/EventLog.vue";
 
@@ -15,10 +16,11 @@ import EventLog from "./playground/EventLog.vue";
 registerPlaygroundTypes();
 provideAiAssistantConfig(aiMockConfig);
 
-type Tab = "designer" | "fill" | "json";
-const TABS: { id: Tab; label: string }[] = [
+type Tab = "designer" | "fill" | "chat" | "json";
+const TABS: { id: Tab; label: string; badge?: string }[] = [
   { id: "designer", label: "Designer" },
   { id: "fill", label: "Fill" },
+  { id: "chat", label: "Chat Mode", badge: "NEW" },
   { id: "json", label: "JSON" },
 ];
 
@@ -99,6 +101,12 @@ function applyJson(next: object) {
   logEvent("sample", "applied JSON from the JSON tab");
 }
 
+function switchToChat() {
+  fillKey.value++;
+  tab.value = "chat";
+  logEvent("sample", "switched to chat mode to test current form");
+}
+
 const sampleChoice = ref("");
 watch(sampleChoice, (id) => {
   if (!id) return;
@@ -124,15 +132,21 @@ watch(sampleChoice, (id) => {
           v-for="t in TABS"
           :key="t.id"
           type="button"
-          class="rounded-md px-3 py-1 text-xs font-medium"
+          class="flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors"
           :class="
             tab === t.id
-              ? 'bg-white shadow-sm dark:bg-slate-700'
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
               : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
           "
           @click="tab = t.id"
         >
-          {{ t.label }}
+          <span>{{ t.label }}</span>
+          <span
+            v-if="t.badge"
+            class="rounded-full bg-indigo-500 px-1.5 py-0.2 text-[9px] font-bold text-white tracking-wide uppercase"
+          >
+            {{ t.badge }}
+          </span>
         </button>
       </nav>
 
@@ -182,7 +196,20 @@ watch(sampleChoice, (id) => {
     <div class="flex min-h-0 flex-1">
       <main class="min-h-0 min-w-0 flex-1">
         <!-- v-show keeps the creator (and its undo history) across tabs -->
-        <div v-show="tab === 'designer'" class="h-full">
+        <div v-show="tab === 'designer'" class="relative h-full">
+          <!-- Floating shortcut to test the form in Chat Mode -->
+          <div class="absolute bottom-5 end-5 z-20">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-xl hover:bg-indigo-500 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-indigo-500/20"
+              title="Test this form in Conversational Chat Mode"
+              @click="switchToChat"
+            >
+              <span class="text-base leading-none">💬</span>
+              <span>Test in Chat Mode</span>
+              <span class="rounded-full bg-white/20 px-1.5 py-0.2 text-[10px] font-extrabold uppercase">Live</span>
+            </button>
+          </div>
           <FormBuilder :json="json" @update:json="onSave" />
         </div>
         <FillPanel
@@ -190,6 +217,14 @@ watch(sampleChoice, (id) => {
           :key="fillKey"
           :json="json"
           @restart="fillKey++"
+        />
+        <ChatPanel
+          v-if="tab === 'chat'"
+          :key="`chat-${fillKey}`"
+          :json="json"
+          @restart="fillKey++"
+          @edit-in-designer="tab = 'designer'"
+          @load-sample="loadSample"
         />
         <JsonPanel v-if="tab === 'json'" :json="json" @apply="applyJson" />
       </main>

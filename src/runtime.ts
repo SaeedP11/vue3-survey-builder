@@ -16,6 +16,7 @@ import "./utils/surveyProperties";
 import RenderResult from "./components/RenderResult.vue";
 import SurveyResult from "./components/templates/SurveyResult.vue";
 import PersianDateTimePicker from "./components/PersianDateTimePicker.vue";
+import ChatSurvey from "./components/ChatSurvey.vue";
 
 registerChartQuestion();
 patchSurveyComponents();
@@ -35,6 +36,7 @@ export { provideSurveyResultTemplate } from "./provider/surveyResultTemplateKey.
 
 export type {
   AsyncDropdownHandlers,
+  ChatSurveyProps,
   ItemType,
   ResultAction,
   ResultActionIcon,
@@ -60,6 +62,7 @@ export {
 } from "./utils/registerChartQuestion";
 
 export {
+  ChatSurvey,
   PersianDateTimePicker,
   RenderResult,
   SurveyResult,
