@@ -23,3 +23,19 @@ Serializer.addProperty("survey", {
   isSerializable: true,
   visible: false,
 });
+
+Serializer.addProperty("survey", {
+  name: "mode",
+  displayName: "Presentation Mode",
+  choices: ["simple", "chat"],
+  default: "simple",
+  category: "general",
+  isSerializable: true,
+});
+
+Serializer.addProperty("survey", {
+  name: "chatConfig",
+  default: null,
+  isSerializable: true,
+  visible: false,
+});
