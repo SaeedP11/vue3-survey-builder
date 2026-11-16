@@ -3,6 +3,7 @@ import recurringSurveyEn from "./en/recurringSurvey.json";
 import surveyResultEn from "./en/surveyResult.json";
 import generalEn from "./en/general.json";
 import chartQuestionEn from "./en/chartQuestion.json";
+import chatEn from "./en/chat.json";
 import dateTimePickerEn from "./en/dateTimePicker.json";
 import chatSurveyEn from "./en/chatSurvey.json";
 
@@ -11,6 +12,7 @@ import recurringSurveyFa from "./fa/recurringSurvey.json";
 import surveyResultFa from "./fa/surveyResult.json";
 import generalFa from "./fa/general.json";
 import chartQuestionFa from "./fa/chartQuestion.json";
+import chatFa from "./fa/chat.json";
 import dateTimePickerFa from "./fa/dateTimePicker.json";
 import chatSurveyFa from "./fa/chatSurvey.json";
 
@@ -57,6 +59,17 @@ export const chartQuestion = {
   fa: chartQuestionFa,
 };
 
+export const chat = {
+  en: {
+    ...general.en,
+    ...chatEn,
+  },
+  fa: {
+    ...general.fa,
+    ...chatFa,
+  },
+};
+
 export const dateTimePicker = {
   en: {
     ...general.en,
@@ -78,4 +91,3 @@ export const chatSurvey = {
     ...chatSurveyFa,
   },
 };
-

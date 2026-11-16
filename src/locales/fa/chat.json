@@ -1,0 +1,21 @@
+{
+  "typing": "در حال نوشتن...",
+  "online": "آنلاین",
+  "typeYourAnswer": "پاسخ خود را بنویسید...",
+  "typeYourMessage": "پیام خود را بنویسید...",
+  "confirm": "تأیید",
+  "clear": "پاک کردن",
+  "done": "تمام",
+  "send": "ارسال",
+  "selectAnOption": "یک گزینه را انتخاب کنید",
+  "searchPlaceholder": "جستجو...",
+  "chooseFile": "فایل را انتخاب کنید یا اینجا بکشید",
+  "editAnswer": "ویرایش پاسخ",
+  "thankYou": "با تشکر از تکمیل نظرسنجی!",
+  "signHere": "اینجا امضا کنید",
+  "stepOf": "مرحله {current} از {total}",
+  "yes": "بله",
+  "no": "خیر",
+  "invalidInput": "لطفاً یک پاسخ معتبر وارد کنید.",
+  "close": "بستن"
+}

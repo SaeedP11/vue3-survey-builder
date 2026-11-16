@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { ChatSurvey } from "../../src/index.ts";
-import { logEvent } from "./eventLog.ts";
+import { ref, computed, watch } from "vue";
 import {
-  Code,
-  Copy,
-  Check,
-  Clock,
-  Monitor,
-  RotateCcw,
-  Sliders,
-  Smartphone,
-  Sparkles,
-  Tablet,
-  Volume2,
-  VolumeX,
-} from "lucide-vue-next";
+  SurveyChatInline,
+  SurveyChatWidget,
+  SurveyChatModal,
+  type ChatBotPersona,
+} from "../../src/index.ts";
+import { CHAT_SAMPLES, type ChatSample } from "./chatSamples.ts";
+import { logEvent } from "./eventLog.ts";
 
 const props = defineProps<{
   json: object;
@@ -23,678 +15,314 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   restart: [];
-  editInDesigner: [];
-  loadSample: [id: string];
+  "load-sample": [json: object];
 }>();
 
-// Viewport Framing: mobile (smartphone mockup), tablet, desktop
-const viewMode = ref<"mobile" | "tablet" | "desktop">("mobile");
+type ViewMode = "inline-wide" | "inline-compact" | "widget" | "modal";
+const mode = ref<ViewMode>("inline-wide");
+const isModalOpen = ref(false);
 
-// Simulated typing delay
-const typingSpeed = ref<number>(200);
+// Active template selection
+const selectedSampleId = ref<string>("customer-support");
 
-// Sound effects state (Web Audio API synth)
-const soundEnabled = ref<boolean>(true);
-
-// Persona presets
-interface Persona {
-  id: string;
-  name: string;
-  avatar: string;
-  subtitle: string;
-}
-
-const PERSONAS: Persona[] = [
-  {
-    id: "assistant",
-    name: "Survey Assistant",
-    avatar: "🤖",
-    subtitle: "AI Questionnaire Companion",
-  },
-  {
-    id: "support",
-    name: "Customer Care",
-    avatar: "👩‍💼",
-    subtitle: "Support Representative",
-  },
-  {
-    id: "health",
-    name: "Dr. Sarah",
-    avatar: "🩺",
-    subtitle: "Clinical Health Guide",
-  },
-  {
-    id: "minimal",
-    name: "SurveyBot",
-    avatar: "💬",
-    subtitle: "Conversational Form",
-  },
-];
-
-const selectedPersonaId = ref<string>("assistant");
-const activePersona = computed(
-  () => PERSONAS.find((p) => p.id === selectedPersonaId.value) ?? PERSONAS[0],
-);
-
-// Feature toggles
-const showProgressBar = ref<boolean>(true);
-const allowEdit = ref<boolean>(true);
-const allowSkip = ref<boolean>(true);
-const showSettings = ref<boolean>(false);
-
-// Inspector panel toggle
-const showInspector = ref<boolean>(true);
-
-// Live survey answers & status
-const liveAnswers = ref<Record<string, unknown>>({});
-const isCompleted = ref<boolean>(false);
-const completedResult = ref<Record<string, unknown> | null>(null);
-const currentQuestionName = ref<string>("");
-const answeredKeys = computed(() => Object.keys(liveAnswers.value));
-const copied = ref<boolean>(false);
-
-const hasQuestions = computed(() => {
-  const j = props.json as any;
-  if (!j) return false;
-  if (Array.isArray(j.elements) && j.elements.length > 0) return true;
-  if (
-    Array.isArray(j.pages) &&
-    j.pages.some((p: any) => p.elements && p.elements.length > 0)
-  )
-    return true;
-  return false;
+const activeSample = computed<ChatSample | undefined>(() => {
+  return CHAT_SAMPLES.find((s) => s.id === selectedSampleId.value);
 });
 
-// Mobile clock simulation
-const currentTime = ref<string>("9:41");
-let timeTimer: any = null;
-function updateClock() {
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes().toString().padStart(2, "0");
-  currentTime.value = `${hours}:${minutes}`;
-}
-
-onMounted(() => {
-  updateClock();
-  timeTimer = setInterval(updateClock, 30000);
-});
-
-onUnmounted(() => {
-  if (timeTimer) clearInterval(timeTimer);
-});
-
-// Synthesized audio feedback using Web Audio API
-function playTone(type: "send" | "receive" | "complete") {
-  if (!soundEnabled.value || typeof window === "undefined") return;
-  try {
-    const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-
-    if (type === "send") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(520, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(840, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.08);
-    } else if (type === "receive") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } else if (type === "complete") {
-      // Pleasant victory chord
-      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = "triangle";
-        const start = ctx.currentTime + idx * 0.06;
-        osc.frequency.setValueAtTime(freq, start);
-        gain.gain.setValueAtTime(0.07, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
-        osc.start(start);
-        osc.stop(start + 0.35);
-      });
-    }
-  } catch {
-    // Audio context may be restricted before user gesture
+// If props.json is provided and not empty, use it; otherwise fallback to active sample JSON
+const effectiveJson = computed(() => {
+  if (props.json && Object.keys(props.json).length > 0) {
+    return props.json;
   }
-}
+  return activeSample.value?.json ?? {};
+});
 
-// Handlers
-function onComplete(data: Record<string, unknown>) {
-  completedResult.value = data;
-  liveAnswers.value = { ...data };
-  isCompleted.value = true;
-  playTone("complete");
-  logEvent("complete", "chat survey completed", data);
-}
-
-function onChange(data: Record<string, unknown>, question: any) {
-  liveAnswers.value = { ...data };
-  logEvent("logic", `answered "${question.name}"`, { value: question.value });
-}
-
-function onAnswer(question: any, value: any) {
-  playTone("send");
-  liveAnswers.value = {
-    ...liveAnswers.value,
-    [question.name]: value,
+// Persona configuration: follows the selected sample or falls back
+const currentPersona = computed<ChatBotPersona>(() => {
+  if (activeSample.value) {
+    return activeSample.value.persona;
+  }
+  return {
+    name: "Survey Concierge",
+    greeting: "Hello! 👋 Welcome to our conversational survey.",
   };
-}
+});
 
-function onQuestionChange(question: any) {
-  currentQuestionName.value = question?.name || "";
-  playTone("receive");
-}
+// Explicit direction control (auto-switches to RTL for Persian form, but user can override)
+const direction = ref<"ltr" | "rtl">("ltr");
 
-function onRestartClick() {
-  liveAnswers.value = {};
-  isCompleted.value = false;
-  completedResult.value = null;
-  currentQuestionName.value = "";
-  emit("restart");
-}
-
-async function copyAnswers() {
-  try {
-    await navigator.clipboard.writeText(
-      JSON.stringify(liveAnswers.value, null, 2),
-    );
-    copied.value = true;
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  } catch {
-    // Clipboard permission fallback
-  }
-}
-
-// Reset state when json changes
 watch(
   () => props.json,
-  () => {
-    liveAnswers.value = {};
-    isCompleted.value = false;
-    completedResult.value = null;
-    currentQuestionName.value = "";
+  (newJson: any) => {
+    if (!newJson) return;
+    const match = CHAT_SAMPLES.find((s) => s.json.title === newJson.title);
+    if (match) {
+      selectedSampleId.value = match.id;
+      direction.value = match.id === "persian-support" ? "rtl" : "ltr";
+    }
   },
-  { deep: true },
+  { immediate: true, deep: true },
 );
+
+function onSampleSelectChange(e: Event) {
+  const target = e.target as HTMLSelectElement;
+  if (!target.value) return;
+  selectedSampleId.value = target.value;
+  const s = CHAT_SAMPLES.find((item) => item.id === target.value);
+  if (s) {
+    direction.value = s.id === "persian-support" ? "rtl" : "ltr";
+    emit("load-sample", structuredClone(s.json));
+  }
+}
+
+function onAnswer(name: string, val: unknown) {
+  logEvent("logic", `Answered question "${name}"`, val);
+}
+
+function onComplete(data: Record<string, unknown>) {
+  logEvent("complete", "Survey completed in Chat Mode", data);
+}
 </script>
 
 <template>
-  <div class="h-full flex flex-col overflow-hidden bg-slate-100/70 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
-    <!-- Top Studio Toolbar -->
-    <header
-      class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-2 shadow-xs dark:border-slate-800 dark:bg-slate-900 shrink-0 select-none"
+  <div class="h-full flex flex-col overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans">
+    <!-- Top Controls Header -->
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 shrink-0"
       dir="ltr"
     >
-      <!-- Left: Viewport Switcher & Speed -->
-      <div class="flex flex-wrap items-center gap-2">
-        <!-- Device Framing Switcher -->
-        <div class="flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="
-              viewMode === 'mobile'
-                ? 'bg-white text-indigo-600 shadow-xs dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            "
-            title="Mobile Phone View"
-            @click="viewMode = 'mobile'"
-          >
-            <Smartphone class="h-3.5 w-3.5" />
-            <span>Mobile</span>
-          </button>
-
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="
-              viewMode === 'tablet'
-                ? 'bg-white text-indigo-600 shadow-xs dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            "
-            title="Tablet View"
-            @click="viewMode = 'tablet'"
-          >
-            <Tablet class="h-3.5 w-3.5" />
-            <span>Tablet</span>
-          </button>
-
-          <button
-            type="button"
-            class="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="
-              viewMode === 'desktop'
-                ? 'bg-white text-indigo-600 shadow-xs dark:bg-slate-700 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            "
-            title="Desktop / Full Width"
-            @click="viewMode = 'desktop'"
-          >
-            <Monitor class="h-3.5 w-3.5" />
-            <span>Full</span>
-          </button>
-        </div>
-
-        <!-- Typing Speed -->
-        <div class="flex items-center gap-1 text-xs">
-          <Clock class="h-3.5 w-3.5 text-slate-400" />
-          <span class="text-slate-500 font-medium">Delay:</span>
-          <select
-            v-model.number="typingSpeed"
-            class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            aria-label="Bot typing delay"
-          >
-            <option :value="0">Instant (0ms)</option>
-            <option :value="150">Fast (150ms)</option>
-            <option :value="300">Normal (300ms)</option>
-            <option :value="600">Realistic (600ms)</option>
-          </select>
-        </div>
-
-        <!-- Sound Effects -->
-        <button
-          type="button"
-          class="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium transition-colors dark:border-slate-700 dark:bg-slate-800"
-          :class="
-            soundEnabled
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-slate-400 hover:text-slate-600'
-          "
-          :title="soundEnabled ? 'Mute Sound Effects' : 'Enable Sound Effects'"
-          @click="soundEnabled = !soundEnabled"
+      <!-- Example Form Selector -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <label for="chat-sample-select" class="font-semibold text-slate-800 dark:text-slate-200 shrink-0">
+          Chat Form Example:
+        </label>
+        <select
+          id="chat-sample-select"
+          :value="selectedSampleId"
+          class="rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
+          @change="onSampleSelectChange"
         >
-          <Volume2 v-if="soundEnabled" class="h-3.5 w-3.5" />
-          <VolumeX v-else class="h-3.5 w-3.5" />
-          <span>{{ soundEnabled ? "Sound ON" : "Muted" }}</span>
-        </button>
+          <optgroup label="Support & Service">
+            <option value="customer-support">Customer Support & Incident Triage</option>
+            <option value="persian-support">پشتیبانی و خدمات پس از فروش (فارسی / RTL)</option>
+          </optgroup>
+          <optgroup label="Feedback & Product">
+            <option value="nps-feedback">Product Feedback & Net Promoter Score (NPS)</option>
+            <option value="usability-matrix">Software Usability Matrix & Feature Roadmap</option>
+          </optgroup>
+          <optgroup label="HR & Sales">
+            <option value="employee-onboarding">Employee Onboarding & Equipment Setup</option>
+            <option value="sales-qualification">Enterprise Lead Qualification & Solution Match</option>
+          </optgroup>
+          <optgroup label="Healthcare & Events">
+            <option value="telehealth-intake">Telehealth Patient Intake & Clinical Triage</option>
+            <option value="tech-summit-rsvp">Tech Summit & Hackathon Registration</option>
+          </optgroup>
+          <optgroup label="Widgets & Micro Surveys">
+            <option value="wellbeing-scorecard">Daily Wellbeing Tracker (Live Chart & Scorecard)</option>
+            <option value="micro-pulse-poll">Quick 60-Second Pulse Check</option>
+          </optgroup>
+        </select>
 
-        <!-- Persona Preset -->
-        <div class="flex items-center gap-1 text-xs">
-          <select
-            v-model="selectedPersonaId"
-            class="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            aria-label="Bot Persona"
-          >
-            <option v-for="p in PERSONAS" :key="p.id" :value="p.id">
-              {{ p.avatar }} {{ p.name }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Settings toggle -->
-        <div class="relative">
+        <!-- RTL / LTR Toggle -->
+        <div class="flex items-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5 ml-1">
           <button
             type="button"
-            class="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            title="Chat Options"
-            @click="showSettings = !showSettings"
+            class="px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer"
+            :class="direction === 'ltr' ? 'bg-white dark:bg-slate-700 font-bold text-blue-600 dark:text-blue-400 shadow-2xs' : 'text-slate-500'"
+            @click="direction = 'ltr'"
           >
-            <Sliders class="h-3.5 w-3.5" />
-            <span>Options</span>
+            LTR
           </button>
-
-          <!-- Settings Dropdown Popover -->
-          <div
-            v-if="showSettings"
-            class="absolute left-0 top-full mt-1.5 z-30 w-56 rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          <button
+            type="button"
+            class="px-2 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer"
+            :class="direction === 'rtl' ? 'bg-white dark:bg-slate-700 font-bold text-blue-600 dark:text-blue-400 shadow-2xs' : 'text-slate-500'"
+            @click="direction = 'rtl'"
           >
-            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
-              Conversational Options
-            </h4>
-            <div class="space-y-2 text-xs">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="showProgressBar" type="checkbox" class="rounded text-indigo-600" />
-                <span>Show Progress Bar</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="allowEdit" type="checkbox" class="rounded text-indigo-600" />
-                <span>Allow Rewind & Edit</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="allowSkip" type="checkbox" class="rounded text-indigo-600" />
-                <span>Allow Skip (Optional)</span>
-              </label>
-            </div>
-          </div>
+            RTL
+          </button>
         </div>
       </div>
 
-      <!-- Right: Inspector Toggle, Restart & Designer Shortcut -->
+      <!-- Container Size & Mode Selector -->
       <div class="flex items-center gap-2">
-        <!-- Quick Load Showcase Form -->
-        <button
-          type="button"
-          class="flex items-center gap-1.5 rounded-md border border-indigo-200 bg-indigo-50/70 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 cursor-pointer"
-          title="Load complete test form for conversational chat mode"
-          @click="emit('loadSample', 'chat-showcase')"
-        >
-          <span>💬 Load Showcase</span>
-        </button>
-
-        <!-- Live Inspector Toggle -->
-        <button
-          type="button"
-          class="flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
-          :class="
-            showInspector
-              ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-300'
-              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
-          "
-          @click="showInspector = !showInspector"
-        >
-          <Code class="h-3.5 w-3.5" />
-          <span>Live Inspector</span>
-          <span
-            v-if="answeredKeys.length > 0"
-            class="rounded-full bg-indigo-600 px-1.5 py-0.2 text-[10px] font-bold text-white"
+        <span class="font-medium text-slate-700 dark:text-slate-300">Container Mode:</span>
+        <div class="flex rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5">
+          <button
+            type="button"
+            class="px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
+            :class="mode === 'inline-wide' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
+            @click="mode = 'inline-wide'"
           >
-            {{ answeredKeys.length }}
-          </span>
-        </button>
+            Wide (680px)
+          </button>
+          <button
+            type="button"
+            class="px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
+            :class="mode === 'inline-compact' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
+            @click="mode = 'inline-compact'"
+          >
+            Compact (380px)
+          </button>
+          <button
+            type="button"
+            class="px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
+            :class="mode === 'widget' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
+            @click="mode = 'widget'"
+          >
+            Floating Widget
+          </button>
+          <button
+            type="button"
+            class="px-2.5 py-1 rounded text-xs transition-colors cursor-pointer"
+            :class="mode === 'modal' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
+            @click="mode = 'modal'"
+          >
+            Modal Dialog
+          </button>
+        </div>
 
-        <!-- Restart -->
         <button
           type="button"
-          class="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          title="Restart Chat Survey"
-          @click="onRestartClick"
+          class="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors shadow-2xs"
+          @click="emit('restart')"
         >
-          <RotateCcw class="h-3.5 w-3.5 text-slate-500" />
-          <span>Restart</span>
-        </button>
-
-        <!-- Edit in Designer Shortcut -->
-        <button
-          type="button"
-          class="flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 transition-colors cursor-pointer"
-          title="Return to visual designer"
-          @click="emit('editInDesigner')"
-        >
-          <Sparkles class="h-3.5 w-3.5" />
-          <span>Edit Questions</span>
+          Restart Chat
         </button>
       </div>
-    </header>
+    </div>
 
-    <!-- Main Studio Workspace: Center Preview + Side Inspector -->
-    <div class="flex flex-1 min-h-0 min-w-0 overflow-hidden">
-      <!-- Center: Simulated Environment Area -->
-      <main
-        class="flex-1 min-w-0 h-full overflow-auto p-4 sm:p-6 flex items-center justify-center transition-all"
-        @click="showSettings = false"
+    <!-- Active Form Metadata Banner -->
+    <div
+      v-if="activeSample"
+      class="border-b border-slate-200/80 bg-slate-50/70 px-4 py-2 text-xs text-slate-600 dark:border-slate-800/80 dark:bg-slate-900/50 dark:text-slate-400 flex flex-wrap items-center justify-between gap-2 shrink-0"
+      dir="ltr"
+    >
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+          {{ activeSample.category }}
+        </span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+          {{ activeSample.badge }}
+        </span>
+        <span class="text-slate-500 dark:text-slate-400 hidden sm:inline">
+          {{ activeSample.description }}
+        </span>
+      </div>
+
+      <!-- Input Types Pill List -->
+      <div class="flex items-center gap-1 flex-wrap">
+        <span class="text-[10px] text-slate-400 font-mono">Types:</span>
+        <span
+          v-for="t in activeSample.typesUsed"
+          :key="t"
+          class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+        >
+          {{ t }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Playground Container Area -->
+    <div class="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center">
+      <!-- 1. Wide Desktop Inline Mode (680px) -->
+      <div
+        v-if="mode === 'inline-wide'"
+        class="w-full max-w-2xl h-[640px] shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all"
       >
-        <!-- Empty State if no questions -->
-        <div
-          v-if="!hasQuestions"
-          class="w-full max-w-md rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-xs dark:border-slate-700 dark:bg-slate-900"
-        >
-          <div
-            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 mb-4"
-          >
-            <Sparkles class="h-7 w-7" />
-          </div>
-          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">
-            Current form is empty
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
-            Load our pre-built test form to experience one-click option progression, multi-select chips, Persian date picking, and dynamic logic in chat mode!
-          </p>
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-500 transition-all cursor-pointer hover:scale-105 active:scale-95"
-            @click="emit('loadSample', 'chat-showcase')"
-          >
-            <span>💬 Load Showcase Test Form</span>
-          </button>
-        </div>
+        <SurveyChatInline
+          :json="effectiveJson"
+          :persona="currentPersona"
+          :direction="direction"
+          @answer="onAnswer"
+          @complete="onComplete"
+          @restart="emit('restart')"
+        />
+      </div>
 
-        <!-- MOBILE FRAME MOCKUP -->
-        <div
-          v-else-if="viewMode === 'mobile'"
-          class="w-full max-w-[390px] h-[660px] max-h-[100%] rounded-[3rem] border-[8px] border-slate-900 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 flex flex-col relative overflow-hidden ring-1 ring-slate-900/10"
-        >
-          <!-- Dynamic Island / Speaker cutout -->
-          <div
-            class="absolute top-2.5 left-1/2 -translate-x-1/2 z-30 h-5 w-28 rounded-full bg-slate-900 dark:bg-slate-800 flex items-center justify-between px-3 shadow-xs"
-          >
-            <div class="h-2.5 w-2.5 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center">
-              <div class="h-1 w-1 rounded-full bg-indigo-400/40"></div>
-            </div>
-            <div class="h-1.5 w-10 rounded-full bg-slate-800"></div>
-          </div>
-
-          <!-- Mobile Status Bar (Clock, Wi-Fi, Battery) -->
-          <div
-            class="h-8 w-full shrink-0 flex items-center justify-between px-6 pt-1 text-[11px] font-semibold text-slate-800 dark:text-slate-200 select-none z-20"
-            dir="ltr"
-          >
-            <span>{{ currentTime }}</span>
-            <div class="flex items-center gap-1.5">
-              <!-- Signal bars -->
-              <svg class="h-2.5 w-3" viewBox="0 0 12 10" fill="currentColor">
-                <rect x="0" y="7" width="2" height="3" rx="0.5" />
-                <rect x="3" y="5" width="2" height="5" rx="0.5" />
-                <rect x="6" y="2.5" width="2" height="7.5" rx="0.5" />
-                <rect x="9" y="0" width="2" height="10" rx="0.5" />
-              </svg>
-              <!-- 5G text -->
-              <span class="text-[9px] font-bold">5G</span>
-              <!-- Battery icon -->
-              <div class="flex items-center">
-                <div class="h-2.5 w-4 rounded-xs border border-current p-0.5 flex items-center">
-                  <div class="h-full w-full rounded-xs bg-current"></div>
-                </div>
-                <div class="h-1 w-0.5 rounded-e-xs bg-current"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ChatSurvey inside Phone Frame -->
-          <div class="flex-1 min-h-0">
-            <ChatSurvey
-              :json="json"
-              :bot-name="activePersona.name"
-              :bot-avatar="activePersona.avatar"
-              :description="activePersona.subtitle"
-              :typing-delay="typingSpeed"
-              :show-progress-bar="showProgressBar"
-              :allow-edit="allowEdit"
-              :allow-skip="allowSkip"
-              @complete="onComplete"
-              @change="onChange"
-              @answer="onAnswer"
-              @question-change="onQuestionChange"
-              @restart="onRestartClick"
-            />
-          </div>
-
-          <!-- Bottom Home Indicator Bar -->
-          <div
-            class="h-5 w-full shrink-0 bg-white dark:bg-slate-900 flex items-center justify-center select-none"
-          >
-            <div class="h-1 w-32 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-          </div>
-        </div>
-
-        <!-- TABLET FRAME MOCKUP -->
-        <div
-          v-else-if="viewMode === 'tablet'"
-          class="w-full max-w-[700px] h-[680px] max-h-[100%] rounded-2xl border-4 border-slate-800 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 flex flex-col overflow-hidden"
-        >
-          <div class="flex-1 min-h-0">
-            <ChatSurvey
-              :json="json"
-              :bot-name="activePersona.name"
-              :bot-avatar="activePersona.avatar"
-              :description="activePersona.subtitle"
-              :typing-delay="typingSpeed"
-              :show-progress-bar="showProgressBar"
-              :allow-edit="allowEdit"
-              :allow-skip="allowSkip"
-              @complete="onComplete"
-              @change="onChange"
-              @answer="onAnswer"
-              @question-change="onQuestionChange"
-              @restart="onRestartClick"
-            />
-          </div>
-        </div>
-
-        <!-- DESKTOP / FULL WIDTH VIEW -->
-        <div
-          v-else
-          class="w-full h-full max-w-4xl rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 overflow-hidden flex flex-col"
-        >
-          <div class="flex-1 min-h-0">
-            <ChatSurvey
-              :json="json"
-              :bot-name="activePersona.name"
-              :bot-avatar="activePersona.avatar"
-              :description="activePersona.subtitle"
-              :typing-delay="typingSpeed"
-              :show-progress-bar="showProgressBar"
-              :allow-edit="allowEdit"
-              :allow-skip="allowSkip"
-              @complete="onComplete"
-              @change="onChange"
-              @answer="onAnswer"
-              @question-change="onQuestionChange"
-              @restart="onRestartClick"
-            />
-          </div>
-        </div>
-      </main>
-
-      <!-- Right: Live Response Inspector (Split Screen) -->
-      <aside
-        v-if="showInspector"
-        class="w-88 shrink-0 border-s border-slate-200 bg-white flex flex-col shadow-xs dark:border-slate-800 dark:bg-slate-900"
-        dir="ltr"
+      <!-- 2. Compact Mobile / Sidebar Mode (380px) -->
+      <div
+        v-else-if="mode === 'inline-compact'"
+        class="w-[380px] h-[600px] shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all flex flex-col"
       >
-        <!-- Inspector Header -->
-        <div
-          class="flex items-center justify-between border-b border-slate-200 px-4 py-3 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60"
+        <!-- Mobile status bar simulation -->
+        <div class="bg-slate-100 dark:bg-slate-800/80 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono border-b border-slate-200/50 dark:border-slate-700/50 select-none">
+          <span>9:41 AM</span>
+          <div class="flex items-center gap-1.5">
+            <span>5G</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-hidden">
+          <SurveyChatInline
+            :json="effectiveJson"
+            :persona="currentPersona"
+            :direction="direction"
+            @answer="onAnswer"
+            @complete="onComplete"
+            @restart="emit('restart')"
+          />
+        </div>
+      </div>
+
+      <!-- 3. Floating Widget Mode -->
+      <div v-else-if="mode === 'widget'" class="text-center p-8 max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
+          💬
+        </div>
+        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+          Floating Widget Active
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          The floating chat launcher button is rendered at the bottom-right corner of your viewport. Click the bubble to minimize or open.
+        </p>
+        <span class="inline-block text-[11px] px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 font-mono text-slate-600 dark:text-slate-300">
+          Position: bottom-right &bull; Auto-opened
+        </span>
+
+        <SurveyChatWidget
+          :json="effectiveJson"
+          :default-open="true"
+          position="bottom-right"
+          :persona="currentPersona"
+          :direction="direction"
+          @answer="onAnswer"
+          @complete="onComplete"
+        />
+      </div>
+
+      <!-- 4. Modal Lightbox Dialog Mode -->
+      <div v-else-if="mode === 'modal'" class="text-center p-8 max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl">
+          🗔
+        </div>
+        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+          Modal Dialog Mode
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          Render the conversational survey as a full-screen or centered backdrop modal with keyboard Escape support.
+        </p>
+
+        <button
+          type="button"
+          class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+          @click="isModalOpen = true"
         >
-          <div class="flex items-center gap-2">
-            <Code class="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-            <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100">
-              Live Data Inspector
-            </h3>
-          </div>
-          <!-- Status pill -->
-          <span
-            class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            :class="
-              isCompleted
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300'
-                : 'bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300'
-            "
-          >
-            {{ isCompleted ? "Completed" : "In Progress" }}
-          </span>
-        </div>
+          Open Conversational Modal
+        </button>
 
-        <!-- Inspector Content -->
-        <div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
-          <!-- Active question & answered stats -->
-          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/40">
-            <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
-              <span>Active Question</span>
-              <span class="font-mono font-semibold text-slate-800 dark:text-slate-200">
-                {{ currentQuestionName || "None" }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between text-xs text-slate-500">
-              <span>Answers Collected</span>
-              <span class="font-bold text-indigo-600 dark:text-indigo-400">
-                {{ answeredKeys.length }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Live Answer Items List -->
-          <div>
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Collected Answers
-            </h4>
-            <div v-if="answeredKeys.length === 0" class="text-xs text-slate-400 italic py-2">
-              No answers submitted yet. Click options in the chat to see answers stream in!
-            </div>
-            <div v-else class="space-y-1.5 max-h-56 overflow-y-auto">
-              <div
-                v-for="key in answeredKeys"
-                :key="key"
-                class="flex items-start justify-between gap-2 rounded-md border border-slate-200 bg-white p-2 text-xs dark:border-slate-800 dark:bg-slate-900"
-              >
-                <span class="font-mono font-medium text-slate-700 dark:text-slate-300 truncate">
-                  {{ key }}
-                </span>
-                <span
-                  class="rounded bg-indigo-50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 shrink-0 max-w-[120px] truncate"
-                >
-                  {{ JSON.stringify(liveAnswers[key]) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Raw JSON Viewer -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                JSON Payload (survey.data)
-              </h4>
-              <button
-                type="button"
-                class="flex items-center gap-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 cursor-pointer"
-                @click="copyAnswers"
-              >
-                <Check v-if="copied" class="h-3 w-3 text-emerald-500" />
-                <Copy v-else class="h-3 w-3" />
-                <span>{{ copied ? "Copied!" : "Copy" }}</span>
-              </button>
-            </div>
-            <pre
-              class="max-h-64 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] font-mono text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-            >{{ JSON.stringify(liveAnswers, null, 2) }}</pre>
-          </div>
-        </div>
-
-        <!-- Inspector Footer -->
-        <div class="border-t border-slate-200 p-3 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 shrink-0 flex items-center justify-between">
-          <span class="text-[11px] text-slate-500">
-            Updates in real-time
-          </span>
-          <button
-            type="button"
-            class="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 cursor-pointer"
-            @click="onRestartClick"
-          >
-            Clear & Reset
-          </button>
-        </div>
-      </aside>
+        <SurveyChatModal
+          :open="isModalOpen"
+          :json="effectiveJson"
+          :persona="currentPersona"
+          :direction="direction"
+          @close="isModalOpen = false"
+          @answer="onAnswer"
+          @complete="onComplete"
+        />
+      </div>
     </div>
   </div>
 </template>

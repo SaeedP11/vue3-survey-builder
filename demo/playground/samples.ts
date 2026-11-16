@@ -1,5 +1,8 @@
 import asqSe2 from "./asqSe2.json";
 import spirometry from "./spirometry.json";
+import { CHAT_SAMPLES } from "./chatSamples.ts";
+
+export { CHAT_SAMPLES };
 
 /** Surveys the playground can load into the designer. */
 export interface Sample {
@@ -500,4 +503,9 @@ export const SAMPLES: Sample[] = [
       ],
     },
   },
+  ...CHAT_SAMPLES.map((cs) => ({
+    id: cs.id,
+    name: `💬 Chat: ${cs.name}`,
+    json: cs.json,
+  })),
 ];

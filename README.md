@@ -120,48 +120,87 @@ the app, and scrolls to the first invalid question on validation. It must be
 called from a component's `setup()`. A Persian survey renders right to left on
 its own; an English one takes the page's direction.
 
-### Conversational form filling (`ChatSurvey`)
+### 💬 Chat Mode: Conversational Surveys
 
-Fill out surveys in an interactive chat environment where questions appear as conversational bubbles with clickable options, typing simulation, answer editing, and instant validation:
+Run any survey schema as a mobile-responsive, conversational chat flow. Available in both full and runtime builds.
+
+#### 1. Embedded / Inline Chat Form
+
+Embed directly inside a support page, contact card, or article:
 
 ```vue
 <script setup lang="ts">
-import { ChatSurvey } from "vue3-survey-builder";
-// or from "vue3-survey-builder/runtime"
+import { SurveyChatInline } from "vue3-survey-builder";
 import "vue3-survey-builder/style.css";
 
-function onComplete(data: Record<string, unknown>) {
-  console.log("Survey completed:", data);
-}
+const supportSurveyJson = { /* ... */ };
 </script>
 
 <template>
-  <ChatSurvey
-    :json="surveyJson"
-    :typing-delay="200"
-    @complete="onComplete"
+  <div class="max-w-xl h-[600px] mx-auto">
+    <SurveyChatInline
+      :json="supportSurveyJson"
+      :persona="{ name: 'Support Concierge', greeting: 'Hi there! How can we help?' }"
+      @complete="(result) => submitTicket(result)"
+    />
+  </div>
+</template>
+```
+
+#### 2. Floating Widget (Support & Feedback)
+
+Floating launcher button on the bottom corner that expands into a conversational popup:
+
+```vue
+<script setup lang="ts">
+import { SurveyChatWidget } from "vue3-survey-builder";
+import "vue3-survey-builder/style.css";
+</script>
+
+<template>
+  <SurveyChatWidget
+    :json="feedbackSurveyJson"
+    position="bottom-right"
+    :persona="{ name: 'Feedback Bot', greeting: 'Got a second to rate your experience?' }"
   />
 </template>
 ```
 
-#### `ChatSurvey` Props & Events
+#### 3. Lightbox Modal Dialog
 
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `json` | `object` | `undefined` | Survey JSON schema |
-| `model` | `SurveyModel` | `undefined` | Existing `SurveyModel` instance (takes precedence over `json`) |
-| `title` | `string` | `survey.title` | Custom chat header title |
-| `description` | `string` | `survey.description` | Custom chat header subtitle |
-| `botName` | `string` | localized | Bot display name |
-| `userName` | `string` | localized | User display name |
-| `typingDelay` | `number` | `200` | Typing animation delay in ms (0 for instant) |
-| `showProgressBar` | `boolean` | `true` | Show progress counter and percentage bar |
-| `allowEdit` | `boolean` | `true` | Allow respondents to edit past answers in chat history |
-| `allowRestart` | `boolean` | `true` | Show restart button |
-| `allowSkip` | `boolean` | `true` | Show skip button for optional questions |
-| `dir` | `"ltr" \| "rtl"` | auto | Direction override (defaults to active locale direction) |
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { SurveyChatModal } from "vue3-survey-builder";
 
-Events: `@complete(data, survey)`, `@change(data, question)`, `@answer(question, value)`, `@restart`, `@skip(question)`.
+const isModalOpen = ref(false);
+</script>
+
+<template>
+  <button @click="isModalOpen = true">Give Feedback</button>
+  <SurveyChatModal
+    :open="isModalOpen"
+    :json="surveyJson"
+    @close="isModalOpen = false"
+  />
+</template>
+```
+
+#### 4. Headless Composable
+
+Build completely custom conversational survey UI with `useSurveyChat`:
+
+```ts
+import { useSurveyChat } from "vue3-survey-builder";
+
+const { messages, activeQuestion, isTyping, submitAnswer, editAnswer } = useSurveyChat(surveyJson, {
+  persona: { name: "Concierge", typingSpeedMs: 300 },
+  autoAdvanceOnSelect: true,
+  allowEditPastAnswers: true,
+});
+```
+
+All standard question types (`radiogroup`, `checkbox`, `rating`, `dropdown`, `text`, `comment`, `file`, `signaturepad`, `matrix`, `ranking`, `imagepicker`) and builder widgets (`chartquestion`, gauges, thermometers) are supported.
 
 #### Without the designer: `vue3-survey-builder/runtime`
 
