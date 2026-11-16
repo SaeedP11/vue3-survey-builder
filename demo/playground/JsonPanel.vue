@@ -12,7 +12,24 @@ const copied = ref(false);
 
 function apply() {
   try {
-    const parsed = JSON.parse(draft.value);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(draft.value);
+    } catch {
+      // Auto-sanitize unescaped control characters or literal newlines in pasted string literals
+      const sanitized = draft.value.replace(
+        /"(?:[^"\\]|\\.)*"/g,
+        (match) =>
+          match.replace(/[\x00-\x1f]/g, (c) => {
+            if (c === "\n") return "\\n";
+            if (c === "\r") return "\\r";
+            if (c === "\t") return "\\t";
+            return "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0");
+          }),
+      );
+      parsed = JSON.parse(sanitized);
+    }
+
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("The survey JSON must be an object");
     }
