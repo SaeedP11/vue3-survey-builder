@@ -1,0 +1,207 @@
+{
+  "title": {
+    "default": "Conversational Experience & Feedback",
+    "fa": "نظرسنجی و ثبت بازخورد تعاملی"
+  },
+  "description": {
+    "default": "Step-by-step conversational survey with one-click options, multi-select, Persian date picker, and dynamic logic.",
+    "fa": "نظرسنجی مرحله‌به‌مرحله با انتخاب سریع گزینه‌ها، انتخاب چندگانه، انتخابگر تاریخ شمسی و منطق شرطی."
+  },
+  "completedHtml": {
+    "default": "<div class='text-center p-4'><h3 class='text-lg font-bold text-emerald-600'>🎉 Thank you for your feedback!</h3><p class='text-sm text-slate-500 mt-1'>Your responses have been successfully recorded in chat mode.</p></div>",
+    "fa": "<div class='text-center p-4' dir='rtl'><h3 class='text-lg font-bold text-emerald-600'>🎉 از بازخورد ارزشمند شما سپاسگزاریم!</h3><p class='text-sm text-slate-500 mt-1'>پاسخ‌های شما با موفقیت در قالب گفتگو ثبت گردید.</p></div>"
+  },
+  "elements": [
+    {
+      "type": "text",
+      "name": "respondentName",
+      "title": {
+        "default": "What is your name?",
+        "fa": "نام و نام خانوادگی شما چیست؟"
+      },
+      "placeholder": {
+        "default": "e.g. Alex Smith",
+        "fa": "مثلاً سارا احمدی"
+      },
+      "isRequired": true
+    },
+    {
+      "type": "radiogroup",
+      "name": "satisfaction",
+      "title": {
+        "default": "How would you rate your overall experience?",
+        "fa": "کیفیت تجربه کاربری خود با این سامانه را چگونه ارزیابی می‌کنید؟"
+      },
+      "isRequired": true,
+      "choices": [
+        {
+          "value": "excellent",
+          "text": {
+            "default": "🌟 Excellent - Exceeded expectations",
+            "fa": "🌟 عالی - فراتر از انتظار"
+          }
+        },
+        {
+          "value": "good",
+          "text": {
+            "default": "👍 Good - Very satisfied",
+            "fa": "👍 خوب - کاملاً راضی"
+          }
+        },
+        {
+          "value": "neutral",
+          "text": {
+            "default": "😐 Neutral - It was okay",
+            "fa": "😐 معمولی - قابل قبول"
+          }
+        },
+        {
+          "value": "needs_work",
+          "text": {
+            "default": "👎 Needs Improvement",
+            "fa": "👎 نیاز به بهبود دارد"
+          }
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "name": "improvementAreas",
+      "title": {
+        "default": "Which areas would you like us to improve? (Select all that apply)",
+        "fa": "چه بخش‌هایی نیاز به بهبود دارند؟ (گزینه‌های مورد نظر را انتخاب کنید)"
+      },
+      "visibleIf": "{satisfaction} = 'needs_work' or {satisfaction} = 'neutral'",
+      "isRequired": true,
+      "choices": [
+        {
+          "value": "ui_design",
+          "text": {
+            "default": "🎨 User Interface & Design",
+            "fa": "🎨 طراحی رابط کاربری"
+          }
+        },
+        {
+          "value": "speed",
+          "text": {
+            "default": "⚡ Speed & Performance",
+            "fa": "⚡ سرعت و کارایی"
+          }
+        },
+        {
+          "value": "mobile",
+          "text": {
+            "default": "📱 Mobile Experience",
+            "fa": "📱 تجربه در موبایل"
+          }
+        },
+        {
+          "value": "features",
+          "text": {
+            "default": "✨ More Interactive Features",
+            "fa": "✨ امکانات تعاملی بیشتر"
+          }
+        }
+      ]
+    },
+    {
+      "type": "boolean",
+      "name": "recommend",
+      "title": {
+        "default": "Would you recommend our conversational survey to others?",
+        "fa": "آیا استفاده از این فرم گفتگومحور را به دیگران پیشنهاد می‌کنید؟"
+      },
+      "labelTrue": {
+        "default": "Yes, definitely! 👍",
+        "fa": "بله، حتماً! 👍"
+      },
+      "labelFalse": {
+        "default": "Not right now 👎",
+        "fa": "خیر، در حال حاضر نه 👎"
+      },
+      "isRequired": true
+    },
+    {
+      "type": "rating",
+      "name": "recommendScore",
+      "title": {
+        "default": "How likely are you to recommend us? (1 = Unlikely, 5 = Highly likely)",
+        "fa": "چقدر احتمال دارد ما را به دوستان خود پیشنهاد دهید؟ (۱ = کم، ۵ = بسیار زیاد)"
+      },
+      "rateMin": 1,
+      "rateMax": 5,
+      "minRateDescription": {
+        "default": "Unlikely",
+        "fa": "کم"
+      },
+      "maxRateDescription": {
+        "default": "Highly likely",
+        "fa": "بسیار زیاد"
+      },
+      "isRequired": false
+    },
+    {
+      "type": "dropdown",
+      "name": "contactChannel",
+      "title": {
+        "default": "What is your preferred channel for updates?",
+        "fa": "بهترین روش برای ارسال پیام‌ها و اطلاعیه‌ها به شما چیست؟"
+      },
+      "isRequired": true,
+      "choices": [
+        {
+          "value": "email",
+          "text": {
+            "default": "📧 Email",
+            "fa": "📧 ایمیل"
+          }
+        },
+        {
+          "value": "sms",
+          "text": {
+            "default": "📱 SMS",
+            "fa": "📱 پیامک"
+          }
+        },
+        {
+          "value": "telegram",
+          "text": {
+            "default": "💬 Telegram",
+            "fa": "💬 تلگرام"
+          }
+        },
+        {
+          "value": "none",
+          "text": {
+            "default": "🚫 No notifications needed",
+            "fa": "🚫 نیازی به اطلاع‌رسانی نیست"
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "preferredDate",
+      "title": {
+        "default": "When is the best date to contact you? (Optional)",
+        "fa": "مناسب‌ترین تاریخ برای تماس یا پیگیری چه زمانی است؟ (اختیاری)"
+      },
+      "inputType": "date",
+      "dateFormat": "jalali",
+      "isRequired": false
+    },
+    {
+      "type": "comment",
+      "name": "feedbackText",
+      "title": {
+        "default": "Any other suggestions or thoughts you'd like to share? (Optional)",
+        "fa": "آیا نظر، پیشنهاد یا نکته دیگری دارید که مایلید با ما در میان بگذارید؟ (اختیاری)"
+      },
+      "placeholder": {
+        "default": "Type your thoughts here...",
+        "fa": "نظر خود را اینجا بنویسید..."
+      },
+      "isRequired": false
+    }
+  ]
+}
