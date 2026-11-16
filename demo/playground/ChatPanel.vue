@@ -93,6 +93,18 @@ const currentQuestionName = ref<string>("");
 const answeredKeys = computed(() => Object.keys(liveAnswers.value));
 const copied = ref<boolean>(false);
 
+const hasQuestions = computed(() => {
+  const j = props.json as any;
+  if (!j) return false;
+  if (Array.isArray(j.elements) && j.elements.length > 0) return true;
+  if (
+    Array.isArray(j.pages) &&
+    j.pages.some((p: any) => p.elements && p.elements.length > 0)
+  )
+    return true;
+  return false;
+});
+
 // Mobile clock simulation
 const currentTime = ref<string>("9:41");
 let timeTimer: any = null;
@@ -370,6 +382,16 @@ watch(
 
       <!-- Right: Inspector Toggle, Restart & Designer Shortcut -->
       <div class="flex items-center gap-2">
+        <!-- Quick Load Showcase Form -->
+        <button
+          type="button"
+          class="flex items-center gap-1.5 rounded-md border border-indigo-200 bg-indigo-50/70 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 cursor-pointer"
+          title="Load complete test form for conversational chat mode"
+          @click="emit('loadSample', 'chat-showcase')"
+        >
+          <span>💬 Load Showcase</span>
+        </button>
+
         <!-- Live Inspector Toggle -->
         <button
           type="button"
@@ -422,9 +444,34 @@ watch(
         class="flex-1 min-w-0 h-full overflow-auto p-4 sm:p-6 flex items-center justify-center transition-all"
         @click="showSettings = false"
       >
+        <!-- Empty State if no questions -->
+        <div
+          v-if="!hasQuestions"
+          class="w-full max-w-md rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-xs dark:border-slate-700 dark:bg-slate-900"
+        >
+          <div
+            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 mb-4"
+          >
+            <Sparkles class="h-7 w-7" />
+          </div>
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">
+            Current form is empty
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
+            Load our pre-built test form to experience one-click option progression, multi-select chips, Persian date picking, and dynamic logic in chat mode!
+          </p>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-500 transition-all cursor-pointer hover:scale-105 active:scale-95"
+            @click="emit('loadSample', 'chat-showcase')"
+          >
+            <span>💬 Load Showcase Test Form</span>
+          </button>
+        </div>
+
         <!-- MOBILE FRAME MOCKUP -->
         <div
-          v-if="viewMode === 'mobile'"
+          v-else-if="viewMode === 'mobile'"
           class="w-full max-w-[390px] h-[660px] max-h-[100%] rounded-[3rem] border-[8px] border-slate-900 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 flex flex-col relative overflow-hidden ring-1 ring-slate-900/10"
         >
           <!-- Dynamic Island / Speaker cutout -->
