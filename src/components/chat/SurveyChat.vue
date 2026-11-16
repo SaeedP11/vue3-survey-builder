@@ -22,6 +22,7 @@ const props = withDefaults(
     autoAdvanceOnSelect?: boolean;
     allowEditPastAnswers?: boolean;
     persistKey?: string;
+    direction?: "ltr" | "rtl";
   }>(),
   {
     autoAdvanceOnSelect: true,
@@ -37,7 +38,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useLocalI18n(chat);
 const { isDark } = useColorMode();
-const direction = computed(() => localeDirection(locale.value));
+const direction = computed(() => props.direction || localeDirection(locale.value));
 
 const effectiveSurvey = computed(() => props.model || props.json || {});
 const scrollContainerRef = ref<HTMLElement | null>(null);

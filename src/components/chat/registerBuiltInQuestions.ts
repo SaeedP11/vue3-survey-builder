@@ -72,6 +72,11 @@ export function registerBuiltInChatQuestions(): void {
     placement: "inline",
     formatHistoryDisplay: () => "✍️ Signed",
   });
+  chatQuestionRegistry.register("signature", {
+    component: ChatInputSignature,
+    placement: "inline",
+    formatHistoryDisplay: () => "✍️ Signed",
+  });
 
   // Tabular & Structural
   chatQuestionRegistry.register("matrix", {

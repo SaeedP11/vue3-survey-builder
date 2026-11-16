@@ -60,6 +60,12 @@ export type {
   SurveyResultProps,
   TableRow,
   TemplateDefinition,
+  ChatBotPersona,
+  ChatMessage,
+  SurveyChatOptions,
+  ChatPlacement,
+  ChatQuestionComponentProps,
+  ChatQuestionRegistration,
 } from "./types";
 
 export {

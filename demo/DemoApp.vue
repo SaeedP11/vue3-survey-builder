@@ -101,6 +101,12 @@ function applyJson(next: object) {
   logEvent("sample", "applied JSON from the JSON tab");
 }
 
+function onChatLoadSample(next: object) {
+  json.value = next;
+  fillKey.value++;
+  logEvent("sample", "loaded chat example form from Chat Mode");
+}
+
 const sampleChoice = ref("");
 watch(sampleChoice, (id) => {
   if (!id) return;
@@ -198,6 +204,7 @@ watch(sampleChoice, (id) => {
           :key="fillKey"
           :json="json"
           @restart="fillKey++"
+          @load-sample="onChatLoadSample"
         />
         <JsonPanel v-if="tab === 'json'" :json="json" @apply="applyJson" />
       </main>

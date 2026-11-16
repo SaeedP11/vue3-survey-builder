@@ -11,6 +11,7 @@ withDefaults(
     autoAdvanceOnSelect?: boolean;
     allowEditPastAnswers?: boolean;
     persistKey?: string;
+    direction?: "ltr" | "rtl";
   }>(),
   {
     autoAdvanceOnSelect: true,
@@ -34,6 +35,7 @@ const emit = defineEmits<{
       :auto-advance-on-select="autoAdvanceOnSelect"
       :allow-edit-past-answers="allowEditPastAnswers"
       :persist-key="persistKey"
+      :direction="direction"
       @complete="(res) => emit('complete', res)"
       @answer="(name, val) => emit('answer', name, val)"
       @restart="emit('restart')"
