@@ -11,6 +11,12 @@ import SurveyResult from "./components/templates/SurveyResult.vue";
 import registerChartQuestion from "./utils/registerChartQuestion";
 import registerChartQuestionDesigner from "./utils/registerChartQuestionDesigner";
 import { patchSurveyComponents } from "./utils/patchSurveyComponents";
+import SurveyChat from "./components/chat/SurveyChat.vue";
+import SurveyChatWidget from "./components/chat/SurveyChatWidget.vue";
+import SurveyChatModal from "./components/chat/SurveyChatModal.vue";
+import SurveyChatInline from "./components/chat/SurveyChatInline.vue";
+import { useSurveyChat } from "./composables/useSurveyChat";
+import { chatQuestionRegistry } from "./components/chat/registry";
 
 // Built in: the chart question needs nothing from the host, so the designer
 // and every survey rendered with this library know it from import
@@ -76,6 +82,12 @@ export {
   SurveyResultEditor,
   SurveyResultEditorModal,
   SurveySchemaPrompt,
+  SurveyChat,
+  SurveyChatWidget,
+  SurveyChatModal,
+  SurveyChatInline,
+  useSurveyChat,
+  chatQuestionRegistry,
   registerAsyncDropdown,
   registerAdvancedTextInput,
   registerCustomLogic,

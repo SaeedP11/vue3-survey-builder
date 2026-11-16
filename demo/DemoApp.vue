@@ -7,6 +7,7 @@ import { aiMockConfig, aiShouldFail } from "./playground/aiMock.ts";
 import { events, logEvent } from "./playground/eventLog.ts";
 import { SAMPLES } from "./playground/samples.ts";
 import FillPanel from "./playground/FillPanel.vue";
+import ChatPanel from "./playground/ChatPanel.vue";
 import JsonPanel from "./playground/JsonPanel.vue";
 import EventLog from "./playground/EventLog.vue";
 
@@ -15,10 +16,11 @@ import EventLog from "./playground/EventLog.vue";
 registerPlaygroundTypes();
 provideAiAssistantConfig(aiMockConfig);
 
-type Tab = "designer" | "fill" | "json";
+type Tab = "designer" | "fill" | "chat" | "json";
 const TABS: { id: Tab; label: string }[] = [
   { id: "designer", label: "Designer" },
   { id: "fill", label: "Fill" },
+  { id: "chat", label: "Chat Mode" },
   { id: "json", label: "JSON" },
 ];
 
@@ -187,6 +189,12 @@ watch(sampleChoice, (id) => {
         </div>
         <FillPanel
           v-if="tab === 'fill'"
+          :key="fillKey"
+          :json="json"
+          @restart="fillKey++"
+        />
+        <ChatPanel
+          v-if="tab === 'chat'"
           :key="fillKey"
           :json="json"
           @restart="fillKey++"

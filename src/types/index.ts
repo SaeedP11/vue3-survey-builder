@@ -2,6 +2,7 @@ import type { SurveyCreatorModel } from "survey-creator-core";
 import type { Question } from "survey-core";
 import type { Component } from "vue";
 import type { Ref } from "vue";
+export * from "./chat";
 
 export type SurveyAiAssitantConfig = {
   onSubmit: (

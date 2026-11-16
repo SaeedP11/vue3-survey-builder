@@ -3,12 +3,14 @@ import recurringSurveyEn from "./en/recurringSurvey.json";
 import surveyResultEn from "./en/surveyResult.json";
 import generalEn from "./en/general.json";
 import chartQuestionEn from "./en/chartQuestion.json";
+import chatEn from "./en/chat.json";
 
 import surveyResultEditorFa from "./fa/surveyResultEditor.json";
 import recurringSurveyFa from "./fa/recurringSurvey.json";
 import surveyResultFa from "./fa/surveyResult.json";
 import generalFa from "./fa/general.json";
 import chartQuestionFa from "./fa/chartQuestion.json";
+import chatFa from "./fa/chat.json";
 
 export const general = {
   en: generalEn,
@@ -52,3 +54,15 @@ export const chartQuestion = {
   en: chartQuestionEn,
   fa: chartQuestionFa,
 };
+
+export const chat = {
+  en: {
+    ...general.en,
+    ...chatEn,
+  },
+  fa: {
+    ...general.fa,
+    ...chatFa,
+  },
+};
+

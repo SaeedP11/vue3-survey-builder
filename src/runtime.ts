@@ -14,6 +14,12 @@ import useScrollToError from "./composables/useScrollToError";
 import "./utils/surveyProperties";
 import RenderResult from "./components/RenderResult.vue";
 import SurveyResult from "./components/templates/SurveyResult.vue";
+import SurveyChat from "./components/chat/SurveyChat.vue";
+import SurveyChatWidget from "./components/chat/SurveyChatWidget.vue";
+import SurveyChatModal from "./components/chat/SurveyChatModal.vue";
+import SurveyChatInline from "./components/chat/SurveyChatInline.vue";
+import { useSurveyChat } from "./composables/useSurveyChat";
+import { chatQuestionRegistry } from "./components/chat/registry";
 
 registerChartQuestion();
 patchSurveyComponents();
@@ -56,4 +62,14 @@ export {
   type ChartType,
 } from "./utils/registerChartQuestion";
 
-export { RenderResult, SurveyResult, useScrollToError };
+export {
+  RenderResult,
+  SurveyResult,
+  SurveyChat,
+  SurveyChatWidget,
+  SurveyChatModal,
+  SurveyChatInline,
+  useSurveyChat,
+  chatQuestionRegistry,
+  useScrollToError,
+};

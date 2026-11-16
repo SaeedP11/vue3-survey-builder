@@ -120,6 +120,89 @@ the app, and scrolls to the first invalid question on validation. It must be
 called from a component's `setup()`. A Persian survey renders right to left on
 its own; an English one takes the page's direction.
 
+### 💬 Chat Mode: Conversational Surveys
+
+Run any survey schema as a mobile-responsive, conversational chat flow. Available in both full and runtime builds.
+
+#### 1. Embedded / Inline Chat Form
+
+Embed directly inside a support page, contact card, or article:
+
+```vue
+<script setup lang="ts">
+import { SurveyChatInline } from "vue3-survey-builder";
+import "vue3-survey-builder/style.css";
+
+const supportSurveyJson = { /* ... */ };
+</script>
+
+<template>
+  <div class="max-w-xl h-[600px] mx-auto">
+    <SurveyChatInline
+      :json="supportSurveyJson"
+      :persona="{ name: 'Support Concierge', greeting: 'Hi there! How can we help?' }"
+      @complete="(result) => submitTicket(result)"
+    />
+  </div>
+</template>
+```
+
+#### 2. Floating Widget (Support & Feedback)
+
+Floating launcher button on the bottom corner that expands into a conversational popup:
+
+```vue
+<script setup lang="ts">
+import { SurveyChatWidget } from "vue3-survey-builder";
+import "vue3-survey-builder/style.css";
+</script>
+
+<template>
+  <SurveyChatWidget
+    :json="feedbackSurveyJson"
+    position="bottom-right"
+    :persona="{ name: 'Feedback Bot', greeting: 'Got a second to rate your experience?' }"
+  />
+</template>
+```
+
+#### 3. Lightbox Modal Dialog
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { SurveyChatModal } from "vue3-survey-builder";
+
+const isModalOpen = ref(false);
+</script>
+
+<template>
+  <button @click="isModalOpen = true">Give Feedback</button>
+  <SurveyChatModal
+    :open="isModalOpen"
+    :json="surveyJson"
+    @close="isModalOpen = false"
+  />
+</template>
+```
+
+#### 4. Headless Composable
+
+Build completely custom conversational survey UI with `useSurveyChat`:
+
+```ts
+import { useSurveyChat } from "vue3-survey-builder";
+
+const { messages, activeQuestion, isTyping, submitAnswer, editAnswer } = useSurveyChat(surveyJson, {
+  persona: { name: "Concierge", typingSpeedMs: 300 },
+  autoAdvanceOnSelect: true,
+  allowEditPastAnswers: true,
+});
+```
+
+All standard question types (`radiogroup`, `checkbox`, `rating`, `dropdown`, `text`, `comment`, `file`, `signaturepad`, `matrix`, `ranking`, `imagepicker`) and builder widgets (`chartquestion`, gauges, thermometers) are supported.
+
+
 #### Without the designer: `vue3-survey-builder/runtime`
 
 A page that only shows surveys can import from the `runtime` entry instead. It

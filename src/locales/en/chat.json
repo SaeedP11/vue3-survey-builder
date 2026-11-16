@@ -1,0 +1,21 @@
+{
+  "typing": "Typing...",
+  "online": "Online",
+  "typeYourAnswer": "Type your answer...",
+  "typeYourMessage": "Type your message...",
+  "confirm": "Confirm",
+  "clear": "Clear",
+  "done": "Done",
+  "send": "Send",
+  "selectAnOption": "Select an option",
+  "searchPlaceholder": "Search...",
+  "chooseFile": "Choose a file or drop here",
+  "editAnswer": "Edit answer",
+  "thankYou": "Thank you for completing the survey!",
+  "signHere": "Sign here",
+  "stepOf": "Step {current} of {total}",
+  "yes": "Yes",
+  "no": "No",
+  "invalidInput": "Please provide a valid answer.",
+  "close": "Close"
+}
