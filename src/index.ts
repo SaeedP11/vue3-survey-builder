@@ -17,12 +17,17 @@ import SurveyChatModal from "./components/chat/SurveyChatModal.vue";
 import SurveyChatInline from "./components/chat/SurveyChatInline.vue";
 import { useSurveyChat } from "./composables/useSurveyChat";
 import { chatQuestionRegistry } from "./components/chat/registry";
+import registerPersianDatePicker from "./utils/registerPersianDatePicker";
+import registerPersianDatePickerDesigner from "./utils/registerPersianDatePickerDesigner";
+import PersianDateTimePicker from "./components/PersianDateTimePicker.vue";
 
 // Built in: the chart question needs nothing from the host, so the designer
 // and every survey rendered with this library know it from import
 registerChartQuestion();
 registerChartQuestionDesigner();
 patchSurveyComponents();
+registerPersianDatePicker();
+registerPersianDatePickerDesigner();
 
 export {
   provideSurveyResultTemplate,
@@ -83,6 +88,7 @@ export type {
 
 export {
   FormBuilder,
+  PersianDateTimePicker,
   RenderResult,
   SurveyResult,
   SurveyResultEditor,
@@ -97,5 +103,6 @@ export {
   registerAsyncDropdown,
   registerAdvancedTextInput,
   registerCustomLogic,
+  registerPersianDatePicker,
   useScrollToError,
 };

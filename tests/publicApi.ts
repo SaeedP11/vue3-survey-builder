@@ -2,6 +2,7 @@
 export const OWN_EXPORTS = [
   "ChartItemValue",
   "FormBuilder",
+  "PersianDateTimePicker",
   "QuestionChartModel",
   "RenderResult",
   "SurveyChat",
@@ -20,6 +21,7 @@ export const OWN_EXPORTS = [
   "registerAdvancedTextInput",
   "registerAsyncDropdown",
   "registerCustomLogic",
+  "registerPersianDatePicker",
   "useIconPicker",
   "useScrollToError",
   "useSurveyAiAssistantConfig",
@@ -32,6 +34,7 @@ export const OWN_EXPORTS = [
 /** What `vue3-survey-builder/runtime` adds to survey-core's exports: rendering a survey, no designer. */
 export const RUNTIME_EXPORTS = [
   "ChartItemValue",
+  "PersianDateTimePicker",
   "QuestionChartModel",
   "RenderResult",
   "SurveyChat",
@@ -43,6 +46,7 @@ export const RUNTIME_EXPORTS = [
   "chatQuestionRegistry",
   "provideIconPicker",
   "provideSurveyResultTemplate",
+  "registerPersianDatePicker",
   "useScrollToError",
   "useSurveyChat",
   "useSurveyModel",

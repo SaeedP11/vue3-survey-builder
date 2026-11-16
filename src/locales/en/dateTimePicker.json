@@ -1,0 +1,13 @@
+{
+  "selectDate": "Select date",
+  "selectTime": "Select time",
+  "selectDateTime": "Select date and time",
+  "today": "Today",
+  "now": "Now",
+  "clear": "Clear",
+  "apply": "Apply",
+  "hour": "Hour",
+  "minute": "Minute",
+  "prevMonth": "Previous month",
+  "nextMonth": "Next month"
+}

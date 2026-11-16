@@ -10,6 +10,7 @@
  */
 import registerChartQuestion from "./utils/registerChartQuestion";
 import { patchSurveyComponents } from "./utils/patchSurveyComponents";
+import registerPersianDatePicker from "./utils/registerPersianDatePicker";
 import useScrollToError from "./composables/useScrollToError";
 import "./utils/surveyProperties";
 import RenderResult from "./components/RenderResult.vue";
@@ -20,9 +21,11 @@ import SurveyChatModal from "./components/chat/SurveyChatModal.vue";
 import SurveyChatInline from "./components/chat/SurveyChatInline.vue";
 import { useSurveyChat } from "./composables/useSurveyChat";
 import { chatQuestionRegistry } from "./components/chat/registry";
+import PersianDateTimePicker from "./components/PersianDateTimePicker.vue";
 
 registerChartQuestion();
 patchSurveyComponents();
+registerPersianDatePicker();
 
 import "survey-core/survey-core.css";
 // The host's --color-formbilder-* variables, mapped onto SurveyJS's.
@@ -69,6 +72,7 @@ export {
 } from "./utils/registerChartQuestion";
 
 export {
+  PersianDateTimePicker,
   RenderResult,
   SurveyResult,
   SurveyChat,
@@ -77,5 +81,6 @@ export {
   SurveyChatInline,
   useSurveyChat,
   chatQuestionRegistry,
+  registerPersianDatePicker,
   useScrollToError,
 };

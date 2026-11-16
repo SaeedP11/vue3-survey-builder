@@ -15,12 +15,20 @@ import immediateWatch from "../utils/immediateWatch";
 import { useI18n } from "vue-i18n";
 import { SURVEY_CREATOR_KEY } from "./surveyCreatorKey";
 import { patchSurveyComponents } from "../utils/patchSurveyComponents";
+import { registerPersianDatePicker } from "../utils/registerPersianDatePicker";
+import {
+  addPersianDateTimeToolboxItems,
+  registerPersianDatePickerDesigner,
+} from "../utils/registerPersianDatePickerDesigner";
 
 export function initSurveyCreator(
   model?: SurveyCreatorModelType,
 ): SurveyCreatorModelType {
   patchSurveyComponents();
+  registerPersianDatePicker();
+  registerPersianDatePickerDesigner();
   if (model) {
+    addPersianDateTimeToolboxItems(model);
     provide(SURVEY_CREATOR_KEY, model);
     return model;
   }
@@ -37,6 +45,7 @@ export function initSurveyCreator(
   // Save button pressed inside the default delay sent the survey as it was before the last edit.
   creator.autoSaveDelay = 0;
   creator.toolbox.showSubitems = false;
+  addPersianDateTimeToolboxItems(creator);
   const { isDark } = useColorMode();
   const { locale } = useI18n();
 
