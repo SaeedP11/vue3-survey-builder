@@ -101,6 +101,12 @@ function applyJson(next: object) {
   logEvent("sample", "applied JSON from the JSON tab");
 }
 
+function switchToChat() {
+  fillKey.value++;
+  tab.value = "chat";
+  logEvent("sample", "switched to chat mode to test current form");
+}
+
 function onChatLoadSample(next: object) {
   json.value = next;
   fillKey.value++;
