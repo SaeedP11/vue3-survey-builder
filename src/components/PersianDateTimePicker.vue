@@ -609,7 +609,7 @@ function formatNum(num: number | string): string {
     <!-- Dropdown / Popover Dialog -->
     <div
       v-if="isOpen"
-      class="fb-datetime-picker__popover absolute z-50 mt-1 w-72 sm:w-80 rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 p-3 text-sm animate-in fade-in"
+      class="fb-datetime-picker__popover absolute z-50 mt-1 w-72 sm:w-80 max-w-[calc(100vw-2rem)] sm:max-w-none rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 p-3 text-sm animate-in fade-in"
       :class="isRTL ? 'right-0' : 'left-0'"
       role="dialog"
       aria-modal="true"

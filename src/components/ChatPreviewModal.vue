@@ -63,20 +63,20 @@ const surveyJson = computed(() => creator.JSON ?? {});
   <Transition name="fade">
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-9998 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6"
+      class="fixed inset-0 z-9998 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs p-2 sm:p-4 md:p-6"
       @click.self="isOpen = false"
     >
       <!-- Modal container -->
       <div
-        class="relative flex flex-col w-full h-full max-h-[92vh] max-w-4xl rounded-2xl bg-fb-surface border border-fb-border shadow-2xl overflow-hidden"
+        class="relative flex flex-col w-full h-full max-h-[96vh] sm:max-h-[92vh] max-w-4xl rounded-2xl bg-fb-surface border border-fb-border shadow-2xl overflow-hidden"
       >
         <!-- Modal Toolbar Header -->
         <header
-          class="flex items-center justify-between border-b border-fb-border px-4 py-3 bg-fb-surface-muted shrink-0"
+          class="flex items-center justify-between border-b border-fb-border px-3 sm:px-4 py-2.5 sm:py-3 bg-fb-surface-muted shrink-0 gap-2"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-fb-accent text-fb-accent-on shadow-xs"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fb-accent text-fb-accent-on shadow-xs"
             >
               <svg
                 class="h-4.5 w-4.5"
@@ -93,25 +93,25 @@ const surveyJson = computed(() => creator.JSON ?? {});
                 <circle cx="16" cy="10" r="1" fill="currentColor" />
               </svg>
             </div>
-            <div>
-              <h2 class="text-sm font-bold text-fb-fg leading-none">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold text-fb-fg leading-none truncate">
                 {{ t("chatPreview") }}
               </h2>
-              <p class="text-xs text-fb-fg-muted mt-1">
+              <p class="text-xs text-fb-fg-muted mt-1 truncate hidden sm:block">
                 {{ t("chatPreviewSubtitle") }}
               </p>
             </div>
           </div>
 
           <!-- Controls: View mode & Actions -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <!-- View Mode Switcher -->
             <div
               class="flex items-center rounded-lg border border-fb-border bg-fb-surface p-0.5 text-xs"
             >
               <button
                 type="button"
-                class="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors cursor-pointer"
+                class="flex items-center gap-1.5 rounded-md px-2 sm:px-2.5 py-1 font-medium transition-colors cursor-pointer"
                 :class="
                   viewMode === 'mobile'
                     ? 'bg-fb-accent text-fb-accent-on shadow-xs'
@@ -124,7 +124,7 @@ const surveyJson = computed(() => creator.JSON ?? {});
               </button>
               <button
                 type="button"
-                class="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors cursor-pointer"
+                class="flex items-center gap-1.5 rounded-md px-2 sm:px-2.5 py-1 font-medium transition-colors cursor-pointer"
                 :class="
                   viewMode === 'desktop'
                     ? 'bg-fb-accent text-fb-accent-on shadow-xs'
@@ -140,7 +140,7 @@ const surveyJson = computed(() => creator.JSON ?? {});
             <!-- Restart -->
             <button
               type="button"
-              class="flex items-center gap-1 rounded-lg border border-fb-border bg-fb-surface px-2.5 py-1.5 text-xs font-medium text-fb-fg hover:bg-fb-surface-muted transition-colors cursor-pointer"
+              class="flex items-center gap-1 rounded-lg border border-fb-border bg-fb-surface px-2 sm:px-2.5 py-1.5 text-xs font-medium text-fb-fg hover:bg-fb-surface-muted transition-colors cursor-pointer"
               :title="t('restart')"
               @click="chatKey++"
             >
@@ -162,22 +162,22 @@ const surveyJson = computed(() => creator.JSON ?? {});
 
         <!-- Modal Body Content -->
         <div
-          class="flex-1 min-h-0 bg-slate-100 dark:bg-slate-950 p-4 flex items-center justify-center overflow-auto"
+          class="flex-1 min-h-0 bg-slate-100 dark:bg-slate-950 p-2 sm:p-4 flex items-center justify-center overflow-auto"
         >
           <!-- Mobile Smartphone Mockup Frame -->
           <div
             v-if="viewMode === 'mobile'"
-            class="w-full max-w-[390px] h-[640px] max-h-[100%] rounded-[2.5rem] border-[6px] border-slate-800 dark:border-slate-700 shadow-2xl bg-fb-surface flex flex-col relative overflow-hidden"
+            class="w-full max-w-[390px] h-full sm:h-[640px] max-h-full rounded-2xl sm:rounded-[2.5rem] border-2 sm:border-[6px] border-slate-800 dark:border-slate-700 shadow-2xl bg-fb-surface flex flex-col relative overflow-hidden"
           >
             <!-- Phone Dynamic Island / Speaker -->
             <div
-              class="absolute top-2 left-1/2 -translate-x-1/2 z-20 h-4 w-24 rounded-full bg-slate-800 dark:bg-slate-700 flex items-center justify-end px-2"
+              class="hidden sm:flex absolute top-2 left-1/2 -translate-x-1/2 z-20 h-4 w-24 rounded-full bg-slate-800 dark:bg-slate-700 items-center justify-end px-2"
             >
               <div class="h-2 w-2 rounded-full bg-slate-900 border border-slate-700"></div>
             </div>
 
             <!-- Status bar space -->
-            <div class="h-7 w-full shrink-0 bg-fb-surface"></div>
+            <div class="hidden sm:block h-7 w-full shrink-0 bg-fb-surface"></div>
 
             <!-- Chat inside mobile frame -->
             <div class="flex-1 min-h-0">
@@ -190,7 +190,7 @@ const surveyJson = computed(() => creator.JSON ?? {});
             </div>
 
             <!-- Bottom Home Indicator -->
-            <div class="h-4 w-full shrink-0 bg-fb-surface flex items-center justify-center">
+            <div class="hidden sm:flex h-4 w-full shrink-0 bg-fb-surface items-center justify-center">
               <div class="h-1 w-28 rounded-full bg-slate-300 dark:bg-slate-700"></div>
             </div>
           </div>

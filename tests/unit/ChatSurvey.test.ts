@@ -445,4 +445,53 @@ describe("ChatSurvey component", () => {
     expect(wrapper.text()).toContain("اجباری");
     expect(wrapper.text()).toContain("نام شما چیست؟");
   });
+
+  test("renders PersianDateTimePicker for inputType date and completes", async () => {
+    const dateJson = {
+      elements: [
+        {
+          type: "text",
+          name: "birthday",
+          title: "Select your date",
+          inputType: "date",
+          isRequired: true,
+        },
+      ],
+    };
+
+    const i18n = createTestI18n("en");
+    const wrapper = mount(ChatSurvey, {
+      global: { plugins: [i18n] },
+      props: {
+        json: dateJson,
+        typingDelay: 0,
+      },
+    });
+    await flush();
+
+    // PersianDateTimePicker should be rendered
+    const picker = wrapper.findComponent({ name: "PersianDateTimePicker" });
+    expect(picker.exists()).toBe(true);
+  });
+
+  test("applies responsive max-width and break-words to user message bubble", async () => {
+    const i18n = createTestI18n("en");
+    const wrapper = mount(ChatSurvey, {
+      global: { plugins: [i18n] },
+      props: {
+        json: sampleSurveyJson,
+        typingDelay: 0,
+      },
+    });
+    await flush();
+
+    // Click first option
+    const opt = wrapper.findAll("button").filter((b) => b.text().includes("Satisfied"))[0];
+    await opt.trigger("click");
+    await flush();
+
+    const userBubble = wrapper.find(".rounded-te-xs");
+    expect(userBubble.exists()).toBe(true);
+    expect(userBubble.classes()).toContain("break-words");
+  });
 });

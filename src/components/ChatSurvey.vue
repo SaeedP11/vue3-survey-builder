@@ -467,6 +467,18 @@ function filterChoices(choices: any[]) {
     return text.includes(q);
   });
 }
+
+function isDateTimeQuestion(q: any): boolean {
+  if (!q) return false;
+  if (q.getType?.() === "persian-datepicker") return true;
+  const inputType = q.inputType;
+  return (
+    inputType === "date" ||
+    inputType === "datetime-local" ||
+    inputType === "datetime" ||
+    inputType === "time"
+  );
+}
 </script>
 
 <template>
@@ -476,33 +488,33 @@ function filterChoices(choices: any[]) {
   >
     <!-- Header -->
     <header
-      class="flex shrink-0 items-center justify-between border-b border-fb-border bg-fb-surface px-4 py-3 shadow-xs"
+      class="flex shrink-0 items-center justify-between border-b border-fb-border bg-fb-surface px-3 sm:px-4 py-2.5 sm:py-3 shadow-xs gap-2"
     >
-      <div class="flex items-center gap-3 min-w-0">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <div
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-fb-accent text-fb-accent-on shadow-xs overflow-hidden"
+          class="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-fb-accent text-fb-accent-on shadow-xs overflow-hidden"
         >
-          <span v-if="botAvatar" class="text-lg leading-none select-none">{{ botAvatar }}</span>
-          <Bot v-else class="h-5 w-5" />
+          <span v-if="botAvatar" class="text-base sm:text-lg leading-none select-none">{{ botAvatar }}</span>
+          <Bot v-else class="h-4.5 w-4.5 sm:h-5 sm:w-5" />
         </div>
         <div class="min-w-0">
-          <h2 class="truncate text-sm font-semibold text-fb-fg">
+          <h2 class="truncate text-xs sm:text-sm font-semibold text-fb-fg">
             {{ title || survey.title || t("title") }}
           </h2>
           <p
             v-if="description || survey.description || t('subtitle')"
-            class="truncate text-xs text-fb-fg-muted"
+            class="truncate text-[11px] sm:text-xs text-fb-fg-muted"
           >
             {{ description || survey.description || t("subtitle") }}
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <!-- Progress counter -->
         <span
           v-if="showProgressBar && !isCompleted && visibleQuestions.length > 0"
-          class="rounded-full bg-fb-surface-muted px-2.5 py-1 text-xs font-medium text-fb-fg-secondary"
+          class="rounded-full bg-fb-surface-muted px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-medium text-fb-fg-secondary"
         >
           {{
             t("progress", {
@@ -516,7 +528,7 @@ function filterChoices(choices: any[]) {
         <button
           v-if="allowRestart"
           type="button"
-          class="flex items-center gap-1.5 rounded-lg border border-fb-border bg-fb-surface px-2.5 py-1.5 text-xs font-medium text-fb-fg-secondary hover:bg-fb-surface-muted hover:text-fb-fg transition-colors"
+          class="flex items-center gap-1.5 rounded-lg border border-fb-border bg-fb-surface px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-medium text-fb-fg-secondary hover:bg-fb-surface-muted hover:text-fb-fg transition-colors cursor-pointer"
           :title="t('restart')"
           @click="restart"
         >
@@ -540,14 +552,14 @@ function filterChoices(choices: any[]) {
     <!-- Chat Messages Stream -->
     <main
       ref="chatScrollRef"
-      class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
+      class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4"
     >
       <div class="mx-auto max-w-2xl space-y-4">
         <template v-for="msg in messages" :key="msg.id">
           <!-- Bot Question / HTML Message -->
           <div
             v-if="msg.sender === 'bot' && (msg.type === 'question' || msg.type === 'html')"
-            class="flex items-start gap-3"
+            class="flex items-start gap-2.5 sm:gap-3"
           >
             <div
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fb-accent/15 text-fb-accent mt-0.5 overflow-hidden"
@@ -558,22 +570,22 @@ function filterChoices(choices: any[]) {
 
             <div class="flex-1 min-w-0">
               <div
-                class="rounded-2xl rounded-ts-xs border border-fb-border bg-fb-surface-muted p-4 shadow-xs"
+                class="rounded-2xl rounded-ts-xs border border-fb-border bg-fb-surface-muted p-3.5 sm:p-4 shadow-xs"
               >
                 <!-- Question Title & Badge -->
                 <div class="flex items-start justify-between gap-2">
-                  <div class="flex-1">
+                  <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                       <span
                         v-if="msg.question?.isRequired"
-                        class="text-xs font-semibold text-rose-500"
+                        class="text-xs font-semibold text-rose-500 shrink-0"
                         :title="t('required')"
                       >
                         * {{ t("required") }}
                       </span>
                     </div>
                     <div
-                      class="text-sm font-semibold text-fb-fg leading-relaxed"
+                      class="text-xs sm:text-sm font-semibold text-fb-fg leading-relaxed break-words"
                       v-html="
                         sanitize(
                           msg.question?.locTitle?.renderedHtml ||
@@ -592,7 +604,7 @@ function filterChoices(choices: any[]) {
                       !isCompleted
                     "
                     type="button"
-                    class="rounded-md p-1 text-fb-fg-muted hover:text-fb-accent hover:bg-fb-surface transition-colors"
+                    class="rounded-md p-1 text-fb-fg-muted hover:text-fb-accent hover:bg-fb-surface transition-colors shrink-0 cursor-pointer"
                     :title="t('edit')"
                     @click="editAnswer(msg.questionName!)"
                   >
@@ -606,7 +618,7 @@ function filterChoices(choices: any[]) {
                     msg.question?.locDescription?.renderedHtml ||
                     msg.question?.description
                   "
-                  class="mt-1 text-xs text-fb-fg-muted leading-normal"
+                  class="mt-1 text-xs text-fb-fg-muted leading-normal break-words"
                   v-html="
                     sanitize(
                       msg.question?.locDescription?.renderedHtml ||
@@ -618,7 +630,7 @@ function filterChoices(choices: any[]) {
                 <!-- Interactive Question Area (Shown only if this is the active question) -->
                 <div
                   v-if="activeQuestion?.name === msg.questionName"
-                  class="mt-4 pt-3 border-t border-fb-border/60 space-y-3"
+                  class="mt-3.5 pt-3 border-t border-fb-border/60 space-y-3"
                 >
                   <!-- 1. Single-choice: Radiogroup -->
                   <div
@@ -630,7 +642,7 @@ function filterChoices(choices: any[]) {
                       v-for="c in getQuestionChoices(msg.question)"
                       :key="c.value"
                       type="button"
-                      class="w-full rounded-xl border border-fb-border bg-fb-surface px-4 py-2.5 text-start text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between group cursor-pointer"
+                      class="w-full rounded-xl border border-fb-border bg-fb-surface px-3.5 sm:px-4 py-2 sm:py-2.5 text-start text-xs sm:text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between group cursor-pointer gap-2"
                       :class="
                         activeQuestion.value === c.value
                           ? 'border-fb-accent bg-fb-accent-soft ring-1 ring-fb-accent text-fb-fg font-medium'
@@ -639,10 +651,11 @@ function filterChoices(choices: any[]) {
                       @click="selectSingleOption(c.value, c.locText?.renderedHtml || c.text)"
                     >
                       <span
+                        class="break-words min-w-0 flex-1"
                         v-html="sanitize(c.locText?.renderedHtml || c.text || String(c.value))"
                       />
                       <span
-                        class="h-4 w-4 rounded-full border border-fb-border flex items-center justify-center group-hover:border-fb-accent"
+                        class="h-4 w-4 shrink-0 rounded-full border border-fb-border flex items-center justify-center group-hover:border-fb-accent"
                         :class="
                           activeQuestion.value === c.value
                             ? 'border-fb-accent bg-fb-accent'
@@ -667,13 +680,13 @@ function filterChoices(choices: any[]) {
                       <input
                         v-model="otherText"
                         type="text"
-                        class="flex-1 rounded-xl border border-fb-border bg-fb-surface px-3 py-2 text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
+                        class="flex-1 min-w-0 rounded-xl border border-fb-border bg-fb-surface px-3 py-2 text-xs sm:text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
                         :placeholder="t('otherPlaceholder')"
                         @keydown.enter.prevent="submitOtherWithText(activeQuestion.value)"
                       />
                       <button
                         type="button"
-                        class="rounded-xl bg-fb-accent px-4 py-2 text-xs font-medium text-fb-accent-on hover:opacity-90"
+                        class="rounded-xl bg-fb-accent px-3.5 sm:px-4 py-2 text-xs font-medium text-fb-accent-on hover:opacity-90 shrink-0 cursor-pointer"
                         @click="submitOtherWithText(activeQuestion.value)"
                       >
                         {{ t("confirm") }}
@@ -709,7 +722,7 @@ function filterChoices(choices: any[]) {
                         v-for="c in filterChoices(getQuestionChoices(msg.question))"
                         :key="c.value"
                         type="button"
-                        class="w-full rounded-xl border border-fb-border bg-fb-surface px-4 py-2.5 text-start text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between cursor-pointer"
+                        class="w-full rounded-xl border border-fb-border bg-fb-surface px-3.5 sm:px-4 py-2 sm:py-2.5 text-start text-xs sm:text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between cursor-pointer gap-2"
                         :class="
                           activeQuestion.value === c.value
                             ? 'border-fb-accent bg-fb-accent-soft ring-1 ring-fb-accent text-fb-fg font-medium'
@@ -718,11 +731,12 @@ function filterChoices(choices: any[]) {
                         @click="selectSingleOption(c.value, c.locText?.renderedHtml || c.text)"
                       >
                         <span
+                          class="break-words min-w-0 flex-1"
                           v-html="sanitize(c.locText?.renderedHtml || c.text || String(c.value))"
                         />
                         <Check
                           v-if="activeQuestion.value === c.value"
-                          class="h-4 w-4 text-fb-accent"
+                          class="h-4 w-4 shrink-0 text-fb-accent"
                         />
                       </button>
 
@@ -738,11 +752,11 @@ function filterChoices(choices: any[]) {
                   <!-- 3. Boolean (Yes / No) -->
                   <div
                     v-else-if="msg.question?.getType() === 'boolean'"
-                    class="grid grid-cols-2 gap-3"
+                    class="grid grid-cols-2 gap-2 sm:gap-3"
                   >
                     <button
                       type="button"
-                      class="rounded-xl border border-fb-border bg-fb-surface px-4 py-3 text-center text-sm font-medium text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer"
+                      class="rounded-xl border border-fb-border bg-fb-surface px-3 sm:px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-medium text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer break-words"
                       :class="
                         activeQuestion.value ===
                         (msg.question.valueTrue !== undefined
@@ -774,7 +788,7 @@ function filterChoices(choices: any[]) {
                     </button>
                     <button
                       type="button"
-                      class="rounded-xl border border-fb-border bg-fb-surface px-4 py-3 text-center text-sm font-medium text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer"
+                      class="rounded-xl border border-fb-border bg-fb-surface px-3 sm:px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-medium text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer break-words"
                       :class="
                         activeQuestion.value ===
                         (msg.question.valueFalse !== undefined
@@ -811,12 +825,12 @@ function filterChoices(choices: any[]) {
                     v-else-if="msg.question?.getType() === 'rating'"
                     class="space-y-2"
                   >
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-1.5 sm:gap-2">
                       <button
                         v-for="r in getRatingChoices(msg.question)"
                         :key="r.value"
                         type="button"
-                        class="flex h-11 min-w-11 items-center justify-center rounded-xl border border-fb-border bg-fb-surface px-3 text-sm font-semibold text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer"
+                        class="flex h-10 min-w-10 sm:h-11 sm:min-w-11 items-center justify-center rounded-xl border border-fb-border bg-fb-surface px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs cursor-pointer shrink-0"
                         :class="
                           activeQuestion.value === r.value
                             ? 'border-fb-accent bg-fb-accent text-fb-accent-on shadow-xs'
@@ -845,7 +859,7 @@ function filterChoices(choices: any[]) {
                         v-for="c in getQuestionChoices(msg.question)"
                         :key="c.value"
                         type="button"
-                        class="w-full rounded-xl border border-fb-border bg-fb-surface px-4 py-2.5 text-start text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between cursor-pointer"
+                        class="w-full rounded-xl border border-fb-border bg-fb-surface px-3.5 sm:px-4 py-2 sm:py-2.5 text-start text-xs sm:text-sm text-fb-fg transition-all hover:border-fb-accent hover:bg-fb-accent-soft/30 hover:shadow-xs flex items-center justify-between cursor-pointer gap-2"
                         :class="
                           selectedValues.includes(c.value)
                             ? 'border-fb-accent bg-fb-accent-soft ring-1 ring-fb-accent text-fb-fg font-medium'
@@ -854,10 +868,11 @@ function filterChoices(choices: any[]) {
                         @click="toggleCheckboxOption(c.value)"
                       >
                         <span
+                          class="break-words min-w-0 flex-1"
                           v-html="sanitize(c.locText?.renderedHtml || c.text || String(c.value))"
                         />
                         <span
-                          class="h-4 w-4 rounded-md border border-fb-border flex items-center justify-center transition-colors"
+                          class="h-4 w-4 shrink-0 rounded-md border border-fb-border flex items-center justify-center transition-colors"
                           :class="
                             selectedValues.includes(c.value)
                               ? 'border-fb-accent bg-fb-accent text-fb-accent-on'
@@ -893,7 +908,7 @@ function filterChoices(choices: any[]) {
                   <!-- 6. ImagePicker -->
                   <div
                     v-else-if="msg.question?.getType() === 'imagepicker'"
-                    class="grid grid-cols-2 sm:grid-cols-3 gap-3"
+                    class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3"
                   >
                     <button
                       v-for="c in getQuestionChoices(msg.question)"
@@ -911,17 +926,17 @@ function filterChoices(choices: any[]) {
                         v-if="c.imageLink"
                         :src="c.imageLink"
                         :alt="c.text || String(c.value)"
-                        class="h-24 w-full rounded-lg object-cover mb-2"
+                        class="h-20 sm:h-24 w-full rounded-lg object-cover mb-1.5 sm:mb-2"
                       />
-                      <span class="text-xs font-medium text-fb-fg">
+                      <span class="text-xs font-medium text-fb-fg break-words line-clamp-2">
                         {{ c.locText?.renderedHtml || c.text || c.value }}
                       </span>
                     </button>
                   </div>
 
-                  <!-- 7. Persian Date Picker -->
+                  <!-- 7. Persian Date Picker (or date/time inputs) -->
                   <div
-                    v-else-if="msg.question?.getType() === 'persian-datepicker'"
+                    v-else-if="isDateTimeQuestion(msg.question)"
                     class="space-y-3"
                   >
                     <PersianDateTimePicker
@@ -932,7 +947,7 @@ function filterChoices(choices: any[]) {
                     <div class="flex justify-end">
                       <button
                         type="button"
-                        class="rounded-xl bg-fb-accent px-4 py-2 text-xs font-semibold text-fb-accent-on hover:opacity-90 shadow-xs"
+                        class="rounded-xl bg-fb-accent px-4 py-2 text-xs font-semibold text-fb-accent-on hover:opacity-90 shadow-xs cursor-pointer"
                         @click="submitTextAnswer"
                       >
                         {{ t("confirm") }}
@@ -949,17 +964,17 @@ function filterChoices(choices: any[]) {
                       ref="inputElRef"
                       v-model="inputText"
                       rows="3"
-                      class="w-full rounded-xl border border-fb-border bg-fb-surface p-3 text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
+                      class="w-full rounded-xl border border-fb-border bg-fb-surface p-3 text-xs sm:text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
                       :placeholder="msg.question?.placeholder || t('commentPlaceholder')"
                       @keydown.enter.exact.prevent="submitTextAnswer"
                     />
                     <div class="flex items-center justify-between">
-                      <span class="text-[11px] text-fb-fg-muted">
+                      <span class="text-[11px] text-fb-fg-muted hidden sm:inline">
                         Enter {{ t("send") }}
                       </span>
                       <button
                         type="button"
-                        class="flex items-center gap-1.5 rounded-xl bg-fb-accent px-4 py-2 text-xs font-semibold text-fb-accent-on hover:opacity-90 shadow-xs cursor-pointer"
+                        class="ms-auto flex items-center gap-1.5 rounded-xl bg-fb-accent px-4 py-2 text-xs font-semibold text-fb-accent-on hover:opacity-90 shadow-xs cursor-pointer"
                         @click="submitTextAnswer"
                       >
                         <Send class="h-3.5 w-3.5" />
@@ -974,7 +989,7 @@ function filterChoices(choices: any[]) {
                     class="space-y-3"
                   >
                     <div
-                      class="text-sm leading-relaxed text-fb-fg"
+                      class="text-xs sm:text-sm leading-relaxed text-fb-fg break-words"
                       v-html="sanitize(msg.question?.html)"
                     />
                     <div class="flex justify-end pt-2">
@@ -996,13 +1011,13 @@ function filterChoices(choices: any[]) {
                         ref="inputElRef"
                         v-model="inputText"
                         :type="msg.question?.inputType || 'text'"
-                        class="flex-1 rounded-xl border border-fb-border bg-fb-surface px-4 py-2.5 text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
+                        class="flex-1 min-w-0 rounded-xl border border-fb-border bg-fb-surface px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-fb-fg focus:border-fb-accent focus:outline-none"
                         :placeholder="msg.question?.placeholder || t('placeholder')"
                         @keydown.enter.prevent="submitTextAnswer"
                       />
                       <button
                         type="button"
-                        class="flex items-center justify-center rounded-xl bg-fb-accent px-4 text-fb-accent-on hover:opacity-90 shadow-xs transition-opacity cursor-pointer"
+                        class="flex items-center justify-center rounded-xl bg-fb-accent px-3.5 sm:px-4 text-fb-accent-on hover:opacity-90 shadow-xs transition-opacity cursor-pointer shrink-0"
                         :title="t('send')"
                         @click="submitTextAnswer"
                       >
@@ -1019,7 +1034,7 @@ function filterChoices(choices: any[]) {
                     <span>{{ t("optional") }}</span>
                     <button
                       type="button"
-                      class="text-xs font-medium text-fb-fg-secondary hover:text-fb-accent transition-colors"
+                      class="text-xs font-medium text-fb-fg-secondary hover:text-fb-accent transition-colors cursor-pointer"
                       @click="skipQuestion"
                     >
                       {{ t("skip") }}
@@ -1032,7 +1047,7 @@ function filterChoices(choices: any[]) {
                     class="flex items-center gap-1.5 text-xs text-rose-500 font-medium pt-1"
                   >
                     <AlertCircle class="h-3.5 w-3.5 shrink-0" />
-                    <span>{{ currentError }}</span>
+                    <span class="break-words">{{ currentError }}</span>
                   </div>
                 </div>
               </div>
@@ -1042,11 +1057,11 @@ function filterChoices(choices: any[]) {
           <!-- User Answer Message -->
           <div
             v-else-if="msg.sender === 'user'"
-            class="flex items-start justify-end gap-3"
+            class="flex items-start justify-end gap-2.5 sm:gap-3"
           >
-            <div class="flex flex-col items-end max-w-md">
+            <div class="flex flex-col items-end max-w-[85%] sm:max-w-md min-w-0">
               <div
-                class="rounded-2xl rounded-te-xs bg-fb-accent px-4 py-2.5 text-sm font-medium text-fb-accent-on shadow-xs"
+                class="rounded-2xl rounded-te-xs bg-fb-accent px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-fb-accent-on shadow-xs break-words max-w-full"
               >
                 {{ msg.displayValue }}
               </div>
@@ -1066,7 +1081,7 @@ function filterChoices(choices: any[]) {
           <!-- Completion Card -->
           <div
             v-else-if="msg.type === 'completion'"
-            class="flex items-start gap-3"
+            class="flex items-start gap-2.5 sm:gap-3"
           >
             <div
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fb-accent text-fb-accent-on mt-0.5 shadow-xs overflow-hidden"
@@ -1077,7 +1092,7 @@ function filterChoices(choices: any[]) {
 
             <div class="flex-1 min-w-0">
               <div
-                class="rounded-2xl rounded-ts-xs border border-fb-border bg-fb-surface p-5 shadow-xs space-y-4"
+                class="rounded-2xl rounded-ts-xs border border-fb-border bg-fb-surface p-4 sm:p-5 shadow-xs space-y-4"
               >
                 <div class="flex items-center gap-2 text-fb-accent">
                   <Check class="h-5 w-5" />
@@ -1088,10 +1103,10 @@ function filterChoices(choices: any[]) {
 
                 <div
                   v-if="survey.completedHtml"
-                  class="text-sm text-fb-fg-secondary leading-relaxed"
+                  class="text-xs sm:text-sm text-fb-fg-secondary leading-relaxed break-words"
                   v-html="sanitize(survey.completedHtml)"
                 />
-                <p v-else class="text-sm text-fb-fg-secondary leading-relaxed">
+                <p v-else class="text-xs sm:text-sm text-fb-fg-secondary leading-relaxed break-words">
                   {{ t("completedText") }}
                 </p>
 
@@ -1115,7 +1130,7 @@ function filterChoices(choices: any[]) {
                   <div
                     class="rounded-xl bg-fb-surface-muted p-3 text-xs font-mono text-fb-fg max-h-48 overflow-y-auto"
                   >
-                    <pre class="whitespace-pre-wrap">{{ JSON.stringify(survey.data, null, 2) }}</pre>
+                    <pre class="whitespace-pre-wrap break-all">{{ JSON.stringify(survey.data, null, 2) }}</pre>
                   </div>
                 </div>
 

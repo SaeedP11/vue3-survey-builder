@@ -204,16 +204,16 @@ watch(sampleChoice, (id) => {
         <!-- v-show keeps the creator (and its undo history) across tabs -->
         <div v-show="tab === 'designer'" class="relative h-full">
           <!-- Floating shortcut to test the form in Chat Mode -->
-          <div class="absolute bottom-5 end-5 z-20">
+          <div class="absolute bottom-4 sm:bottom-5 end-4 sm:end-5 z-20">
             <button
               type="button"
-              class="flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-xl hover:bg-indigo-500 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-indigo-500/20"
+              class="flex items-center gap-1.5 sm:gap-2 rounded-full bg-indigo-600 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white shadow-xl hover:bg-indigo-500 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-indigo-500/20"
               title="Test this form in Conversational Chat Mode"
               @click="switchToChat"
             >
-              <span class="text-base leading-none">💬</span>
-              <span>Test in Chat Mode</span>
-              <span class="rounded-full bg-white/20 px-1.5 py-0.2 text-[10px] font-extrabold uppercase">Live</span>
+              <span class="text-sm sm:text-base leading-none">💬</span>
+              <span><span class="hidden sm:inline">Test in </span>Chat Mode</span>
+              <span class="rounded-full bg-white/20 px-1.5 py-0.2 text-[9px] sm:text-[10px] font-extrabold uppercase">Live</span>
             </button>
           </div>
           <FormBuilder :json="json" @update:json="onSave" />
@@ -235,7 +235,7 @@ watch(sampleChoice, (id) => {
       </main>
       <aside
         v-if="showEvents"
-        class="w-80 shrink-0 border-s border-slate-200 dark:border-slate-800"
+        class="fixed inset-y-0 end-0 z-50 w-80 bg-white dark:bg-slate-900 border-s border-slate-200 dark:border-slate-800 shadow-2xl lg:static lg:z-auto lg:shadow-none"
       >
         <EventLog />
       </aside>

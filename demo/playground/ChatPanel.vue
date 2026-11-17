@@ -146,8 +146,8 @@ function onComplete(data: Record<string, unknown>) {
       </div>
 
       <!-- Container Size & Mode Selector -->
-      <div class="flex items-center gap-2">
-        <span class="font-medium text-slate-700 dark:text-slate-300">Container Mode:</span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-medium text-slate-700 dark:text-slate-300 hidden sm:inline">Container Mode:</span>
         <div class="flex rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5">
           <button
             type="button"
@@ -155,7 +155,7 @@ function onComplete(data: Record<string, unknown>) {
             :class="mode === 'inline-wide' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
             @click="mode = 'inline-wide'"
           >
-            Wide (680px)
+            Wide <span class="hidden sm:inline">(680px)</span>
           </button>
           <button
             type="button"
@@ -163,7 +163,7 @@ function onComplete(data: Record<string, unknown>) {
             :class="mode === 'inline-compact' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
             @click="mode = 'inline-compact'"
           >
-            Compact (380px)
+            Compact <span class="hidden sm:inline">(380px)</span>
           </button>
           <button
             type="button"
@@ -171,7 +171,7 @@ function onComplete(data: Record<string, unknown>) {
             :class="mode === 'widget' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
             @click="mode = 'widget'"
           >
-            Floating Widget
+            <span class="hidden sm:inline">Floating </span>Widget
           </button>
           <button
             type="button"
@@ -179,7 +179,7 @@ function onComplete(data: Record<string, unknown>) {
             :class="mode === 'modal' ? 'bg-white dark:bg-slate-700 font-semibold text-slate-900 dark:text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
             @click="mode = 'modal'"
           >
-            Modal Dialog
+            Modal<span class="hidden sm:inline"> Dialog</span>
           </button>
         </div>
 
@@ -229,7 +229,7 @@ function onComplete(data: Record<string, unknown>) {
       <!-- 1. Wide Desktop Inline Mode (680px) -->
       <div
         v-if="mode === 'inline-wide'"
-        class="w-full max-w-2xl h-[640px] shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all"
+        class="w-full max-w-2xl h-[640px] max-h-full shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all"
       >
         <SurveyChatInline
           :json="effectiveJson"
@@ -244,7 +244,7 @@ function onComplete(data: Record<string, unknown>) {
       <!-- 2. Compact Mobile / Sidebar Mode (380px) -->
       <div
         v-else-if="mode === 'inline-compact'"
-        class="w-[380px] h-[600px] shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all flex flex-col"
+        class="w-full max-w-[380px] h-[600px] max-h-full shadow-xl rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all flex flex-col"
       >
         <!-- Mobile status bar simulation -->
         <div class="bg-slate-100 dark:bg-slate-800/80 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono border-b border-slate-200/50 dark:border-slate-700/50 select-none">
