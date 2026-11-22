@@ -92,6 +92,7 @@ const props = defineProps({
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   // One colour per tier, from the template; without it the widget's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
   // The scale's marks; by default its two ends
   ticks: { type: Array, default: null },
 });
@@ -99,15 +100,42 @@ const props = defineProps({
 const tierCount = computed(() => Math.max(props.statusLabels.length, 1));
 const colors = computed(() => resolveTierColors(props.tierColors, tierCount.value));
 
-// One equal slice of the bar per status label, the way tierIndex splits the range
-const tiers = computed(() =>
-  Array.from({ length: tierCount.value }, (_, i) => ({
-    from: (i / tierCount.value) * 100,
-    to: ((i + 1) / tierCount.value) * 100,
-    color: colors.value[i],
-    label: pickLabel(props.statusLabels, i, "—"),
-  })),
-);
+// One slice of the bar per status label, scaled proportionally if custom bounds cover the range
+const tiers = computed(() => {
+  const range = props.max - props.min;
+  const count = tierCount.value;
+  const bounds = props.tierBounds;
+  const hasCustomBounds =
+    Array.isArray(bounds) &&
+    bounds.some(
+      (b) =>
+        b &&
+        ((typeof b.min === "number" && !Number.isNaN(b.min)) ||
+          (typeof b.max === "number" && !Number.isNaN(b.max))),
+    );
+
+  return Array.from({ length: count }, (_, i) => {
+    let from = (i / count) * 100;
+    let to = ((i + 1) / count) * 100;
+
+    if (hasCustomBounds && range > 0) {
+      const b = bounds?.[i];
+      if (b) {
+        const bMin = typeof b.min === "number" ? b.min : props.min;
+        const bMax = typeof b.max === "number" ? b.max : props.max;
+        from = Math.max(0, Math.min(100, ((bMin - props.min) / range) * 100));
+        to = Math.max(0, Math.min(100, ((bMax - props.min) / range) * 100));
+      }
+    }
+
+    return {
+      from,
+      to,
+      color: colors.value[i],
+      label: pickLabel(props.statusLabels, i, "—"),
+    };
+  });
+});
 
 const scaleTicks = computed(() => props.ticks ?? [props.min, props.max]);
 
@@ -123,12 +151,16 @@ const percentage = computed(() => {
 });
 
 // Determine active state based on the current animated value
-const currentSegment = computed(
-  () =>
-    tiers.value[
-      tierIndex(displayValue.value, props.min, props.max, tierCount.value)
-    ],
-);
+const currentSegment = computed(() => {
+  const idx = tierIndex(
+    displayValue.value,
+    props.min,
+    props.max,
+    tierCount.value,
+    props.tierBounds,
+  );
+  return tiers.value[idx] ?? tiers.value[0];
+});
 
 // 60fps Easing Animation logic
 const animateValue = (target) => {

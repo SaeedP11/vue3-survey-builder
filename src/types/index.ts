@@ -40,6 +40,11 @@ export interface TemplateDefinition<P = Record<string, unknown>> {
   editor?: Component;
 }
 
+export interface StatusTierBound {
+  min?: number;
+  max?: number;
+}
+
 export type ScoreDisplayVariant =
   | "default"
   | "linear"
@@ -342,6 +347,11 @@ export interface SurveyResultProps {
    * index of `statusLabels`. A tier without one gets a green-to-red default.
    */
   tierColors?: string[];
+  /**
+   * Custom score point bounds for each status tier, by index of `statusLabels`.
+   * When unset, the range is split equally among tiers.
+   */
+  tierBounds?: StatusTierBound[];
   /** Page-wide look: card size, header, chip, hero icon, spacing, button shape. */
   appearance?: ResultAppearance;
   /**

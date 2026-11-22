@@ -225,6 +225,7 @@ const scoreTier = computed(() =>
         props.min ?? 0,
         props.max ?? 100,
         statusLabels.value.length,
+        props.tierBounds,
       ),
 );
 
@@ -285,6 +286,7 @@ const visibleImages = computed<ResultImage[]>(() => {
       survey: props.survey,
       score: numericScore.value,
     },
+    props.tierBounds,
   );
 });
 const imagesAt = (placement: ResultImagePlacement | undefined) =>
@@ -703,7 +705,8 @@ const themeVars = computed<Record<string, string>>(() => {
                 :min="min"
                 :max="max"
                 :status-labels="statusLabels"
-              :tier-colors="tierColors"
+                :tier-colors="tierColors"
+                :tier-bounds="tierBounds"
               />
               <div v-else class="flex justify-center" dir="ltr">
                 <LinearHealthGauge
@@ -712,7 +715,8 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
-                :tier-colors="tierColors"
+                  :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <RadialGauge
                   v-else-if="scoreDisplay === 'radial'"
@@ -721,6 +725,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :max="max"
                   :status-labels="statusLabels"
                   :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <TemperatureGauge
                   v-else-if="scoreDisplay === 'temperature'"
@@ -728,7 +733,8 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
-                :tier-colors="tierColors"
+                  :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <DonutGauge
                   v-else-if="scoreDisplay === 'donut'"
@@ -736,7 +742,8 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
-                :tier-colors="tierColors"
+                  :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <BulletChart
                   v-else-if="scoreDisplay === 'bullet'"
@@ -745,6 +752,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :max="max"
                   :status-labels="statusLabels"
                   :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <VerticalThermometer
                   v-else-if="scoreDisplay === 'thermometer'"
@@ -752,7 +760,8 @@ const themeVars = computed<Record<string, string>>(() => {
                   :min="min"
                   :max="max"
                   :status-labels="statusLabels"
-                :tier-colors="tierColors"
+                  :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <SegmentedPills
                   v-else-if="scoreDisplay === 'pills'"
@@ -761,6 +770,7 @@ const themeVars = computed<Record<string, string>>(() => {
                   :max="max"
                   :status-labels="statusLabels"
                   :tier-colors="tierColors"
+                  :tier-bounds="tierBounds"
                 />
                 <Table
                   v-else-if="scoreDisplay === 'table'"

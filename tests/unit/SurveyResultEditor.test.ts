@@ -175,6 +175,58 @@ describe("status labels", () => {
     await button(T.addStatusLabel)!.trigger("click");
     expect(model.statusLabels).toEqual([""]);
   });
+
+  test("allows setting min and max bounds for status tiers", async () => {
+    const { model, child } = setup(WITH_SOURCES, {
+      statusLabels: ["Critical", "Moderate"],
+    });
+    const minInput = child.find('input[id$="-tier-min-0"]');
+    const maxInput = child.find('input[id$="-tier-max-0"]');
+    expect(minInput.exists()).toBe(true);
+    expect(maxInput.exists()).toBe(true);
+
+    await minInput.setValue("0");
+    await maxInput.setValue("25");
+    expect(model.tierBounds?.[0]).toEqual({ min: 0, max: 25 });
+  });
+
+  test("removes bounds when a status tier is removed", async () => {
+    const { model, child } = setup(WITH_SOURCES, {
+      statusLabels: ["Critical", "Moderate"],
+      tierBounds: [
+        { min: 0, max: 25 },
+        { min: 26, max: 100 },
+      ],
+    });
+    const removes = () => child.findAll("button").filter((b) => b.text() === T.remove);
+    await removes()[0].trigger("click");
+    expect(model.statusLabels).toEqual(["Moderate"]);
+    expect(model.tierBounds).toEqual([{ min: 26, max: 100 }]);
+  });
+
+  test("resets custom bounds when reset bounds is clicked", async () => {
+    const { model, button } = setup(WITH_SOURCES, {
+      statusLabels: ["Critical", "Moderate"],
+      tierBounds: [
+        { min: 0, max: 25 },
+        { min: 26, max: 100 },
+      ],
+    });
+    const resetBtn = button(T.fields.tierBounds.reset);
+    expect(resetBtn).toBeDefined();
+    await resetBtn!.trigger("click");
+    expect(model.tierBounds).toEqual([]);
+  });
+
+  test("shows invalid range alert when min > max", async () => {
+    const { child } = setup(WITH_SOURCES, {
+      statusLabels: ["Critical"],
+      tierBounds: [{ min: 50, max: 20 }],
+    });
+    const alert = child.find('[role="alert"]');
+    expect(alert.exists()).toBe(true);
+    expect(alert.text()).toBe(T.fields.tierBounds.invalidRange);
+  });
 });
 
 test("binds the brand and copy fields", async () => {

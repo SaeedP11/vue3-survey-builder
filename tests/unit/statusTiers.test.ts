@@ -37,6 +37,52 @@ describe("tierIndex", () => {
     expect(tierIndex(70, 50, 50, 4)).toBe(0);
     expect(tierIndex(70, 100, 0, 4)).toBe(0);
   });
+
+  test("uses custom bounds when specified", () => {
+    const bounds = [
+      { min: 0, max: 25 },
+      { min: 26, max: 60 },
+      { min: 61, max: 100 },
+    ];
+    expect(tierIndex(0, 0, 100, 3, bounds)).toBe(0);
+    expect(tierIndex(15, 0, 100, 3, bounds)).toBe(0);
+    expect(tierIndex(25, 0, 100, 3, bounds)).toBe(0);
+    expect(tierIndex(26, 0, 100, 3, bounds)).toBe(1);
+    expect(tierIndex(50, 0, 100, 3, bounds)).toBe(1);
+    expect(tierIndex(60, 0, 100, 3, bounds)).toBe(1);
+    expect(tierIndex(61, 0, 100, 3, bounds)).toBe(2);
+    expect(tierIndex(100, 0, 100, 3, bounds)).toBe(2);
+  });
+
+  test("resolves nearest bound for gaps and out-of-range values", () => {
+    const bounds = [
+      { min: 0, max: 25 },
+      { min: 30, max: 60 },
+    ];
+    // Below lowest min
+    expect(tierIndex(-10, 0, 100, 2, bounds)).toBe(0);
+    // Above highest max
+    expect(tierIndex(120, 0, 100, 2, bounds)).toBe(1);
+    // Gap: 27 is closer to 25 than 30
+    expect(tierIndex(27, 0, 100, 2, bounds)).toBe(0);
+    // Gap: 29 is closer to 30 than 25
+    expect(tierIndex(29, 0, 100, 2, bounds)).toBe(1);
+  });
+
+  test("supports open-ended bounds", () => {
+    const bounds = [
+      { max: 25 }, // <= 25
+      { min: 75 }, // >= 75
+    ];
+    expect(tierIndex(10, 0, 100, 2, bounds)).toBe(0);
+    expect(tierIndex(25, 0, 100, 2, bounds)).toBe(0);
+    expect(tierIndex(80, 0, 100, 2, bounds)).toBe(1);
+  });
+
+  test("falls back to equal partition if bounds array has no defined bounds", () => {
+    expect(tierIndex(20, 0, 100, 4, [])).toBe(0);
+    expect(tierIndex(30, 0, 100, 4, [{}, {}])).toBe(1);
+  });
 });
 
 describe("pickLabel", () => {

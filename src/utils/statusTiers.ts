@@ -5,13 +5,69 @@
  * `statusLabels` prop so all widgets share a single configurable vocabulary.
  */
 
+export interface StatusTierBound {
+  min?: number;
+  max?: number;
+}
+
 export function tierIndex(
   value: number,
   min: number,
   max: number,
   count: number,
+  bounds?: Array<StatusTierBound | undefined | null>,
 ): number {
   if (count <= 1) return 0;
+
+  if (
+    Array.isArray(bounds) &&
+    bounds.some(
+      (b) =>
+        b &&
+        ((typeof b.min === "number" && !Number.isNaN(b.min)) ||
+          (typeof b.max === "number" && !Number.isNaN(b.max))),
+    )
+  ) {
+    // 1. Check if value falls directly within any defined bound
+    for (let i = 0; i < count; i++) {
+      const b = bounds[i];
+      if (!b) continue;
+      const hasMin = typeof b.min === "number" && !Number.isNaN(b.min);
+      const hasMax = typeof b.max === "number" && !Number.isNaN(b.max);
+      if (!hasMin && !hasMax) continue;
+
+      const minPass = !hasMin || value >= b.min!;
+      const maxPass = !hasMax || value <= b.max!;
+      if (minPass && maxPass) {
+        return i;
+      }
+    }
+
+    // 2. Nearest bound fallback if value is outside or in a gap
+    let bestIdx = 0;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < count; i++) {
+      const b = bounds[i];
+      if (!b) continue;
+      const hasMin = typeof b.min === "number" && !Number.isNaN(b.min);
+      const hasMax = typeof b.max === "number" && !Number.isNaN(b.max);
+      if (!hasMin && !hasMax) continue;
+
+      let dist = 0;
+      if (hasMin && value < b.min!) {
+        dist = b.min! - value;
+      } else if (hasMax && value > b.max!) {
+        dist = value - b.max!;
+      }
+      if (dist < minDistance) {
+        minDistance = dist;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  }
+
   const range = max - min;
   if (range <= 0) return 0;
   const clamped = Math.max(min, Math.min(max, value));

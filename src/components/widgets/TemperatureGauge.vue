@@ -175,6 +175,7 @@ const props = defineProps({
   },
   // One colour per tier, from the template; without it the gauge's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
   duration: {
     type: Number,
     default: 1200,
@@ -216,7 +217,13 @@ const currentProgressPercentage = computed(() => {
 
 const tier = computed(() => {
   const count = props.statusLabels.length || 1;
-  return tierIndex(displayValue.value, props.min, props.max, count);
+  return tierIndex(
+    displayValue.value,
+    props.min,
+    props.max,
+    count,
+    props.tierBounds,
+  );
 });
 
 const statusText = computed(() =>

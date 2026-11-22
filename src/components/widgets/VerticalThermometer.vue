@@ -67,6 +67,7 @@ const props = defineProps({
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   // One colour per tier, from the template; without it the widget's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
   tickCount: { type: Number, default: 5 },
   duration: { type: Number, default: 1200 },
 });
@@ -97,7 +98,13 @@ const ticks = computed(() => {
 
 const tier = computed(() => {
   const count = props.statusLabels.length || 1;
-  return tierIndex(animatedValue.value, props.min, props.max, count);
+  return tierIndex(
+    animatedValue.value,
+    props.min,
+    props.max,
+    count,
+    props.tierBounds,
+  );
 });
 
 const bulbColor = computed(() =>

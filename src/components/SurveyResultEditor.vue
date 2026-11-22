@@ -185,13 +185,16 @@ function ensureStatusLabels() {
 function addStatusLabel() {
   ensureStatusLabels();
   statusLabels.value.push("");
+  if (Array.isArray(props.value.tierBounds)) {
+    props.value.tierBounds.push({});
+  }
 }
 
 function removeStatusLabel(index: number) {
   ensureStatusLabels();
   statusLabels.value.splice(index, 1);
-  // The notes and colours follow their tiers
-  for (const key of ["tierNotes", "tierColors"] as const) {
+  // The notes, colours and bounds follow their tiers
+  for (const key of ["tierNotes", "tierColors", "tierBounds"] as const) {
     const list = props.value[key];
     if (Array.isArray(list) && index < list.length) list.splice(index, 1);
   }
@@ -213,6 +216,57 @@ function setTierColor(index: number, color: string) {
 function resetTierColors() {
   props.value.tierColors = [];
 }
+
+function tierBound(index: number): { min?: number; max?: number } | undefined {
+  return props.value.tierBounds?.[index];
+}
+
+function defaultTierBound(index: number): { min: number; max: number } {
+  const count = Math.max(1, statusLabels.value.length);
+  const min = typeof props.value.min === "number" ? props.value.min : 0;
+  const max = typeof props.value.max === "number" ? props.value.max : 100;
+  const span = Math.max(0, max - min);
+  const lo = Math.floor(min + (span * index) / count);
+  const hi = Math.floor(min + (span * (index + 1)) / count);
+  return { min: lo, max: hi };
+}
+
+function setTierBound(index: number, key: "min" | "max", rawValue: string) {
+  const list = Array.isArray(props.value.tierBounds) ? [...props.value.tierBounds] : [];
+  while (list.length <= index) list.push({});
+  const current = { ...(list[index] ?? {}) };
+  const trimmed = rawValue.trim();
+  if (trimmed === "" || Number.isNaN(Number(trimmed))) {
+    delete current[key];
+  } else {
+    current[key] = Number(trimmed);
+  }
+  list[index] = current;
+  props.value.tierBounds = list;
+}
+
+function tierBoundInvalid(index: number): boolean {
+  const b = props.value.tierBounds?.[index];
+  if (!b) return false;
+  return typeof b.min === "number" && typeof b.max === "number" && b.min > b.max;
+}
+
+function resetTierBounds() {
+  props.value.tierBounds = [];
+}
+
+const hasCustomTierBounds = computed(() => {
+  const bounds = props.value.tierBounds;
+  return (
+    Array.isArray(bounds) &&
+    bounds.some(
+      (b) =>
+        b &&
+        ((typeof b.min === "number" && !Number.isNaN(b.min)) ||
+          (typeof b.max === "number" && !Number.isNaN(b.max))),
+    )
+  );
+});
 
 function tierNote(index: number): string {
   return props.value.tierNotes?.[index] ?? "";
@@ -780,40 +834,95 @@ watch(selectedBlock, (id) => {
           <h3 :id="`${uid}-segments`" :class="headingClass">{{ t("fields.statusLabels.label") }}</h3>
           <p :class="helpClass">{{ t("fields.statusLabels.help") }}</p>
         </div>
-        <ol class="m-0 list-none space-y-2 p-0">
-          <li v-for="(label, index) in statusLabels" :key="index" class="flex items-center gap-2">
-            <span
-              class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-fb-surface-muted text-[11px] font-semibold tabular-nums text-fb-fg-muted"
-              aria-hidden="true"
-              >{{ index + 1 }}</span
+        <ol class="m-0 list-none space-y-2.5 p-0">
+          <li
+            v-for="(label, index) in statusLabels"
+            :key="index"
+            class="rounded-xl border border-fb-border bg-fb-surface p-3 space-y-2.5 transition-colors"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-fb-surface-muted text-[11px] font-semibold tabular-nums text-fb-fg-muted"
+                aria-hidden="true"
+                >{{ index + 1 }}</span
+              >
+              <input
+                :value="label"
+                type="text"
+                :aria-label="`${t('fields.statusLabels.label')} ${index + 1}`"
+                :class="inputClass"
+                class="flex-1 min-w-0"
+                @input="updateStatusLabel(index, ($event.target as HTMLInputElement).value)"
+              />
+              <input
+                :value="tierColor(index)"
+                type="color"
+                :aria-label="`${t('fields.tierColors.label')}: ${label || index + 1}`"
+                class="order-first h-8 w-8 shrink-0 cursor-pointer rounded-md border border-fb-border bg-fb-surface p-0.5 shadow-xs"
+                @input="setTierColor(index, ($event.target as HTMLInputElement).value)"
+              />
+              <button
+                type="button"
+                :disabled="statusLabels.length <= 1"
+                :aria-label="`${t('remove')}: ${label || index + 1}`"
+                :class="smallButtonClass"
+                @click="removeStatusLabel(index)"
+              >
+                {{ t("remove") }}
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-fb-border/60">
+              <div class="flex flex-col gap-1">
+                <label
+                  :for="`${uid}-tier-min-${index}`"
+                  class="text-[11px] font-semibold text-fb-fg-secondary"
+                >
+                  {{ t("fields.tierBounds.min") }}
+                </label>
+                <input
+                  :id="`${uid}-tier-min-${index}`"
+                  :value="tierBound(index)?.min ?? ''"
+                  type="number"
+                  inputmode="decimal"
+                  dir="ltr"
+                  :placeholder="String(defaultTierBound(index).min)"
+                  :aria-invalid="tierBoundInvalid(index) || undefined"
+                  :class="[inputClass, 'min-w-0 aria-invalid:border-[#d92d20]']"
+                  @input="setTierBound(index, 'min', ($event.target as HTMLInputElement).value)"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label
+                  :for="`${uid}-tier-max-${index}`"
+                  class="text-[11px] font-semibold text-fb-fg-secondary"
+                >
+                  {{ t("fields.tierBounds.max") }}
+                </label>
+                <input
+                  :id="`${uid}-tier-max-${index}`"
+                  :value="tierBound(index)?.max ?? ''"
+                  type="number"
+                  inputmode="decimal"
+                  dir="ltr"
+                  :placeholder="String(defaultTierBound(index).max)"
+                  :aria-invalid="tierBoundInvalid(index) || undefined"
+                  :class="[inputClass, 'min-w-0 aria-invalid:border-[#d92d20]']"
+                  @input="setTierBound(index, 'max', ($event.target as HTMLInputElement).value)"
+                />
+              </div>
+            </div>
+
+            <p
+              v-if="tierBoundInvalid(index)"
+              role="alert"
+              class="text-[11px] leading-snug text-[#d92d20]"
             >
-            <input
-              :value="label"
-              type="text"
-              :aria-label="`${t('fields.statusLabels.label')} ${index + 1}`"
-              :class="inputClass"
-              class="flex-1"
-              @input="updateStatusLabel(index, ($event.target as HTMLInputElement).value)"
-            />
-            <input
-              :value="tierColor(index)"
-              type="color"
-              :aria-label="`${t('fields.tierColors.label')}: ${label || index + 1}`"
-              class="order-first h-9 w-9 shrink-0 cursor-pointer rounded-md border border-fb-border bg-fb-surface p-0.5"
-              @input="setTierColor(index, ($event.target as HTMLInputElement).value)"
-            />
-            <button
-              type="button"
-              :disabled="statusLabels.length <= 1"
-              :aria-label="`${t('remove')}: ${label || index + 1}`"
-              :class="smallButtonClass"
-              @click="removeStatusLabel(index)"
-            >
-              {{ t("remove") }}
-            </button>
+              {{ t("fields.tierBounds.invalidRange") }}
+            </p>
           </li>
         </ol>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <button type="button" :class="addButtonClass" @click="addStatusLabel">
             {{ t("addStatusLabel") }}
           </button>
@@ -824,6 +933,14 @@ watch(selectedBlock, (id) => {
             @click="resetTierColors"
           >
             {{ t("fields.tierColors.reset") }}
+          </button>
+          <button
+            v-if="hasCustomTierBounds"
+            type="button"
+            :class="smallButtonClass"
+            @click="resetTierBounds"
+          >
+            {{ t("fields.tierBounds.reset") }}
           </button>
         </div>
       </section>

@@ -12,6 +12,7 @@ const props = withDefaults(
     statusLabels?: string[];
     /** One colour per tier, from the template; without it the card's green, yellow and red. */
     tierColors?: string[];
+    tierBounds?: Array<{ min?: number; max?: number }>;
   }>(),
   {
     value: 0,
@@ -19,6 +20,7 @@ const props = withDefaults(
     max: 100,
     statusLabels: () => ["Mild", "Moderate", "Severe", "Critical"],
     tierColors: undefined,
+    tierBounds: undefined,
   },
 );
 
@@ -33,7 +35,7 @@ const span = computed(() => Math.max(1, props.max - props.min));
 const tierCount = computed(() => Math.max(1, props.statusLabels.length));
 
 const tier = computed(() =>
-  tierIndex(props.value, props.min, props.max, tierCount.value),
+  tierIndex(props.value, props.min, props.max, tierCount.value, props.tierBounds),
 );
 
 const statusText = computed(() =>
@@ -89,10 +91,18 @@ const ranges = computed<string[]>(() => {
   const count = tierCount.value;
   const dash = "–";
   const out: string[] = [];
+  const bounds = props.tierBounds;
   for (let i = 0; i < count; i++) {
-    const lo = Math.floor(props.min + (span.value * i) / count);
-    const hi = Math.floor(props.min + (span.value * (i + 1)) / count);
-    out.push(`${fmt(lo)}${dash}${fmt(hi)}`);
+    const b = bounds?.[i];
+    if (b && (typeof b.min === "number" || typeof b.max === "number")) {
+      const lo = typeof b.min === "number" ? fmt(b.min) : fmt(props.min);
+      const hi = typeof b.max === "number" ? fmt(b.max) : fmt(props.max);
+      out.push(`${lo}${dash}${hi}`);
+    } else {
+      const lo = Math.floor(props.min + (span.value * i) / count);
+      const hi = Math.floor(props.min + (span.value * (i + 1)) / count);
+      out.push(`${fmt(lo)}${dash}${fmt(hi)}`);
+    }
   }
   return out;
 });

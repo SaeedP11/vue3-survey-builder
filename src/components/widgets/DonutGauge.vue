@@ -81,6 +81,7 @@ const props = defineProps({
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   // One colour per tier, from the template; without it the widget's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
   duration: { type: Number, default: 1000 },
 });
 
@@ -104,7 +105,13 @@ const percentageLabel = computed(() => `${Math.round(progress.value * 100)}%`);
 
 const tier = computed(() => {
   const count = props.statusLabels.length || 1;
-  return tierIndex(animatedValue.value, props.min, props.max, count);
+  return tierIndex(
+    animatedValue.value,
+    props.min,
+    props.max,
+    count,
+    props.tierBounds,
+  );
 });
 
 const statusText = computed(() =>

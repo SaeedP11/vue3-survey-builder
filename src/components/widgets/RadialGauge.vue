@@ -120,6 +120,7 @@ const props = defineProps({
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   // One colour per tier, from the template; without it the widget's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
 });
 
 const isLoaded = ref(false);
@@ -183,7 +184,7 @@ const statusText = computed(() =>
 
 const tier = computed(() => {
   const count = props.statusLabels.length || 1;
-  return tierIndex(props.value, props.min, props.max, count);
+  return tierIndex(props.value, props.min, props.max, count, props.tierBounds);
 });
 
 // Reversed Ticks Math — derive 6 evenly-spaced ticks from min/max so the

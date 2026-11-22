@@ -7,6 +7,7 @@ import { Model } from "survey-core";
 import type {
   ResultAction,
   ResultImage,
+  StatusTierBound,
   SurveyResultProps,
 } from "../types/index.ts";
 import { tierIndex } from "./statusTiers.ts";
@@ -228,9 +229,10 @@ export function imagesForScore(
   max: number,
   tierCount: number,
   context?: ConditionContext,
+  bounds?: Array<StatusTierBound | undefined | null>,
 ): ResultImage[] {
   const tier =
-    score === undefined ? undefined : tierIndex(score, min, max, tierCount);
+    score === undefined ? undefined : tierIndex(score, min, max, tierCount, bounds);
   return images.filter((image) => {
     if (image.tier !== undefined && image.tier !== null && image.tier !== tier) {
       return false;

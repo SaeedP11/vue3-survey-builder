@@ -68,6 +68,7 @@ const props = defineProps({
   statusLabels: { type: Array, default: () => ["Mild", "Moderate", "Severe", "Critical"] },
   // One colour per tier, from the template; without it the widget's own
   tierColors: { type: Array, default: null },
+  tierBounds: { type: Array, default: null },
   duration: { type: Number, default: 1100 },
 });
 
@@ -78,16 +79,24 @@ const bands = computed(() => {
   const labels = props.statusLabels.length
     ? props.statusLabels
     : ["Mild", "Moderate", "Severe", "Critical"];
-  return labels.map((label, i) => ({
-    label,
-    pct: 1,
-    color: props.tierColors?.length ? "" : pickColor(palette, i),
-    style: props.tierColors?.length
-      ? {
-          backgroundColor: `color-mix(in srgb, ${pickColor(props.tierColors, i)} 28%, white)`,
-        }
-      : undefined,
-  }));
+  const bounds = props.tierBounds;
+  return labels.map((label, i) => {
+    const b = bounds?.[i];
+    let pct = 1;
+    if (b && typeof b.min === "number" && typeof b.max === "number" && b.max > b.min) {
+      pct = b.max - b.min;
+    }
+    return {
+      label,
+      pct,
+      color: props.tierColors?.length ? "" : pickColor(palette, i),
+      style: props.tierColors?.length
+        ? {
+            backgroundColor: `color-mix(in srgb, ${pickColor(props.tierColors, i)} 28%, white)`,
+          }
+        : undefined,
+    };
+  });
 });
 
 const valuePercentage = computed(() => percentOf(animatedValue.value));

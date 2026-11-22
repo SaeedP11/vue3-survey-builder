@@ -112,6 +112,47 @@ describe.each(CHARTS)("%s tier colours", (_name, widget, scoreProp) => {
   });
 });
 
+describe.each(CHARTS)("%s tier bounds", (_name, widget, scoreProp) => {
+  const BOUNDS = [
+    { min: 0, max: 25 },
+    { min: 26, max: 60 },
+    { min: 61, max: 80 },
+    { min: 81, max: 100 },
+  ];
+
+  test("activates the custom tier bound matching score", async () => {
+    const w1 = mount(widget, {
+      props: { [scoreProp]: 20, min: 0, max: 100, statusLabels: LABELS, tierBounds: BOUNDS },
+      global: { plugins: [createTestI18n("en")] },
+    });
+    await settle(w1);
+    expect(w1.text()).toContain("Tier-A");
+
+    const w2 = mount(widget, {
+      props: { [scoreProp]: 55, min: 0, max: 100, statusLabels: LABELS, tierBounds: BOUNDS },
+      global: { plugins: [createTestI18n("en")] },
+    });
+    await settle(w2);
+    expect(w2.text()).toContain("Tier-B");
+  });
+});
+
+test("DefaultScoreCard displays custom bounds in ranges", async () => {
+  const bounds = [
+    { min: 0, max: 25 },
+    { min: 26, max: 60 },
+    { min: 61, max: 80 },
+    { min: 81, max: 100 },
+  ];
+  const wrapper = mount(DefaultScoreCard, {
+    props: { value: 10, min: 0, max: 100, statusLabels: LABELS, tierBounds: bounds },
+    global: { plugins: [createTestI18n("en")] },
+  });
+  await settle(wrapper);
+  expect(wrapper.text()).toContain("0–25");
+  expect(wrapper.text()).toContain("26–60");
+});
+
 describe("Table", () => {
   function render(props: Record<string, unknown>, locale = "en") {
     return mount(Table, { props, global: { plugins: [createTestI18n(locale)] } });
