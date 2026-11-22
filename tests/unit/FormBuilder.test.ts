@@ -79,9 +79,11 @@ describe("FormBuilder", () => {
     expect(wrapper.findComponent(RenderResult).exists()).toBe(false);
   });
 
-  test("loads the v-model JSON into the creator", () => {
+  test("loads the v-model JSON into the creator, starts on designer tab, and selects first question", () => {
     const { creator } = setup();
     expect(creator.survey.getAllQuestions().map((q) => q.name)).toEqual(["score"]);
+    expect(creator.activeTab).toBe("designer");
+    expect((creator.selectedElement as any)?.name).toBe("score");
   });
 
   test("autosave hands the creator's JSON back through v-model", async () => {

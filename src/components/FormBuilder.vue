@@ -68,7 +68,14 @@ watch(
       skipNextJsonWatch = false;
       return;
     }
-    if (val) creator.JSON = val;
+    if (val) {
+      creator.JSON = val;
+      creator.activeTab = "designer";
+      const questions = creator.survey?.getAllQuestions?.() ?? [];
+      if (questions.length > 0) {
+        creator.selectedElement = questions[0];
+      }
+    }
   },
   {
     immediate: true,
